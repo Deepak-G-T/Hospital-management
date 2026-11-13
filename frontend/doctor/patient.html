@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>Patient record · MediCore</title>
+</head>
+<body data-title="Patient record">
+<!-- @include portal-start.html -->
+<a class="link small mb-4" href="/doctor/patients"><svg class="icon icon-sm"><use href="#i-arrow-left" /></svg>All patients</a>
+<div data-state="loading" id="record" data-source="/doctor/patients/{path.2}">
+  <!-- @include load-states.html -->
+  <div class="when-ready stack" style="--gap:1.5rem">
+    <section class="card card-pad" style="padding:1.5rem" data-header>
+      <div class="row" style="--gap:1.25rem">
+        <span class="avatar avatar-xl" data-initials="fullName"></span>
+        <div class="grow" style="min-width:14rem">
+          <h1 style="font-size:1.5rem" data-text="fullName"></h1>
+          <p class="muted"><span data-text="{dateOfBirth|age} years · {gender|enum} · Blood group {bloodGroup|blood}"></span><span data-if="heightCm" data-text=" · {heightCm} cm"></span><span data-if="weightKg" data-text=" · {weightKg} kg"></span></p>
+          <div class="row small muted mt-2" style="--gap:0.25rem 1rem">
+            <span class="row" style="--gap:0.25rem" data-if="phone"><svg class="icon icon-sm"><use href="#i-phone" /></svg><span data-text="phone"></span></span>
+            <span class="row" style="--gap:0.25rem"><svg class="icon icon-sm"><use href="#i-mail" /></svg><span data-text="user.email"></span></span>
+            <span data-if="emergencyContactName" data-text="Emergency contact: {emergencyContactName} ({emergencyContactPhone})"></span>
+          </div>
+        </div>
+        <div class="row" style="--gap:0.5rem" data-if="access.canWrite">
+          <button type="button" class="btn btn-primary btn-sm" data-action="rx"><svg class="icon icon-sm"><use href="#i-pill" /></svg>Prescribe</button>
+          <button type="button" class="btn btn-secondary btn-sm" data-open="history-dialog"><svg class="icon icon-sm"><use href="#i-plus" /></svg>Diagnosis</button>
+          <button type="button" class="btn btn-secondary btn-sm" data-open="doc-upload-dialog"><svg class="icon icon-sm"><use href="#i-upload" /></svg>Upload report</button>
+          <button type="button" class="btn btn-secondary btn-sm" data-open="referral-dialog"><svg class="icon icon-sm"><use href="#i-arrow-right-left" /></svg>Refer</button>
+        </div>
+      </div>
+      <div class="notice mt-4" data-if="access.level=HISTORICAL"><p class="small"><strong>Limited view.</strong> You have no active appointment, emergency or referral with this patient, so only the records from your own consultations are shown. Allergies and the rest of the chart are available while you are treating them.</p></div>
+      <div class="notice mt-4" data-if="access.level=EMERGENCY"><p class="small"><strong>Emergency access.</strong> Allergies, medical history and prescriptions are shown for the emergency you accepted. This access is recorded and ends when the emergency is closed.</p></div>
+      <div class="notice notice-danger mt-4" style="flex-direction:column;gap:0.5rem" data-if="allergies">
+        <p class="row strong"><svg class="icon icon-md"><use href="#i-alert-triangle" /></svg>Allergies</p>
+        <div class="row" data-each="allergies:tpl-allergy"></div>
+      </div>
+    </section>
+
+    <div class="tabs" id="tabs" data-name="tab" data-panels="#record">
+      <button class="tab" data-value="history">Medical history<span class="count" data-text="medicalRecords.length"></span></button>
+      <button class="tab" data-value="appointments">Appointments<span class="count" data-text="appointments.length"></span></button>
+      <button class="tab" data-value="prescriptions">Prescriptions<span class="count" data-text="prescriptions.length"></span></button>
+      <button class="tab" data-value="reports">Reports<span class="count" data-text="medicalReports.length"></span></button>
+      <button class="tab" data-value="emergencies">Emergencies<span class="count" data-text="emergencyRequests.length"></span></button>
+    </div>
+
+    <section class="card" data-panel="history">
+      <div class="empty" data-if="!medicalRecords"><p class="empty-title">No medical history recorded</p></div>
+      <ul class="list list-pad" data-each="medicalRecords:tpl-history"></ul>
+    </section>
+    <section class="card" data-panel="appointments" hidden>
+      <div class="empty" data-if="!appointments"><p class="empty-title">No appointments</p></div>
+      <div class="table-wrap" data-if="appointments"><table class="table"><thead><tr><th>Date</th><th>Doctor</th><th>Department</th><th>Diagnosis</th><th>Status</th></tr></thead><tbody data-each="appointments:tpl-appt"></tbody></table></div>
+    </section>
+    <section class="card" data-panel="prescriptions" hidden>
+      <div class="empty" data-if="!prescriptions"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-pill" /></svg></span><p class="empty-title">No prescriptions</p></div>
+      <ul class="list list-pad" data-each="prescriptions:tpl-rx"></ul>
+    </section>
+    <section class="card" data-panel="reports" hidden>
+      <div class="empty" data-if="!medicalReports"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-file-text" /></svg></span><p class="empty-title">No reports uploaded</p></div>
+      <ul class="list list-pad" data-each="medicalReports:tpl-report"></ul>
+    </section>
+    <section class="card" data-panel="emergencies" hidden>
+      <div class="empty" data-if="!emergencyRequests"><p class="empty-title">No emergency history</p></div>
+      <div class="table-wrap" data-if="emergencyRequests"><table class="table"><thead><tr><th>Date</th><th>Priority</th><th>Symptoms</th><th>Doctor</th><th>Status</th></tr></thead><tbody data-each="emergencyRequests:tpl-em"></tbody></table></div>
+    </section>
+  </div>
+</div>
+
+<template id="tpl-allergy"><span class="chip" data-attr="class:chip sev-{severity};title:{reaction}"><span data-text="{allergen} · {type|enum} · {severity|enum}"></span><span data-if="deletedAt" data-attr="title:Removed by the patient on {deletedAt|date}"> · removed by patient</span></span></template>
+<template id="tpl-history">
+  <li style="display:block">
+    <span class="row" style="--gap:0.5rem"><span class="strong" data-text="title"></span><span class="chip tone-brand" data-text="recordType|enum"></span><span data-badge="status"></span><span class="chip" data-if="deletedAt" data-attr="title:Removed by the patient on {deletedAt|date}">removed by patient</span></span>
+    <p class="small muted mt-1" data-if="description" data-text="description"></p>
+    <p class="xsmall muted mt-1"><span data-if="diagnosedOn" data-text="Since {diagnosedOn|date} · "></span>Added by <span data-if="createdBy.doctor" data-text="Dr. {createdBy.doctor.fullName}"></span><span data-if="!createdBy.doctor">patient</span></p>
+  </li>
+</template>
+<template id="tpl-med"><span class="list-dot" data-text="{medicineName} {dosage} ({frequency}, {durationDays}d)"></span></template>
+<template id="tpl-appt">
+  <tr>
+    <td data-label="Date" class="nowrap" data-text="startAt|datetime"></td>
+    <td data-label="Doctor" data-text="doctor.fullName|dr"></td>
+    <td data-label="Department" data-text="department.name"></td>
+    <td data-label="Diagnosis" class="xsmall"><span class="truncate" style="display:block;max-width:16rem" data-text="diagnosis"></span></td>
+    <td data-label="Status"><span data-badge="status"></span></td>
+  </tr>
+</template>
+<template id="tpl-rx">
+  <li class="items-start">
+    <span class="grow">
+      <span class="strong" data-text="prescriptionNumber"></span> <span class="xsmall muted" data-text="· Dr. {doctor.fullName} · {createdAt|date}"></span>
+      <span class="small" style="display:block" data-text="diagnosis"></span>
+      <span class="xsmall muted" style="display:block;margin-top:0.25rem" data-each="items:tpl-med"></span>
+    </span>
+    <button type="button" class="btn btn-secondary btn-sm" data-download="/files/prescriptions/{id}/pdf"><svg class="icon icon-sm"><use href="#i-download" /></svg>PDF</button>
+  </li>
+</template>
+<template id="tpl-report">
+  <li>
+    <span class="icon-tile" data-tone="brand" style="padding:0.5rem"><svg class="icon icon-md"><use href="#i-file-text" /></svg></span>
+    <span class="grow"><span class="strong" style="display:block"><span data-text="title"></span> <span class="chip" data-if="deletedAt" data-attr="title:Removed by the patient on {deletedAt|date}">removed by patient</span></span><span class="xsmall muted" data-text="{reportType|enum} · {fileName} · {fileSize|filesize} · {createdAt|date} · {doctor.fullName|dr|or:Uploaded by patient}"></span></span>
+    <button type="button" class="btn btn-secondary btn-sm" data-download="/files/reports/{id}"><svg class="icon icon-sm"><use href="#i-download" /></svg>Download</button>
+  </li>
+</template>
+<template id="tpl-em">
+  <tr>
+    <td data-label="Date" class="nowrap" data-text="createdAt|datetime"></td>
+    <td data-label="Priority" data-text="priority|enum"></td>
+    <td data-label="Symptoms"><span class="truncate" style="display:block;max-width:18rem" data-text="symptoms"></span></td>
+    <td data-label="Doctor" data-text="assignedDoctor.fullName|dr"></td>
+    <td data-label="Status"><span data-badge="status"></span></td>
+  </tr>
+</template>
+
+<dialog class="modal" id="history-dialog" aria-labelledby="hd-title">
+  <form class="modal-panel" id="history-form" data-api="POST /doctor/patients/{id}/records" data-done="Added to medical history">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><h3 id="hd-title">Add diagnosis / medical history</h3><button type="button" class="btn-icon" data-close aria-label="Close"><svg class="icon icon-md"><use href="#i-x" /></svg></button></div>
+    <div class="modal-body form-grid cols-2">
+      <div class="field"><label class="label" for="hd-type">Type</label><select class="input" id="hd-type" name="recordType"><option value="DIAGNOSIS">Diagnosis</option><option value="CONDITION">Condition</option><option value="SURGERY">Surgery</option><option value="MEDICATION">Medication</option><option value="FAMILY_HISTORY">Family history</option><option value="VACCINATION">Vaccination</option><option value="OTHER">Other</option></select></div>
+      <div class="field"><label class="label" for="hd-status">Status</label><select class="input" id="hd-status" name="status"><option value="ACTIVE">Active</option><option value="RESOLVED">Resolved</option></select></div>
+      <div class="field span-2"><label class="label" for="hd-title-input">Title <span class="req">*</span></label><input class="input" id="hd-title-input" name="title" required minlength="2" /></div>
+      <div class="field span-2"><label class="label" for="hd-desc">Details / treatment</label><textarea class="input" id="hd-desc" name="description" rows="3"></textarea></div>
+      <div class="field"><label class="label" for="hd-date">Diagnosed on</label><input class="input" id="hd-date" name="diagnosedOn" type="date" /></div>
+    </div>
+    <div class="modal-foot"><button type="button" class="btn btn-secondary" data-close>Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+  </form>
+</dialog>
+<dialog class="modal" id="doc-upload-dialog" aria-labelledby="du-title">
+  <form class="modal-panel" id="doc-upload-form" enctype="multipart/form-data" data-api="POST /doctor/patients/{id}/reports" data-done="Report uploaded and shared with the patient">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><h3 id="du-title">Upload consultation report</h3><button type="button" class="btn-icon" data-close aria-label="Close"><svg class="icon icon-md"><use href="#i-x" /></svg></button></div>
+    <div class="modal-body stack">
+      <div class="field"><label class="label" for="du-title-input">Title <span class="req">*</span></label><input class="input" id="du-title-input" name="title" required minlength="2" /></div>
+      <div class="field"><label class="label" for="du-type">Type</label><select class="input" id="du-type" name="reportType"><option value="CONSULTATION">Consultation</option><option value="LAB">Lab</option><option value="IMAGING">Imaging</option><option value="DISCHARGE">Discharge</option><option value="OTHER">Other</option></select></div>
+      <div class="field"><label class="label" for="du-file">File <span class="req">*</span></label><input class="input" id="du-file" name="file" type="file" required accept=".pdf,.jpg,.jpeg,.png,.webp,.txt,.doc,.docx" /><p class="hint">PDF, JPG, PNG, WEBP, TXT, DOC or DOCX · max 10 MB</p></div>
+      <div class="field"><label class="label" for="du-notes">Notes</label><textarea class="input" id="du-notes" name="notes" rows="2"></textarea></div>
+    </div>
+    <div class="modal-foot"><button type="button" class="btn btn-secondary" data-close>Cancel</button><button type="submit" class="btn btn-primary">Upload</button></div>
+  </form>
+</dialog>
+<!-- @include dialogs/doctor-dialogs.html -->
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/pages/doctor/patient.js"></script>
+</body>
+</html>

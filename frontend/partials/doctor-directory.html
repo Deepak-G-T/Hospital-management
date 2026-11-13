@@ -1,0 +1,20 @@
+<!-- Doctor directory: search + department filter + cards (public /doctors and patient /patient/find-doctors) -->
+<div id="directory">
+  <form class="card toolbar mb-6" style="--cols:1fr 16rem" data-no-submit>
+    <div class="input-wrap">
+      <svg class="icon icon-sm"><use href="#i-search" /></svg>
+      <input class="input" type="search" data-search name="search" placeholder="Search by name, specialty or department…" aria-label="Search by name, specialty or department" />
+    </div>
+    <select class="input" data-department name="departmentId" aria-label="Filter by department" data-options="/public/departments"><option value="">All departments</option></select>
+  </form>
+  <div data-state="loading" data-results data-source="/public/doctors" data-template="tpl-doctor-card" data-filters="#directory .toolbar">
+    <!-- @include load-states.html -->
+    <div class="when-empty card"><div class="empty"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-stethoscope" /></svg></span><p class="empty-title">No doctors match your search</p><p class="empty-text">Try a different name, specialty or department.</p></div></div>
+    <div class="when-ready">
+      <div class="grid md-grid-2 xl-grid-3 stagger" style="--gap:1.5rem" data-list></div>
+      <p class="small muted mb-4" data-count></p>
+    </div>
+  </div>
+</div>
+<!-- @include tpl-doctor-card.html -->
+<!-- @include dialogs/booking.html -->

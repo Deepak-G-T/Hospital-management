@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>MediCore Smart Hospital</title>
+</head>
+<body>
+<!-- @include public-header.html -->
+
+<!-- Hero -->
+<section class="hero">
+  <div class="container hero-grid">
+    <div class="animate-up">
+      <span class="chip tone-brand"><svg class="icon icon-sm"><use href="#i-heart-pulse" /></svg>Smart care, connected</span>
+      <h1>Healthcare that <span class="gradient-text">moves with you</span></h1>
+      <p class="lead">Book specialists, manage your medical records and get coordinated hospital support — all from one secure platform.</p>
+      <div class="row mt-6" style="--gap:0.75rem">
+        <a class="btn btn-primary btn-lg" href="/doctors">Find a doctor<svg class="icon icon-sm"><use href="#i-arrow-right" /></svg></a>
+        <a class="btn btn-secondary btn-lg" href="/register">Create free account</a>
+      </div>
+      <div class="checks">
+        <span><svg class="icon icon-sm"><use href="#i-check-circle-2" /></svg>Verified specialists</span>
+        <span><svg class="icon icon-sm"><use href="#i-check-circle-2" /></svg>Real-time availability</span>
+        <span><svg class="icon icon-sm"><use href="#i-check-circle-2" /></svg>Digital prescriptions</span>
+      </div>
+    </div>
+    <div class="card card-pad animate-up" id="live-stats" data-source="/public/stats">
+      <div class="row between">
+        <p class="strong">Today at MediCore</p>
+        <span class="badge" data-status="ACTIVE">Live</span>
+      </div>
+      <div class="grid grid-2 mt-4">
+        <div class="hero-stat"><svg class="icon icon-md text-brand"><use href="#i-stethoscope" /></svg><strong data-stat="doctors">—</strong><small>Specialists</small></div>
+        <div class="hero-stat"><svg class="icon icon-md text-brand"><use href="#i-building-2" /></svg><strong data-stat="departments">—</strong><small>Departments</small></div>
+        <div class="hero-stat"><svg class="icon icon-md text-brand"><use href="#i-users" /></svg><strong data-stat="patients">—</strong><small>Patients served</small></div>
+        <div class="hero-stat"><svg class="icon icon-md text-brand"><use href="#i-star" /></svg><strong><span data-if="avgRating" data-text="{avgRating}/5"></span><span data-if="!avgRating">—</span></strong><small>Avg. rating</small></div>
+      </div>
+      <div class="hero-callout">
+        <svg class="icon icon-xl shrink-0"><use href="#i-clock" /></svg>
+        <div><p class="strong" style="color:#fff"><span data-stat="completedAppointments">—</span> consultations completed</p><p class="xsmall" style="color:var(--brand-100)">Book your next visit in under a minute</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="section container">
+  <div class="section-head">
+    <p class="eyebrow">Why MediCore</p>
+    <h2>Everything your care journey needs</h2>
+  </div>
+  <div class="grid sm-grid-2 lg-grid-4 mt-6 stagger" style="--gap:1.5rem">
+    <article class="card card-hover feature-card"><span class="icon-tile" data-tone="brand"><svg class="icon icon-md"><use href="#i-calendar-check" /></svg></span><h3>Instant booking</h3><p>See real-time doctor availability and reserve a slot in seconds — no phone queues.</p></article>
+    <article class="card card-hover feature-card"><span class="icon-tile" data-tone="brand"><svg class="icon icon-md"><use href="#i-siren" /></svg></span><h3>Coordinated emergencies</h3><p>Urgent requests are routed to the right department and on-shift doctors are alerted instantly.</p></article>
+    <article class="card card-hover feature-card"><span class="icon-tile" data-tone="brand"><svg class="icon icon-md"><use href="#i-file-text" /></svg></span><h3>Digital records</h3><p>Prescriptions, reports, allergies and history in one secure place you control.</p></article>
+    <article class="card card-hover feature-card"><span class="icon-tile" data-tone="brand"><svg class="icon icon-md"><use href="#i-shield-check" /></svg></span><h3>Private by design</h3><p>Role-based access, encrypted passwords and a full audit trail on every medical record.</p></article>
+  </div>
+</section>
+
+<!-- Departments -->
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-row">
+      <div><p class="eyebrow">Specialities</p><h2>Our departments</h2></div>
+      <a class="link" href="/departments">All departments<svg class="icon icon-sm"><use href="#i-arrow-right" /></svg></a>
+    </div>
+    <div class="mt-6" data-state="loading" id="departments" data-source="/public/departments" data-template="tpl-dept-tile">
+      <!-- @include load-states.html -->
+      <div class="when-empty"><p class="center muted">No departments yet.</p></div>
+      <div class="when-ready grid grid-2 sm-grid-3 lg-grid-5 stagger is-grid top-10" data-list></div>
+    </div>
+  </div>
+</section>
+
+<!-- Doctors -->
+<section class="section container">
+  <div class="section-row">
+    <div><p class="eyebrow">Top rated</p><h2>Meet our specialists</h2></div>
+    <a class="link" href="/doctors">All doctors<svg class="icon icon-sm"><use href="#i-arrow-right" /></svg></a>
+  </div>
+  <div class="mt-6" data-state="loading" id="doctors" data-source="/public/doctors" data-template="tpl-doctor-card" data-sort="-rating">
+    <!-- @include load-states.html -->
+    <div class="when-empty"><p class="center muted">No doctors yet.</p></div>
+    <div class="when-ready grid md-grid-3 stagger is-grid top-3" style="--gap:1.5rem" data-list></div>
+  </div>
+</section>
+
+<!-- Call to action -->
+<section class="container" style="padding-bottom:5rem">
+  <div class="cta">
+    <div class="cta-grid">
+      <div>
+        <h2>Ready to take charge of your health?</h2>
+        <p>Create your account to book appointments, keep your allergies and history up to date, and download your prescriptions anytime.</p>
+      </div>
+      <div class="row" style="--gap:0.75rem">
+        <a class="btn btn-white btn-lg" href="/register">Get started</a>
+        <a class="btn btn-glass btn-lg" href="/contact">Contact us</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<template id="tpl-dept-tile">
+  <a class="card card-hover dept-card" data-attr="href:/doctors?departmentId={id}">
+    <span class="icon-tile" data-attr="data-tone:{isEmergency|pick:red,accent}"><svg class="icon icon-lg"><use data-attr="href:{icon|icon}" /></svg></span>
+    <p data-text="name"></p>
+    <small class="xsmall muted" data-text="{_count.doctors} doctor(s)"></small>
+  </a>
+</template>
+<!-- @include tpl-doctor-card.html -->
+<!-- @include dialogs/booking.html -->
+<!-- @include public-footer.html -->
+<script type="module" src="/src/js/pages/public/landing.js"></script>
+</body>
+</html>

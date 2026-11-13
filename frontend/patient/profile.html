@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>My profile · MediCore</title>
+</head>
+<body data-title="Profile" data-roles="PATIENT">
+<!-- @include portal-start.html -->
+<div style="max-width:56rem">
+  <div class="page-header"><div><h1>My profile</h1><p>Personal details and emergency contact</p></div></div>
+  <div data-state="loading" id="profile-box" data-source="/patient/profile">
+    <!-- @include load-states.html -->
+    <form class="when-ready card card-pad stack" style="padding:1.5rem;--gap:1.25rem" id="profile-form" data-api="PUT /patient/profile" data-fill data-done="Profile updated">
+      <div class="row row-nowrap" style="--gap:1rem">
+        <span class="avatar avatar-xl" data-initials="fullName"></span>
+        <div><p class="strong" style="font-size:1.125rem" data-text="fullName"></p><p class="small muted" data-text="{user.email} · member since {user.createdAt|date}"></p></div>
+      </div>
+      <div class="form-grid cols-2">
+        <div class="field"><label class="label" for="pf-name">Full name <span class="req">*</span></label><input class="input" id="pf-name" name="fullName" required minlength="2" /></div>
+        <div class="field"><label class="label" for="pf-phone">Phone</label><input class="input" id="pf-phone" name="phone" /></div>
+        <div class="field"><label class="label" for="pf-dob">Date of birth</label><input class="input" id="pf-dob" name="dateOfBirth" type="date" data-max-today /></div>
+        <div class="field"><label class="label" for="pf-gender">Gender</label><select class="input" id="pf-gender" name="gender"><option value="">Prefer not to say</option><option value="MALE">Male</option><option value="FEMALE">Female</option><option value="OTHER">Other</option></select></div>
+        <div class="field"><label class="label" for="pf-blood">Blood group</label>
+          <select class="input" id="pf-blood" name="bloodGroup"><option value="">Unknown</option><option value="A_POS">A+</option><option value="A_NEG">A−</option><option value="B_POS">B+</option><option value="B_NEG">B−</option><option value="AB_POS">AB+</option><option value="AB_NEG">AB−</option><option value="O_POS">O+</option><option value="O_NEG">O−</option></select></div>
+        <div class="grid grid-2" style="--gap:0.75rem">
+          <div class="field"><label class="label" for="pf-h">Height (cm)</label><input class="input" id="pf-h" name="heightCm" type="number" min="20" max="300" step="0.1" /></div>
+          <div class="field"><label class="label" for="pf-w">Weight (kg)</label><input class="input" id="pf-w" name="weightKg" type="number" min="0.5" max="700" step="0.1" /></div>
+        </div>
+        <div class="field span-2"><label class="label" for="pf-address">Address</label><input class="input" id="pf-address" name="address" /></div>
+        <div class="field"><label class="label" for="pf-ecn">Emergency contact name</label><input class="input" id="pf-ecn" name="emergencyContactName" /></div>
+        <div class="field"><label class="label" for="pf-ecp">Emergency contact phone</label><input class="input" id="pf-ecp" name="emergencyContactPhone" /></div>
+      </div>
+      <div><button type="submit" class="btn btn-primary"><svg class="icon icon-sm"><use href="#i-save" /></svg>Save changes</button></div>
+    </form>
+  </div>
+</div>
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/portal.js"></script>
+</body>
+</html>

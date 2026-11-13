@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>Patient feedback · MediCore</title>
+</head>
+<body data-title="Feedback">
+<!-- @include portal-start.html -->
+<div class="page-header"><div><h1>Patient feedback</h1><p>Ratings and reviews from your completed consultations</p></div></div>
+<div data-state="loading" id="reviews" data-source="/doctor/reviews" data-limit="10">
+  <!-- @include load-states.html -->
+  <div class="when-ready grid lg-grid-3" style="--gap:1.5rem">
+    <section class="card card-pad center" style="padding:1.5rem;height:fit-content">
+      <p style="font-size:3rem;font-weight:800" class="strong tnum" data-text="average|or:—"></p>
+      <span class="stars stars-lg" data-stars="average"></span>
+      <p class="small muted mt-1" data-text="{total} review(s)"></p>
+      <div class="stack stack-sm mt-6" data-each="distribution:tpl-dist"></div>
+    </section>
+    <section class="card lg-span-2">
+      <div class="empty" data-if="!items"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-star" /></svg></span><p class="empty-title">No reviews yet</p></div>
+      <ul class="list list-pad" data-each="items:tpl-review"></ul>
+    <!-- @include pager.html -->
+    </section>
+  </div>
+</div>
+<template id="tpl-dist">
+  <div class="dist-row"><span data-text="{rating}★"></span><div class="bar-track"><div class="bar-fill" data-style="--w:{pct}%"></div></div><span data-text="count"></span></div>
+</template>
+<template id="tpl-review">
+  <li style="display:block">
+    <div class="row between"><p class="strong" data-text="patient.fullName"></p><span class="xsmall muted" data-text="createdAt|date"></span></div>
+    <span class="stars stars-sm" data-stars="rating"></span>
+    <p class="small muted mt-1" data-if="comment" data-text="comment"></p>
+    <p class="xsmall soft mt-1" data-text="Visit on {appointment.startAt|date}"></p>
+  </li>
+</template>
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/pages/doctor/reviews.js"></script>
+</body>
+</html>

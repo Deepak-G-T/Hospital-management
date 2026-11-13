@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>User accounts · MediCore</title>
+</head>
+<body data-title="User accounts">
+<!-- @include portal-start.html -->
+<div class="page-header"><div><h1>User accounts</h1><p>Activate, deactivate and reset credentials for every portal user</p></div></div>
+<form class="card toolbar mb-4" id="filters" style="--cols:1fr 11rem 11rem" data-no-submit>
+  <div class="input-wrap"><svg class="icon icon-sm"><use href="#i-search" /></svg><input class="input" type="search" name="search" placeholder="Search by name or email…" aria-label="Search users" /></div>
+  <select class="input" name="role" aria-label="Role"><option value="">All roles</option><option value="ADMIN">Admins</option><option value="DOCTOR">Doctors</option><option value="PATIENT">Patients</option></select>
+  <select class="input" name="status" aria-label="Status"><option value="">All statuses</option><option value="active">Active</option><option value="inactive">Inactive</option></select>
+</form>
+<div class="card" data-state="loading" id="list" data-source="/admin/users" data-template="tpl-row" data-filters="#filters" data-limit="20">
+  <!-- @include load-states.html -->
+  <div class="when-empty"><div class="empty"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-user-cog" /></svg></span><p class="empty-title">No users found</p></div></div>
+  <div class="when-ready table-wrap">
+    <table class="table">
+      <thead><tr><th>User</th><th>Role</th><th>Last login</th><th>Created</th><th>Status</th><th class="right">Actions</th></tr></thead>
+      <tbody data-list></tbody>
+    </table>
+  </div>
+  <!-- @include pager.html -->
+</div>
+<template id="tpl-row">
+  <tr>
+    <td data-label="User"><span class="cell-person"><span class="avatar avatar-sm" data-initials="{admin.fullName}{doctor.fullName}{patient.fullName}"></span><span><strong><span data-if="doctor">Dr. </span><span data-text="{admin.fullName}{doctor.fullName}{patient.fullName}"></span></strong><small data-text="email"></small></span></span></td>
+    <td data-label="Role"><span class="chip" data-text="role|enum"></span></td>
+    <td data-label="Last login" class="xsmall" data-attr="title:{lastLoginAt|datetime}" data-text="lastLoginAt|relative|or:Never"></td>
+    <td data-label="Created" class="xsmall" data-text="createdAt|datetime"></td>
+    <td data-label="Status"><span data-badge="{isActive|pick:ACTIVE,INACTIVE}"></span></td>
+    <td class="cell-actions"><div class="actions">
+      <button type="button" class="btn btn-ghost btn-sm" data-open="reset-dialog"><svg class="icon icon-sm"><use href="#i-key-round" /></svg>Reset</button>
+      <button type="button" class="btn btn-ghost btn-sm" data-if="isActive&!isMe" data-call="PATCH /admin/users/{id}/status" data-body="isActive:false" data-done="Account deactivated"><svg class="icon icon-sm text-green"><use href="#i-power" /></svg>Deactivate</button>
+      <button type="button" class="btn btn-ghost btn-sm" data-if="!isActive" data-call="PATCH /admin/users/{id}/status" data-body="isActive:true" data-done="Account activated"><svg class="icon icon-sm"><use href="#i-power" /></svg>Activate</button>
+    </div></td>
+  </tr>
+</template>
+<dialog class="modal size-sm" id="reset-dialog" aria-labelledby="rp-title">
+  <form class="modal-panel" id="reset-form" data-api="POST /admin/users/{id}/reset-password" data-done="Password reset — share it with the user securely" data-reload="none">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><div><h3 id="rp-title">Reset password</h3><p data-text="email"></p></div><button type="button" class="btn-icon" data-close aria-label="Close"><svg class="icon icon-md"><use href="#i-x" /></svg></button></div>
+    <div class="modal-body"><div class="field"><label class="label" for="rp-new">New password <span class="req">*</span></label><input class="input" id="rp-new" name="newPassword" required minlength="8" /><p class="hint">Min. 8 characters with a letter and a number</p></div></div>
+    <div class="modal-foot"><button type="button" class="btn btn-secondary" data-close>Cancel</button><button type="submit" class="btn btn-primary">Reset</button></div>
+  </form>
+</dialog>
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/pages/admin/users.js"></script>
+</body>
+</html>

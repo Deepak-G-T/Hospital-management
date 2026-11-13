@@ -1,0 +1,132 @@
+<div class="portal">
+  <aside class="sidebar" aria-label="Main menu">
+    <div class="sidebar-head">
+      <a class="logo" data-role-link="" href="/"><!-- @include logo-mark.html --><span class="logo-text">Medi<b>Core</b></span></a>
+      <button type="button" class="btn-icon drawer-close" data-close-menu aria-label="Close menu"><svg class="icon icon-md"><use href="#i-x" /></svg></button>
+    </div>
+
+    <!-- Admin menu -->
+    <nav class="nav scroll-thin" data-nav="ADMIN" aria-label="Administrator menu">
+      <p class="nav-section"><span class="nav-section-label">Overview</span></p>
+      <a class="nav-link" href="/admin" data-exact><svg class="icon"><use href="#i-layout-dashboard" /></svg><span class="label-text">Dashboard</span></a>
+      <p class="nav-section"><span class="nav-section-label">Management</span></p>
+      <a class="nav-link" href="/admin/doctors"><svg class="icon"><use href="#i-stethoscope" /></svg><span class="label-text">Doctors</span></a>
+      <a class="nav-link" href="/admin/patients"><svg class="icon"><use href="#i-users" /></svg><span class="label-text">Patients</span></a>
+      <a class="nav-link" href="/admin/departments"><svg class="icon"><use href="#i-building-2" /></svg><span class="label-text">Departments</span></a>
+      <a class="nav-link" href="/admin/appointments"><svg class="icon"><use href="#i-calendar-days" /></svg><span class="label-text">Appointments</span></a>
+      <a class="nav-link" href="/admin/emergencies" data-emergency><svg class="icon"><use href="#i-siren" /></svg><span class="label-text">Emergencies</span><span class="alert-dot" aria-label="New emergency"></span></a>
+      <a class="nav-link" href="/admin/complaints"><svg class="icon"><use href="#i-message-square-warning" /></svg><span class="label-text">Complaints</span></a>
+      <p class="nav-section"><span class="nav-section-label">System</span></p>
+      <a class="nav-link" href="/admin/users"><svg class="icon"><use href="#i-user-cog" /></svg><span class="label-text">User accounts</span></a>
+      <a class="nav-link" href="/admin/activity"><svg class="icon"><use href="#i-activity" /></svg><span class="label-text">Activity</span></a>
+      <a class="nav-link" href="/admin/reports"><svg class="icon"><use href="#i-file-bar-chart" /></svg><span class="label-text">Reports</span></a>
+      <a class="nav-link" href="/admin/notifications"><svg class="icon"><use href="#i-bell" /></svg><span class="label-text">Notifications</span></a>
+      <a class="nav-link" href="/admin/audit-logs"><svg class="icon"><use href="#i-scroll-text" /></svg><span class="label-text">Audit logs</span></a>
+      <a class="nav-link" href="/admin/settings"><svg class="icon"><use href="#i-settings" /></svg><span class="label-text">Settings</span></a>
+    </nav>
+
+    <!-- Doctor menu -->
+    <nav class="nav scroll-thin" data-nav="DOCTOR" aria-label="Doctor menu">
+      <p class="nav-section"><span class="nav-section-label">Overview</span></p>
+      <a class="nav-link" href="/doctor" data-exact><svg class="icon"><use href="#i-layout-dashboard" /></svg><span class="label-text">Dashboard</span></a>
+      <p class="nav-section"><span class="nav-section-label">Clinical</span></p>
+      <a class="nav-link" href="/doctor/appointments"><svg class="icon"><use href="#i-calendar-days" /></svg><span class="label-text">Appointments</span></a>
+      <a class="nav-link" href="/doctor/schedule"><svg class="icon"><use href="#i-calendar-clock" /></svg><span class="label-text">Schedule</span></a>
+      <a class="nav-link" href="/doctor/patients"><svg class="icon"><use href="#i-clipboard-list" /></svg><span class="label-text">Patients</span></a>
+      <a class="nav-link" href="/doctor/prescriptions"><svg class="icon"><use href="#i-pill" /></svg><span class="label-text">Prescriptions</span></a>
+      <a class="nav-link" href="/doctor/emergencies" data-emergency><svg class="icon"><use href="#i-siren" /></svg><span class="label-text">Emergencies</span><span class="alert-dot" aria-label="New emergency"></span></a>
+      <p class="nav-section"><span class="nav-section-label">Collaboration</span></p>
+      <a class="nav-link" href="/doctor/referrals"><svg class="icon"><use href="#i-arrow-right-left" /></svg><span class="label-text">Referrals</span></a>
+      <a class="nav-link" href="/doctor/messages"><svg class="icon"><use href="#i-messages-square" /></svg><span class="label-text">Departments</span></a>
+      <a class="nav-link" href="/doctor/reviews"><svg class="icon"><use href="#i-star" /></svg><span class="label-text">Feedback</span></a>
+      <a class="nav-link" href="/doctor/complaints"><svg class="icon"><use href="#i-message-square-warning" /></svg><span class="label-text">Complaints</span></a>
+      <p class="nav-section"><span class="nav-section-label">Account</span></p>
+      <a class="nav-link" href="/doctor/notifications"><svg class="icon"><use href="#i-bell" /></svg><span class="label-text">Notifications</span></a>
+      <a class="nav-link" href="/doctor/profile"><svg class="icon"><use href="#i-user-circle" /></svg><span class="label-text">Profile</span></a>
+      <a class="nav-link" href="/doctor/settings"><svg class="icon"><use href="#i-settings" /></svg><span class="label-text">Settings</span></a>
+    </nav>
+
+    <!-- Patient menu -->
+    <nav class="nav scroll-thin" data-nav="PATIENT" aria-label="Patient menu">
+      <p class="nav-section"><span class="nav-section-label">Overview</span></p>
+      <a class="nav-link" href="/patient" data-exact><svg class="icon"><use href="#i-layout-dashboard" /></svg><span class="label-text">Dashboard</span></a>
+      <p class="nav-section"><span class="nav-section-label">Care</span></p>
+      <a class="nav-link" href="/patient/find-doctors"><svg class="icon"><use href="#i-search" /></svg><span class="label-text">Find doctors</span></a>
+      <a class="nav-link" href="/patient/appointments"><svg class="icon"><use href="#i-calendar-days" /></svg><span class="label-text">Appointments</span></a>
+      <a class="nav-link" href="/patient/emergency" data-emergency><svg class="icon"><use href="#i-siren" /></svg><span class="label-text">Emergency</span><span class="alert-dot" aria-label="Emergency update"></span></a>
+      <a class="nav-link" href="/patient/prescriptions"><svg class="icon"><use href="#i-pill" /></svg><span class="label-text">Prescriptions</span></a>
+      <p class="nav-section"><span class="nav-section-label">My health</span></p>
+      <a class="nav-link" href="/patient/medical-profile"><svg class="icon"><use href="#i-heart-pulse" /></svg><span class="label-text">Medical profile</span></a>
+      <a class="nav-link" href="/patient/reports"><svg class="icon"><use href="#i-file-text" /></svg><span class="label-text">Medical reports</span></a>
+      <a class="nav-link" href="/patient/reviews"><svg class="icon"><use href="#i-star" /></svg><span class="label-text">My reviews</span></a>
+      <a class="nav-link" href="/patient/complaints"><svg class="icon"><use href="#i-message-square-warning" /></svg><span class="label-text">Complaints</span></a>
+      <p class="nav-section"><span class="nav-section-label">Account</span></p>
+      <a class="nav-link" href="/patient/notifications"><svg class="icon"><use href="#i-bell" /></svg><span class="label-text">Notifications</span></a>
+      <a class="nav-link" href="/patient/profile"><svg class="icon"><use href="#i-user-circle" /></svg><span class="label-text">Profile</span></a>
+      <a class="nav-link" href="/patient/settings"><svg class="icon"><use href="#i-settings" /></svg><span class="label-text">Settings</span></a>
+    </nav>
+
+    <a class="sidebar-public" href="/"><svg class="icon icon-sm"><use href="#i-globe" /></svg>Public website</a>
+    <div class="user-card">
+      <div class="user-card-inner">
+        <span class="avatar-wrap"><span class="avatar avatar-sm" data-user-avatar></span><span class="conn-dot" title="Live updates"></span></span>
+        <span class="user-meta grow">
+          <strong class="truncate small strong" style="display:block" data-user-name></strong>
+          <small class="truncate xsmall muted" style="display:block" data-user-role></small>
+        </span>
+        <button type="button" class="btn-icon" data-logout title="Log out" aria-label="Log out"><svg class="icon icon-sm"><use href="#i-log-out" /></svg></button>
+      </div>
+    </div>
+  </aside>
+  <div class="drawer-backdrop" data-close-menu></div>
+
+  <div class="portal-main">
+    <header class="portal-header glass">
+      <button type="button" class="btn-icon menu-btn" data-open-menu aria-label="Open menu"><svg class="icon icon-md"><use href="#i-menu" /></svg></button>
+      <button type="button" class="btn-icon collapse-btn" aria-label="Collapse or expand sidebar" title="Collapse or expand sidebar">
+        <svg class="icon icon-md when-expanded"><use href="#i-panel-left-close" /></svg>
+        <svg class="icon icon-md when-collapsed"><use href="#i-panel-left-open" /></svg>
+      </button>
+      <div class="portal-title"><strong data-page-title></strong><small data-page-sub></small></div>
+      <div class="header-tools">
+        <button type="button" class="btn-icon theme-toggle" data-theme-toggle aria-label="Toggle dark mode" title="Toggle dark mode">
+          <svg class="icon icon-md when-light"><use href="#i-moon" /></svg><svg class="icon icon-md when-dark"><use href="#i-sun" /></svg>
+        </button>
+
+        <div class="bell-wrap" data-bell data-popover>
+          <button type="button" class="btn-icon" data-popover-btn aria-label="Notifications (0 unread)" aria-expanded="false">
+            <svg class="icon icon-md"><use href="#i-bell" /></svg><span class="bell-badge" data-bell-badge></span>
+          </button>
+          <div class="bell-panel" data-popover-panel hidden>
+            <div class="card-head">
+              <div>
+                <p class="small strong">Notifications</p>
+                <p class="xsmall muted"><span class="live-label"></span></p>
+              </div>
+              <button type="button" class="btn btn-ghost btn-sm" data-bell-markall hidden><svg class="icon icon-sm"><use href="#i-check-check" /></svg>Mark all read</button>
+            </div>
+            <ul class="bell-list scroll-thin" data-bell-list></ul>
+            <p class="center small muted" style="padding:2rem 1rem" data-bell-empty>You're all caught up</p>
+            <a class="link center" style="display:flex;justify-content:center;padding:0.75rem;border-top:1px solid var(--border)" data-bell-viewall href="#">View all notifications</a>
+          </div>
+        </div>
+
+        <div class="account" data-popover>
+          <button type="button" class="account-btn" data-popover-btn aria-label="Account menu" aria-expanded="false">
+            <span class="avatar avatar-sm" data-user-avatar></span>
+            <span class="name" data-user-name></span>
+            <svg class="icon icon-sm chev muted"><use href="#i-chevron-down" /></svg>
+          </button>
+          <div class="popover" data-popover-panel hidden>
+            <div style="padding:0.75rem 1rem;border-bottom:1px solid var(--border)">
+              <p class="truncate small strong" data-user-name></p>
+              <p class="truncate xsmall muted" data-user-email></p>
+            </div>
+            <a class="menu-item" data-role-link="profile" data-hide-admin href="#"><svg class="icon icon-sm"><use href="#i-user-circle" /></svg>Profile</a>
+            <a class="menu-item" data-role-link="settings" href="#"><svg class="icon icon-sm"><use href="#i-settings" /></svg>Settings</a>
+            <button type="button" class="menu-item is-danger" data-logout><svg class="icon icon-sm"><use href="#i-log-out" /></svg>Log out</button>
+          </div>
+        </div>
+      </div>
+    </header>
+    <main class="portal-content" id="main">

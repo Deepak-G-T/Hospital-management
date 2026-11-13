@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>Reports · MediCore</title>
+</head>
+<body data-title="Reports">
+<!-- @include portal-start.html -->
+<div class="page-header"><div><h1>Hospital reports</h1><p>Generate reports from live database records and export them as CSV</p></div></div>
+<div class="stack" style="--gap:1.25rem">
+  <div class="grid sm-grid-2 xl-grid-3" id="types" role="radiogroup" aria-label="Report type" style="--gap:0.75rem">
+    <label class="card card-hover card-pad choice" style="border-width:1px"><input type="radio" name="type" value="appointments" checked /><span class="strong">Appointments register</span><p>Every appointment with patient, doctor, department and status</p></label>
+    <label class="card card-hover card-pad choice" style="border-width:1px"><input type="radio" name="type" value="doctors" /><span class="strong">Doctor performance</span><p>Appointments, completion rate, emergencies handled and ratings</p></label>
+    <label class="card card-hover card-pad choice" style="border-width:1px"><input type="radio" name="type" value="departments" /><span class="strong">Department summary</span><p>Workload and emergencies by department</p></label>
+    <label class="card card-hover card-pad choice" style="border-width:1px"><input type="radio" name="type" value="patients" /><span class="strong">Patient registrations</span><p>New patients registered in the period</p></label>
+    <label class="card card-hover card-pad choice" style="border-width:1px"><input type="radio" name="type" value="emergencies" /><span class="strong">Emergency response</span><p>Priority, outcome, assigned doctor and response time</p></label>
+    <label class="card card-hover card-pad choice" style="border-width:1px"><input type="radio" name="type" value="complaints" /><span class="strong">Complaints log</span><p>All complaints and their resolution status</p></label>
+  </div>
+  <div class="card range-bar" data-range>
+    <!-- @include date-range-fields.html -->
+    <div class="field range-extra" data-dept-field><label class="label" for="dept">Department</label><select class="input input-sm" id="dept"><option value="">All</option></select></div>
+    <div class="row" style="margin-left:auto">
+      <button type="button" class="btn btn-primary" id="generate"><svg class="icon icon-sm"><use href="#i-play" /></svg>Generate</button>
+      <button type="button" class="btn btn-secondary" id="export"><svg class="icon icon-sm"><use href="#i-download" /></svg>Export CSV</button>
+    </div>
+  </div>
+  <div class="card" data-state="empty" id="result">
+    <!-- @include load-states.html -->
+    <div class="when-empty"><div class="empty"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-file-bar-chart" /></svg></span><p class="empty-title" data-empty-title>Choose a report and click Generate</p><p class="empty-text">Reports are built from the current database state for the selected period.</p></div></div>
+    <div class="when-ready">
+      <div class="card-head"><div><p class="strong" data-report-title></p><p class="xsmall muted" data-report-meta></p></div></div>
+      <div class="table-wrap md-scroll" data-report-table></div>
+    </div>
+  </div>
+</div>
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/pages/admin/reports.js"></script>
+</body>
+</html>

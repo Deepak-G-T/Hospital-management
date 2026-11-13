@@ -1,0 +1,54 @@
+<!-- Doctor profile body (public /doctors/:id and patient /patient/doctors/:id) -->
+<a class="link small mb-6" data-back href="/doctors"><svg class="icon icon-sm"><use href="#i-arrow-left" /></svg>Back to doctors</a>
+<div data-state="loading" id="profile" data-source="/public/doctors/{pathEnd}">
+  <!-- @include load-states.html -->
+  <div class="when-ready">
+    <div class="grid lg-grid-3" style="--gap:1.5rem">
+      <div class="stack lg-span-2" style="--gap:1.5rem">
+        <article class="card" style="overflow:hidden">
+          <div class="profile-cover"></div>
+          <div style="padding:0 1.5rem 1.5rem">
+            <div class="profile-top">
+              <span class="avatar avatar-xl avatar-ring" data-initials="fullName"></span>
+              <div class="grow">
+                <h1 style="font-size:1.5rem" data-text="Dr. {fullName}"></h1>
+                <p class="strong" style="color:var(--teal-fg)" data-text="specialization"></p>
+                <div class="row small muted mt-1"><span class="stars" data-stars="rating"></span><span data-if="rating" data-text="{rating} · {reviewCount} reviews"></span><span data-if="!rating">No reviews yet</span></div>
+              </div>
+              <button type="button" class="btn btn-primary" data-action="book"><svg class="icon icon-sm"><use href="#i-calendar-check" /></svg>Book appointment</button>
+            </div>
+            <div class="facts">
+              <div class="fact"><svg class="icon icon-md"><use href="#i-briefcase" /></svg><small>Experience</small><strong data-text="{experienceYears} years"></strong></div>
+              <div class="fact"><svg class="icon icon-md"><use href="#i-graduation-cap" /></svg><small>Qualification</small><strong data-text="qualification"></strong></div>
+              <div class="fact"><svg class="icon icon-md"><use href="#i-wallet" /></svg><small>Consultation fee</small><strong data-text="consultationFee|currency"></strong></div>
+            </div>
+            <h2 class="section-title mt-6">About</h2>
+            <p class="small muted mt-2" style="line-height:1.7" data-text="bio|or:No biography provided."></p>
+            <div class="row mt-4" data-each="departments:tpl-profile-dept"></div>
+          </div>
+        </article>
+        <article class="card card-pad" style="padding:1.5rem">
+          <h2 class="section-title">Patient reviews</h2>
+          <p class="small muted mt-3" data-if="!reviews">No reviews yet.</p>
+          <ul class="list mt-2" data-each="reviews:tpl-review"></ul>
+        </article>
+      </div>
+      <aside class="card card-pad" style="padding:1.5rem;height:fit-content">
+        <h2 class="section-title"><svg class="icon icon-md" style="color:var(--accent-600)"><use href="#i-clock" /></svg>Consultation hours</h2>
+        <ul class="hours mt-4" data-each="hours:tpl-hours"></ul>
+        <p class="xsmall muted mt-4" data-text="{slotDurationMinutes}-minute appointments · {_count.appointments} consultations completed"></p>
+        <button type="button" class="btn btn-accent btn-block mt-4" data-action="book">Check availability &amp; book</button>
+      </aside>
+    </div>
+  </div>
+</div>
+<template id="tpl-profile-dept"><span class="chip tone-brand"><span data-text="department.name"></span><span data-if="isPrimary"> · Primary</span></span></template>
+<template id="tpl-review">
+  <li style="display:block">
+    <div class="row between"><p class="small strong" data-text="patient.fullName"></p><span class="xsmall muted" data-text="createdAt|date"></span></div>
+    <span class="stars stars-sm" data-stars="rating"></span>
+    <p class="small muted mt-1" data-if="comment" data-text="comment"></p>
+  </li>
+</template>
+<template id="tpl-hours"><li><span class="strong" data-text="day"></span><span data-text="times"></span></li></template>
+<!-- @include dialogs/booking.html -->

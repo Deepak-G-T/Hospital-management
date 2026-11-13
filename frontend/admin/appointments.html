@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>Appointments · MediCore</title>
+</head>
+<body data-title="Appointments" data-roles="ADMIN">
+<!-- @include portal-start.html -->
+<div class="page-header"><div><h1>Appointments</h1><p>All bookings across the hospital — approve, reject or manage</p></div></div>
+<form class="card toolbar mb-4" id="filters" style="--cols:1.4fr 1fr 1fr 1fr 1.4fr" data-no-submit>
+  <div class="input-wrap"><svg class="icon icon-sm"><use href="#i-search" /></svg><input class="input" type="search" name="search" placeholder="Patient, doctor or reason…" aria-label="Search appointments" /></div>
+  <select class="input" name="status" aria-label="Status"><option value="">All statuses</option><option value="PENDING">Pending</option><option value="CONFIRMED">Confirmed</option><option value="COMPLETED">Completed</option><option value="CANCELLED">Cancelled</option><option value="REJECTED">Rejected</option><option value="NO_SHOW">No Show</option></select>
+  <select class="input" name="departmentId" aria-label="Department" data-options="/admin/departments"><option value="">All departments</option></select>
+  <select class="input" name="doctorId" aria-label="Doctor" data-options="/admin/doctors?limit=100" data-option-label="Dr. {fullName}"><option value="">All doctors</option></select>
+  <div class="date-pair"><input class="input" type="date" name="from" aria-label="From" /><input class="input" type="date" name="to" aria-label="To" /></div>
+</form>
+<div class="card" data-state="loading" id="list" data-source="/admin/appointments" data-template="tpl-row" data-filters="#filters" data-limit="20" data-live="appointment:updated">
+  <!-- @include load-states.html -->
+  <div class="when-empty"><div class="empty"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-calendar-days" /></svg></span><p class="empty-title">No appointments match these filters</p></div></div>
+  <div class="when-ready table-wrap">
+    <table class="table">
+      <thead><tr><th>Date &amp; time</th><th>Patient</th><th>Doctor</th><th>Department</th><th>Reason</th><th>Status</th><th class="right">Actions</th></tr></thead>
+      <tbody data-list></tbody>
+    </table>
+  </div>
+  <!-- @include pager.html -->
+</div>
+<template id="tpl-row">
+  <tr>
+    <td data-label="Date &amp; time" class="nowrap strong" data-text="startAt|datetime"></td>
+    <td data-label="Patient" data-text="patient.fullName"></td>
+    <td data-label="Doctor" class="nowrap" data-text="doctor.fullName|dr"></td>
+    <td data-label="Department" data-text="department.name"></td>
+    <td data-label="Reason" class="xsmall muted"><span class="truncate" style="display:block;max-width:14rem" data-attr="title:{reason}" data-text="reason"></span></td>
+    <td data-label="Status"><span class="row" style="--gap:0.25rem"><span data-badge="status"></span><span class="xsmall muted" data-if="approvedByAdmin">admin-approved</span></span></td>
+    <td class="cell-actions"><div class="actions">
+      <button type="button" class="btn btn-ghost btn-sm text-green" data-if="status=PENDING" data-call="PATCH /admin/appointments/{id}/status" data-body="status:CONFIRMED" data-confirm="Approve appointment?" data-confirm-text="{patient.fullName} with Dr. {doctor.fullName} on {startAt|datetime}. Both will be notified." data-confirm-ok="Approve" data-reason="Note (optional)" data-done="Appointment confirmed"><svg class="icon icon-sm"><use href="#i-check" /></svg>Approve</button>
+      <button type="button" class="btn btn-ghost btn-sm text-red" data-if="status=PENDING" data-call="PATCH /admin/appointments/{id}/status" data-body="status:REJECTED" data-confirm="Reject appointment?" data-confirm-text="{patient.fullName} with Dr. {doctor.fullName} on {startAt|datetime}. Both will be notified." data-confirm-ok="Reject" data-danger data-reason="Note (optional)" data-done="Appointment rejected"><svg class="icon icon-sm"><use href="#i-x" /></svg>Reject</button>
+      <button type="button" class="btn btn-ghost btn-sm text-green" data-if="status=CONFIRMED&startAt<now" data-call="PATCH /admin/appointments/{id}/status" data-body="status:COMPLETED" data-confirm="Mark completed appointment?" data-confirm-text="{patient.fullName} with Dr. {doctor.fullName} on {startAt|datetime}. Both will be notified." data-confirm-ok="Mark completed" data-reason="Note (optional)" data-done="Appointment completed"><svg class="icon icon-sm"><use href="#i-check-circle-2" /></svg>Mark completed</button>
+      <button type="button" class="btn btn-ghost btn-sm text-red" data-if="status=CONFIRMED" data-call="PATCH /admin/appointments/{id}/status" data-body="status:CANCELLED" data-confirm="Cancel appointment?" data-confirm-text="{patient.fullName} with Dr. {doctor.fullName} on {startAt|datetime}. Both will be notified." data-confirm-ok="Cancel" data-danger data-reason="Note (optional)" data-done="Appointment cancelled"><svg class="icon icon-sm"><use href="#i-ban" /></svg>Cancel</button>
+    </div></td>
+  </tr>
+</template>
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/portal.js"></script>
+</body>
+</html>

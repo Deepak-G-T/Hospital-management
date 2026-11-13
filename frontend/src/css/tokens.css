@@ -1,0 +1,120 @@
+/* ==========================================================================
+   MediCore design tokens — colours, type, radii, shadows, motion
+   Light theme is the default; html[data-theme="dark"] switches every token.
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* Brand blue + teal accent */
+  --brand-50: #eff6ff; --brand-100: #dbeafe; --brand-200: #bfdbfe; --brand-300: #93c5fd; --brand-400: #60a5fa;
+  --brand-500: #3b82f6; --brand-600: #2563eb; --brand-700: #1d4ed8; --brand-800: #1e40af; --brand-900: #1e3a8a;
+  --accent-50: #f0fdfa; --accent-100: #ccfbf1; --accent-200: #99f6e4; --accent-300: #5eead4; --accent-400: #2dd4bf;
+  --accent-500: #14b8a6; --accent-600: #0d9488; --accent-700: #0f766e; --accent-800: #115e59;
+
+  /* Surfaces & text */
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --surface-3: #f1f5f9;
+  --surface-glass: rgba(255, 255, 255, 0.78);
+  --overlay: rgba(2, 6, 23, 0.5);
+  --border: rgba(226, 232, 240, 0.85);
+  --border-strong: #cbd5e1;
+  --divider: #f1f5f9;
+  --text: #1e293b;
+  --text-strong: #0f172a;
+  --text-muted: #64748b;
+  --text-soft: #94a3b8;
+  --link: var(--brand-600);
+  --link-hover: var(--brand-700);
+  --focus: rgba(59, 130, 246, 0.55);
+  --input-bg: #ffffff;
+  --input-border: rgba(203, 213, 225, 0.95);
+  --tint-brand: var(--brand-50);
+  --tint-brand-text: var(--brand-700);
+  --tint-brand-ring: var(--brand-100);
+  --hover: #f1f5f9;
+  --row-hover: rgba(239, 246, 255, 0.5);
+
+  /* Semantic tints: [bg, text, ring] */
+  --amber-bg: #fffbeb; --amber-fg: #b45309; --amber-ring: rgba(217, 119, 6, 0.2);
+  --emerald-bg: #ecfdf5; --emerald-fg: #047857; --emerald-ring: rgba(5, 150, 105, 0.2);
+  --red-bg: #fef2f2; --red-fg: #b91c1c; --red-ring: rgba(220, 38, 38, 0.2);
+  --sky-bg: #f0f9ff; --sky-fg: #0369a1; --sky-ring: rgba(2, 132, 199, 0.2);
+  --purple-bg: #faf5ff; --purple-fg: #7e22ce; --purple-ring: rgba(147, 51, 234, 0.2);
+  --orange-bg: #fff7ed; --orange-fg: #c2410c; --orange-ring: rgba(234, 88, 12, 0.2);
+  --indigo-bg: #eef2ff; --indigo-fg: #4338ca; --indigo-ring: rgba(79, 70, 229, 0.2);
+  --slate-bg: #f1f5f9; --slate-fg: #475569; --slate-ring: rgba(100, 116, 139, 0.2);
+  --teal-bg: var(--accent-50); --teal-fg: var(--accent-700); --teal-ring: rgba(13, 148, 136, 0.2);
+
+  /* Charts — validated categorical palette (fixed order) + chrome */
+  --series-1: #2a78d6; --series-2: #eb6834; --series-3: #1baf7a; --series-4: #eda100;
+  --series-5: #e87ba4; --series-6: #008300; --series-7: #6250d6; --series-8: #e34948;
+  --status-good: #0ca30c; --status-warning: #fab219; --status-serious: #ec835a; --status-critical: #d03b3b;
+  --chart-grid: #e1e0d9; --chart-axis: #c3c2b7; --chart-muted: #898781;
+
+  /* Type */
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --fs-xs: 0.75rem; --fs-sm: 0.875rem; --fs-base: 1rem; --fs-lg: 1.125rem; --fs-xl: 1.25rem; --fs-2xl: 1.5rem; --fs-3xl: 1.875rem;
+
+  /* Shape */
+  --r-sm: 0.5rem; --r: 0.75rem; --r-lg: 1rem; --r-xl: 1.5rem; --r-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 2px 8px -2px rgba(15, 23, 42, 0.06);
+  --shadow-hover: 0 4px 6px -2px rgba(15, 23, 42, 0.05), 0 16px 32px -8px rgba(15, 23, 42, 0.14);
+  --shadow-pop: 0 20px 48px -12px rgba(15, 23, 42, 0.28);
+  --shadow-glow: 0 8px 24px -8px rgba(37, 99, 235, 0.55);
+  --shadow-glow-accent: 0 8px 24px -8px rgba(13, 148, 136, 0.55);
+
+  /* Motion */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --t-fast: 150ms; --t: 220ms; --t-slow: 450ms;
+
+  /* Layout */
+  --sidebar-w: 16rem; --sidebar-w-collapsed: 5rem; --header-h: 4rem; --bottom-nav-h: 4.25rem;
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #070b16;
+  --surface: rgba(15, 23, 42, 0.82);
+  --surface-2: rgba(255, 255, 255, 0.03);
+  --surface-3: rgba(255, 255, 255, 0.05);
+  --surface-glass: rgba(11, 17, 32, 0.78);
+  --overlay: rgba(2, 6, 23, 0.65);
+  --border: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --divider: rgba(255, 255, 255, 0.05);
+  --text: #e2e8f0;
+  --text-strong: #ffffff;
+  --text-muted: #94a3b8;
+  --text-soft: #64748b;
+  --link: var(--brand-400);
+  --link-hover: var(--brand-300);
+  --input-bg: #0b1120;
+  --input-border: rgba(255, 255, 255, 0.1);
+  --tint-brand: rgba(59, 130, 246, 0.12);
+  --tint-brand-text: var(--brand-300);
+  --tint-brand-ring: rgba(96, 165, 250, 0.15);
+  --hover: rgba(255, 255, 255, 0.05);
+  --row-hover: rgba(255, 255, 255, 0.03);
+
+  --amber-bg: rgba(245, 158, 11, 0.12); --amber-fg: #fcd34d; --amber-ring: rgba(251, 191, 36, 0.2);
+  --emerald-bg: rgba(16, 185, 129, 0.12); --emerald-fg: #6ee7b7; --emerald-ring: rgba(52, 211, 153, 0.2);
+  --red-bg: rgba(239, 68, 68, 0.12); --red-fg: #fca5a5; --red-ring: rgba(248, 113, 113, 0.2);
+  --sky-bg: rgba(14, 165, 233, 0.12); --sky-fg: #7dd3fc; --sky-ring: rgba(56, 189, 248, 0.2);
+  --purple-bg: rgba(168, 85, 247, 0.12); --purple-fg: #d8b4fe; --purple-ring: rgba(192, 132, 252, 0.2);
+  --orange-bg: rgba(249, 115, 22, 0.12); --orange-fg: #fdba74; --orange-ring: rgba(251, 146, 60, 0.2);
+  --indigo-bg: rgba(99, 102, 241, 0.12); --indigo-fg: #a5b4fc; --indigo-ring: rgba(129, 140, 248, 0.2);
+  --slate-bg: rgba(255, 255, 255, 0.05); --slate-fg: #cbd5e1; --slate-ring: rgba(255, 255, 255, 0.1);
+  --teal-bg: rgba(20, 184, 166, 0.12); --teal-fg: #5eead4; --teal-ring: rgba(45, 212, 191, 0.2);
+
+  --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --series-4: #c98500;
+  --series-5: #d55181; --series-6: #008300; --series-7: #9085e9; --series-8: #e66767;
+  --chart-grid: #2c2c2a; --chart-axis: #383835; --chart-muted: #898781;
+
+  --shadow-card: none;
+  --shadow-hover: 0 16px 32px -12px rgba(0, 0, 0, 0.6);
+  --shadow-pop: 0 24px 56px -12px rgba(0, 0, 0, 0.7);
+}

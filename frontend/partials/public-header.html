@@ -1,0 +1,38 @@
+<div class="page-shell">
+<div class="topbar">
+  <div class="container">
+    <div class="row" style="--gap:1.5rem">
+      <span><svg class="icon icon-sm"><use href="#i-phone" /></svg>+1 555 0100</span>
+      <span><svg class="icon icon-sm"><use href="#i-mail" /></svg>care@medicore.com</span>
+    </div>
+    <span><svg class="icon icon-sm" style="color:#fca5a5"><use href="#i-siren" /></svg>In a life-threatening emergency, call your local emergency number immediately.</span>
+  </div>
+</div>
+<header class="site-header glass">
+  <div class="container bar">
+    <a class="logo" href="/" aria-label="MediCore home"><!-- @include logo-mark.html --><span>Medi<b>Core</b></span></a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="/" data-exact>Home</a><a href="/about">About</a><a href="/departments">Departments</a><a href="/doctors">Doctors</a><a href="/contact">Contact</a>
+    </nav>
+    <div class="site-actions">
+      <button type="button" class="btn-icon theme-toggle" data-theme-toggle aria-label="Toggle dark mode" title="Toggle dark mode">
+        <svg class="icon icon-md when-light"><use href="#i-moon" /></svg><svg class="icon icon-md when-dark"><use href="#i-sun" /></svg>
+      </button>
+      <a class="btn btn-primary when-desktop" href="/" data-when-user hidden>My dashboard</a>
+      <a class="btn btn-ghost when-desktop" href="/login" data-when-guest>Log in</a>
+      <a class="btn btn-primary when-desktop" href="/register" data-when-guest>Book appointment</a>
+      <button type="button" class="btn-icon menu-toggle" aria-label="Toggle menu" aria-expanded="false"><svg class="icon icon-md"><use href="#i-menu" /></svg></button>
+    </div>
+  </div>
+  <div class="mobile-menu">
+    <nav class="site-nav" aria-label="Main (mobile)">
+      <a href="/" data-exact>Home</a><a href="/about">About</a><a href="/departments">Departments</a><a href="/doctors">Doctors</a><a href="/contact">Contact</a>
+    </nav>
+    <div class="row mt-3">
+      <a class="btn btn-primary grow" href="/" data-when-user hidden>My dashboard</a>
+      <a class="btn btn-secondary grow" href="/login" data-when-guest>Log in</a>
+      <a class="btn btn-primary grow" href="/register" data-when-guest>Register</a>
+    </div>
+  </div>
+</header>
+<main class="site-main" id="main">

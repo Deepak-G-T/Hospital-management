@@ -1,0 +1,23 @@
+<!-- Doctor card used on the landing page, the public directory and the patient portal -->
+<template id="tpl-doctor-card">
+  <article class="card card-hover doctor-card">
+    <div class="row row-nowrap items-start" style="--gap:1rem">
+      <span class="avatar avatar-lg" data-initials="fullName"></span>
+      <div class="grow">
+        <a class="strong truncate" style="display:block" data-attr="href:doctors/{id}" data-text="Dr. {fullName}"></a>
+        <p class="spec truncate" data-text="specialization"></p>
+        <div class="row xsmall muted mt-1" style="--gap:0.375rem"><span class="stars stars-sm" data-stars="rating"></span><span data-if="rating" data-text="{rating} ({reviewCount})"></span><span data-if="!rating">No reviews yet</span></div>
+      </div>
+    </div>
+    <div class="row mt-4" style="--gap:0.375rem" data-each="departments:tpl-dept-chip"></div>
+    <div class="meta">
+      <span><svg class="icon icon-sm"><use href="#i-briefcase" /></svg><span data-text="{experienceYears} years experience · {consultationFee|currency}"></span></span>
+      <span data-if="availableDays"><svg class="icon icon-sm"><use href="#i-calendar-days" /></svg><span data-text="availableDays|days"></span></span>
+    </div>
+    <div class="actions">
+      <a class="btn btn-secondary" data-attr="href:doctors/{id}">View profile</a>
+      <button type="button" class="btn btn-primary" data-action="book">Book</button>
+    </div>
+  </article>
+</template>
+<template id="tpl-dept-chip"><span class="chip tone-brand" data-text="department.name"></span></template>

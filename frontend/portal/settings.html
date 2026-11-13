@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>Settings · MediCore</title>
+</head>
+<body data-title="Settings" data-roles="ADMIN,DOCTOR,PATIENT">
+<!-- @include portal-start.html -->
+<div style="max-width:48rem">
+  <div class="page-header"><div><h1>Settings</h1><p>Manage your account security and preferences</p></div></div>
+  <div class="stack" style="--gap:1.5rem">
+    <section class="card card-pad" style="padding:1.5rem">
+      <h2 class="section-title">Account</h2>
+      <dl class="kv mt-4" id="account" data-source="/auth/me">
+        <div><dt>Email</dt><dd data-text="user.email"></dd></div>
+        <div><dt>Role</dt><dd data-text="user.role|enum"></dd></div>
+        <div><dt>Member since</dt><dd data-text="user.createdAt|datetime"></dd></div>
+        <div><dt>Last login</dt><dd data-text="user.lastLoginAt|datetime"></dd></div>
+      </dl>
+    </section>
+    <section class="card card-pad row between" style="padding:1.5rem">
+      <div><h2 class="section-title">Appearance</h2><p class="small muted">Light or dark mode — remembered on this device</p></div>
+      <button type="button" class="btn btn-secondary theme-toggle" data-theme-toggle>
+        <svg class="icon icon-sm when-light"><use href="#i-moon" /></svg><span class="when-light">Switch to dark</span>
+        <svg class="icon icon-sm when-dark"><use href="#i-sun" /></svg><span class="when-dark">Switch to light</span>
+      </button>
+    </section>
+    <form class="card card-pad stack" id="password-form" style="padding:1.5rem" data-api="PUT /auth/change-password" data-login data-done="Password changed successfully" data-reset data-reload="none">
+      <h2 class="section-title"><svg class="icon icon-md text-brand"><use href="#i-key-round" /></svg>Change password</h2>
+      <div class="field"><label class="label" for="pw-current">Current password <span class="req">*</span></label><input class="input" id="pw-current" name="currentPassword" type="password" required autocomplete="current-password" /></div>
+      <div class="form-grid cols-2">
+        <div class="field"><label class="label" for="pw-new">New password <span class="req">*</span></label><input class="input" id="pw-new" name="newPassword" type="password" required minlength="8" autocomplete="new-password" /><p class="hint">Min. 8 characters with a letter and a number</p></div>
+        <div class="field"><label class="label" for="pw-confirm">Confirm new password <span class="req">*</span></label><input class="input" id="pw-confirm" data-match="newPassword" data-message="New passwords do not match" type="password" required autocomplete="new-password" /></div>
+      </div>
+      <div><button type="submit" class="btn btn-primary">Update password</button></div>
+    </form>
+  </div>
+</div>
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/portal.js"></script>
+</body>
+</html>

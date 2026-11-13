@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>Patients · MediCore</title>
+</head>
+<body data-title="Patients" data-roles="ADMIN">
+<!-- @include portal-start.html -->
+<div class="page-header">
+  <div><h1>Patients</h1><p>Register and manage patient accounts</p></div>
+  <div class="page-actions"><button type="button" class="btn btn-primary" id="add" data-open="patient-dialog" data-new><svg class="icon icon-sm"><use href="#i-plus" /></svg>Add patient</button></div>
+</div>
+<form class="card toolbar mb-4" id="filters" style="--cols:1fr 11rem" data-no-submit>
+  <div class="input-wrap"><svg class="icon icon-sm"><use href="#i-search" /></svg><input class="input" type="search" name="search" placeholder="Search name, email or phone…" aria-label="Search patients" /></div>
+  <select class="input" name="status" aria-label="Status"><option value="">All statuses</option><option value="active">Active</option><option value="inactive">Inactive</option></select>
+</form>
+<div class="card" data-state="loading" id="list" data-source="/admin/patients" data-template="tpl-row" data-filters="#filters" data-limit="15">
+  <!-- @include load-states.html -->
+  <div class="when-empty"><div class="empty"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-users" /></svg></span><p class="empty-title">No patients found</p></div></div>
+  <div class="when-ready table-wrap">
+    <table class="table">
+      <thead><tr><th>Patient</th><th>Phone</th><th>Age / Gender</th><th>Activity</th><th>Registered</th><th>Status</th><th class="right">Actions</th></tr></thead>
+      <tbody data-list></tbody>
+    </table>
+  </div>
+  <!-- @include pager.html -->
+</div>
+<template id="tpl-row">
+  <tr>
+    <td data-label="Patient"><span class="cell-person"><span class="avatar avatar-sm" data-initials="fullName"></span><span><strong data-text="fullName"></strong><small data-text="user.email"></small></span></span></td>
+    <td data-label="Phone" data-text="phone"></td>
+    <td data-label="Age / Gender" data-text="{dateOfBirth|age} · {gender|enum}"></td>
+    <td data-label="Activity" class="xsmall muted" data-text="{_count.appointments} appts · {_count.emergencyRequests} emerg."></td>
+    <td data-label="Registered" class="xsmall" data-text="createdAt|date"></td>
+    <td data-label="Status"><span data-badge="{user.isActive|pick:ACTIVE,INACTIVE}"></span></td>
+    <td class="cell-actions"><div class="actions">
+      <button type="button" class="btn-icon" data-open="view-dialog" title="View" aria-label="View"><svg class="icon icon-sm"><use href="#i-eye" /></svg></button>
+      <button type="button" class="btn-icon" data-open="patient-dialog" title="Edit" aria-label="Edit"><svg class="icon icon-sm"><use href="#i-pencil" /></svg></button>
+      <button type="button" class="btn-icon is-green" data-if="user.isActive" title="Deactivate" aria-label="Deactivate" data-call="PATCH /admin/users/{user.id}/status" data-body="isActive:false" data-done="Patient account deactivated"><svg class="icon icon-sm"><use href="#i-power" /></svg></button>
+      <button type="button" class="btn-icon" data-if="!user.isActive" title="Activate" aria-label="Activate" data-call="PATCH /admin/users/{user.id}/status" data-body="isActive:true" data-done="Patient account activated"><svg class="icon icon-sm"><use href="#i-power" /></svg></button>
+    </div></td>
+  </tr>
+</template>
+
+<dialog class="modal size-lg" id="patient-dialog" aria-labelledby="pd-title">
+  <form class="modal-panel" id="patient-form" data-api="POST /admin/patients" data-api-edit="PUT /admin/patients/{id}" data-fill data-done="Patient registered" data-done-edit="Patient updated">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><h3 id="pd-title"><span data-if="id" data-text="Edit {fullName}"></span><span data-if="!id">Register patient</span></h3><button type="button" class="btn-icon" data-close aria-label="Close"><svg class="icon icon-md"><use href="#i-x" /></svg></button></div>
+    <div class="modal-body form-grid cols-2">
+      <div class="field"><label class="label" for="p-name">Full name <span class="req">*</span></label><input class="input" id="p-name" name="fullName" required /></div>
+      <div class="field"><label class="label" for="p-email">Email <span class="req">*</span></label><input class="input" id="p-email" name="email" type="email" required data-from="user.email" /></div>
+      <fieldset class="contents" data-if="!id"><div class="field"><label class="label" for="p-pass">Temporary password <span class="req">*</span></label><input class="input" id="p-pass" name="password" minlength="8" required /><p class="hint">Min. 8 chars, letter + number</p></div></fieldset>
+      <div class="field"><label class="label" for="p-phone">Phone</label><input class="input" id="p-phone" name="phone" /></div>
+      <div class="field"><label class="label" for="p-dob">Date of birth</label><input class="input" id="p-dob" name="dateOfBirth" type="date" /></div>
+      <div class="field"><label class="label" for="p-gender">Gender</label><select class="input" id="p-gender" name="gender"><option value="">—</option><option value="MALE">Male</option><option value="FEMALE">Female</option><option value="OTHER">Other</option></select></div>
+      <fieldset class="contents" data-if="!id"><div class="field"><label class="label" for="p-blood">Blood group</label><select class="input" id="p-blood" name="bloodGroup"><option value="">Unknown</option><option value="A_POS">A+</option><option value="A_NEG">A−</option><option value="B_POS">B+</option><option value="B_NEG">B−</option><option value="AB_POS">AB+</option><option value="AB_NEG">AB−</option><option value="O_POS">O+</option><option value="O_NEG">O−</option></select></div><p class="hint span-2" style="grid-column:1/-1">Blood group is entered at registration only and is not shown in lists.</p></fieldset>
+      <div class="field span-2"><label class="label" for="p-address">Address</label><input class="input" id="p-address" name="address" /></div>
+      <fieldset class="contents" data-if="id"><div class="field"><label class="label" for="p-ecn">Emergency contact name</label><input class="input" id="p-ecn" name="emergencyContactName" /></div>
+      <div class="field"><label class="label" for="p-ecp">Emergency contact phone</label><input class="input" id="p-ecp" name="emergencyContactPhone" /></div></fieldset>
+    </div>
+    <div class="modal-foot"><button type="button" class="btn btn-secondary" data-close>Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+  </form>
+</dialog>
+
+<dialog class="modal size-lg" id="view-dialog" aria-labelledby="pv-title">
+  <div class="modal-panel">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><div><h3 id="pv-title" data-text="fullName">Patient</h3><p>Patient record (access is audit-logged)</p></div><button type="button" class="btn-icon" data-close aria-label="Close"><svg class="icon icon-md"><use href="#i-x" /></svg></button></div>
+    <div class="modal-body" data-state="loading" data-source="/admin/patients/{id}">
+      <!-- @include load-states.html -->
+      <div class="when-ready stack" style="--gap:1.25rem">
+        <dl class="kv cols-3">
+          <div><dt>Email</dt><dd data-text="user.email"></dd></div><div><dt>Phone</dt><dd data-text="phone"></dd></div><div><dt>Age</dt><dd data-text="dateOfBirth|age"></dd></div>
+          <div><dt>Gender</dt><dd data-text="gender|enum"></dd></div><div data-if-not="clinicalWithheld"><dt>Blood group</dt><dd data-text="bloodGroup|blood"></dd></div><div><dt>Emergency contact</dt><dd><span data-text="emergencyContactName"></span><span data-if="emergencyContactName" data-text=" ({emergencyContactPhone|or:—})"></span></dd></div>
+        </dl>
+        <div class="notice" style="flex-direction:column;gap:0.5rem;align-items:flex-start" data-if="clinicalWithheld">
+          <p class="small"><strong>Allergies and medical history are confidential.</strong> Opening them needs a reason, which is recorded in the audit log.</p>
+          <button type="button" class="btn btn-secondary btn-sm" data-reveal="/admin/patients/{id}"><svg class="icon icon-sm"><use href="#i-eye" /></svg>Open medical details</button>
+        </div>
+        <div data-if-not="clinicalWithheld"><p class="strong mb-2">Allergies</p><p class="small muted" data-if="!allergies">None recorded</p><div class="row" data-each="allergies:tpl-allergy"></div></div>
+        <div data-if-not="clinicalWithheld"><p class="strong mb-2">Medical history</p><p class="small muted" data-if="!medicalRecords">None recorded</p><ul class="stack stack-sm" data-each="medicalRecords:tpl-history"></ul></div>
+        <div><p class="strong mb-2">Recent appointments</p><p class="small muted" data-if="!appointments">No appointments</p><ul class="list" data-each="appointments:tpl-appt"></ul></div>
+      </div>
+    </div>
+  </div>
+</dialog>
+<template id="tpl-allergy"><span class="chip tone-red" data-text="{allergen} · {severity|enum}"></span></template>
+<template id="tpl-history"><li class="box small"><strong data-text="title"></strong> <span class="muted" data-text="· {recordType|enum} · {status|enum}"></span></li></template>
+<template id="tpl-appt"><li class="small"><span class="grow" data-text="{startAt|datetime} · Dr. {doctor.fullName}"></span><span data-badge="status"></span></li></template>
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/pages/admin/patients.js"></script>
+</body>
+</html>

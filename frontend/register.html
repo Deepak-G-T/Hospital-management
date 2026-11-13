@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>Create account · MediCore</title>
+</head>
+<body>
+<!-- @include public-header.html -->
+<div class="auth-wrap">
+  <form class="card card-pad stack animate-up" id="register-form" style="width:100%;max-width:36rem;padding:2rem" data-api="POST /auth/register" data-login data-go="/patient/medical-profile" data-done="Account created! Complete your medical profile to get started.">
+    <div>
+      <h1 style="font-size:1.5rem">Create your patient account</h1>
+      <p class="small muted mt-1">Book appointments, manage records and get notified in real time.</p>
+    </div>
+    <div class="field">
+      <label class="label" for="r-name">Full name <span class="req">*</span></label>
+      <input class="input" id="r-name" name="fullName" autocomplete="name" required minlength="2" />
+      <p class="hint text-red" data-error="fullName">Please enter your full name</p>
+    </div>
+    <div class="form-grid cols-2">
+      <div class="field"><label class="label" for="r-email">Email <span class="req">*</span></label><input class="input" id="r-email" name="email" type="email" required autocomplete="email" /></div>
+      <div class="field"><label class="label" for="r-phone">Phone</label><input class="input" id="r-phone" name="phone" placeholder="+1 555 123 4567" autocomplete="tel" /></div>
+      <div class="field"><label class="label" for="r-dob">Date of birth</label><input class="input" id="r-dob" name="dateOfBirth" type="date" data-max-today /></div>
+      <div class="field">
+        <label class="label" for="r-gender">Gender</label>
+        <select class="input" id="r-gender" name="gender"><option value="">Prefer not to say</option><option value="MALE">Male</option><option value="FEMALE">Female</option><option value="OTHER">Other</option></select>
+      </div>
+      <div class="field">
+        <label class="label" for="r-password">Password <span class="req">*</span></label>
+        <input class="input" id="r-password" name="password" type="password" autocomplete="new-password" required pattern="(?=.*[A-Za-z])(?=.*\d).{8,}" title="At least 8 characters with a letter and a number" />
+        <p class="hint text-red" data-error="password">At least 8 characters with a letter and a number</p>
+      </div>
+      <div class="field">
+        <label class="label" for="r-confirm">Confirm password <span class="req">*</span></label>
+        <input class="input" id="r-confirm" data-match="password" data-message="Passwords do not match" type="password" autocomplete="new-password" required />
+      </div>
+    </div>
+    <label class="check"><input type="checkbox" id="r-agree" required /> I consent to MediCore storing my health information securely to provide care. Only my care team and authorised staff can access it.</label>
+    <p class="hint text-red" data-error="agree">Please accept the privacy terms</p>
+    <button type="submit" class="btn btn-primary btn-block btn-lg"><svg class="icon icon-sm"><use href="#i-user-plus" /></svg>Create account</button>
+    <p class="center small muted">Already registered? <a class="link" href="/login">Sign in</a></p>
+  </form>
+</div>
+<!-- @include public-footer.html -->
+<script type="module" src="/src/js/public.js"></script>
+</body>
+</html>

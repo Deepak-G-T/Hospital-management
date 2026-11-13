@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>Departments · MediCore</title>
+</head>
+<body data-title="Departments" data-roles="ADMIN">
+<!-- @include portal-start.html -->
+<div class="page-header">
+  <div><h1>Departments</h1><p>Create departments, set heads and configure emergency routing keywords</p></div>
+  <div class="page-actions"><button type="button" class="btn btn-primary" id="add" data-open="dept-dialog" data-new><svg class="icon icon-sm"><use href="#i-plus" /></svg>New department</button></div>
+</div>
+<div class="row mb-4"><select class="input" style="width:auto" id="dfilter" name="deleted" aria-label="Show"><option value="">Current departments</option><option value="true">Deleted departments</option></select></div>
+<div data-state="loading" id="list" data-source="/admin/departments" data-filters="#dfilter" data-template="tpl-dept">
+  <!-- @include load-states.html -->
+  <div class="when-empty card"><div class="empty"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-building-2" /></svg></span><p class="empty-title">No departments yet</p></div></div>
+  <div class="when-ready grid md-grid-2 xl-grid-3 stagger is-grid" data-list></div>
+</div>
+<template id="tpl-dept">
+  <article class="card card-pad stack" style="--gap:0.75rem">
+    <div class="row row-nowrap items-start" style="--gap:0.75rem">
+      <span class="icon-tile" data-attr="data-tone:{isEmergency|pick:red,brand}"><svg class="icon icon-md"><use data-attr="href:{icon|icon}" /></svg></span>
+      <div class="grow"><p class="strong" data-text="name"></p><p class="xsmall muted"><span data-if="headDoctor" data-text="Head: Dr. {headDoctor.fullName}"></span><span data-if="!headDoctor">No head assigned</span></p></div>
+      <div class="stack" style="--gap:0.25rem;align-items:flex-end"><span data-badge="{isActive|pick:ACTIVE,INACTIVE}"></span><span class="chip tone-red" data-if="isEmergency">Emergency</span></div>
+    </div>
+    <p class="small muted clamp-2 grow" data-text="description|or:No description"></p>
+    <div class="xsmall muted stack" style="--gap:0.25rem">
+      <span class="row" style="--gap:0.375rem" data-if="location"><svg class="icon icon-sm"><use href="#i-map-pin" /></svg><span data-text="location"></span></span>
+      <span class="row" style="--gap:0.375rem" data-if="phone"><svg class="icon icon-sm"><use href="#i-phone" /></svg><span data-text="phone"></span></span>
+    </div>
+    <div class="grid" style="grid-template-columns:repeat(3,1fr);--gap:0.5rem">
+      <div class="box center" style="padding:0.5rem"><p class="strong" data-text="_count.doctors"></p><p class="xsmall muted">Doctors</p></div>
+      <div class="box center" style="padding:0.5rem"><p class="strong" data-text="_count.appointments"></p><p class="xsmall muted">Appointments</p></div>
+      <div class="box center" style="padding:0.5rem"><p class="strong" data-text="_count.emergencyRequests"></p><p class="xsmall muted">Emergencies</p></div>
+    </div>
+    <p class="truncate xsmall muted" data-if="doctors">Team: <span data-each="doctors:tpl-team"></span></p>
+    <div class="row row-nowrap" style="--gap:0.5rem">
+      <button type="button" class="btn btn-secondary btn-sm grow" data-if="!deletedAt" data-open="dept-dialog" data-fill><svg class="icon icon-sm"><use href="#i-pencil" /></svg>Edit</button>
+      <button type="button" class="btn btn-secondary btn-sm grow" data-if="deletedAt" data-call="POST /admin/departments/{id}/restore" data-done="{message}">Restore</button>
+      <button type="button" class="btn-icon is-red" data-if="!deletedAt" data-call="DELETE /admin/departments/{id}" data-confirm="Delete department?" data-confirm-text="{name} will be hidden and deactivated. Its appointment and emergency history is kept, and you can restore it later." data-confirm-ok="Delete" data-danger data-done="{message}" aria-label="Delete department"><svg class="icon icon-sm"><use href="#i-trash-2" /></svg></button>
+    </div>
+  </article>
+</template>
+<template id="tpl-team"><span class="list-comma" data-text="Dr. {doctor.fullName}"></span></template>
+
+<dialog class="modal size-lg" id="dept-dialog" aria-labelledby="dp-title">
+  <form class="modal-panel" id="dept-form" data-api="POST /admin/departments" data-api-edit="PUT /admin/departments/{id}" data-fill data-done="Department created" data-done-edit="Department updated">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><h3 id="dp-title"><span data-if="id" data-text="Edit {name}"></span><span data-if="!id">New department</span></h3><button type="button" class="btn-icon" data-close aria-label="Close"><svg class="icon icon-md"><use href="#i-x" /></svg></button></div>
+    <div class="modal-body form-grid cols-2">
+      <div class="field"><label class="label" for="dp-name">Name <span class="req">*</span></label><input class="input" id="dp-name" name="name" required minlength="2" /></div>
+      <div class="field"><label class="label" for="dp-icon">Icon</label>
+        <select class="input" id="dp-icon" name="icon"><option>Siren</option><option>HeartPulse</option><option>Brain</option><option>Bone</option><option>Baby</option><option>Wind</option><option>Pill</option><option>Sparkles</option><option selected>Stethoscope</option><option>Flower2</option><option>Eye</option><option>Ear</option><option>Syringe</option><option>Microscope</option><option>Building2</option></select></div>
+      <div class="field"><label class="label" for="dp-loc">Location</label><input class="input" id="dp-loc" name="location" /></div>
+      <div class="field"><label class="label" for="dp-phone">Phone</label><input class="input" id="dp-phone" name="phone" /></div>
+      <div class="field span-2"><label class="label" for="dp-head">Head of department</label><select class="input" id="dp-head" name="headDoctorId" data-null data-options="/admin/doctors?limit=100&amp;status=active" data-option-label="Dr. {fullName} — {specialization}"><option value="">None</option></select></div>
+      <div class="field span-2"><label class="label" for="dp-desc">Description</label><textarea class="input" id="dp-desc" name="description" rows="3"></textarea></div>
+      <div class="field span-2"><label class="label" for="dp-kw">Emergency routing keywords</label><input class="input" id="dp-kw" name="keywords" /><p class="hint">Comma separated symptoms, e.g. chest pain, palpitation — used to route emergency requests to this department</p></div>
+      <label class="check"><input type="checkbox" name="isEmergency" />Emergency department (fallback for unrouted cases)</label>
+      <label class="check"><input type="checkbox" name="isActive" checked />Active (visible to patients)</label>
+    </div>
+    <div class="modal-foot"><button type="button" class="btn btn-secondary" data-close>Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+  </form>
+</dialog>
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/portal.js"></script>
+</body>
+</html>

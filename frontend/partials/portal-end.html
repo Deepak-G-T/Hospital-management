@@ -1,0 +1,29 @@
+    </main>
+  </div>
+
+  <!-- Phone bottom bar: four most-used pages per role + "More" (opens the full menu) -->
+  <nav class="bottom-nav glass" aria-label="Quick navigation">
+    <div class="bottom-nav-grid" data-nav="ADMIN">
+      <a class="tab-link" href="/admin" data-exact><span class="tab-ico"><svg class="icon icon-md"><use href="#i-layout-dashboard" /></svg></span><span>Home</span></a>
+      <a class="tab-link" href="/admin/appointments"><span class="tab-ico"><svg class="icon icon-md"><use href="#i-calendar-days" /></svg></span><span>Bookings</span></a>
+      <a class="tab-link" href="/admin/doctors"><span class="tab-ico"><svg class="icon icon-md"><use href="#i-stethoscope" /></svg></span><span>Doctors</span></a>
+      <a class="tab-link" href="/admin/emergencies" data-emergency><span class="tab-ico"><svg class="icon icon-md"><use href="#i-siren" /></svg><span class="alert-dot"></span></span><span>Alerts</span></a>
+      <button type="button" class="tab-link" data-open-menu aria-label="Open full menu"><span class="tab-ico"><svg class="icon icon-md"><use href="#i-layout-grid" /></svg></span><span>More</span></button>
+    </div>
+    <div class="bottom-nav-grid" data-nav="DOCTOR">
+      <a class="tab-link" href="/doctor" data-exact><span class="tab-ico"><svg class="icon icon-md"><use href="#i-layout-dashboard" /></svg></span><span>Home</span></a>
+      <a class="tab-link" href="/doctor/appointments"><span class="tab-ico"><svg class="icon icon-md"><use href="#i-calendar-days" /></svg></span><span>Visits</span></a>
+      <a class="tab-link" href="/doctor/patients"><span class="tab-ico"><svg class="icon icon-md"><use href="#i-clipboard-list" /></svg></span><span>Patients</span></a>
+      <a class="tab-link" href="/doctor/emergencies" data-emergency><span class="tab-ico"><svg class="icon icon-md"><use href="#i-siren" /></svg><span class="alert-dot"></span></span><span>Alerts</span></a>
+      <button type="button" class="tab-link" data-open-menu aria-label="Open full menu"><span class="tab-ico"><svg class="icon icon-md"><use href="#i-layout-grid" /></svg></span><span>More</span></button>
+    </div>
+    <div class="bottom-nav-grid" data-nav="PATIENT">
+      <a class="tab-link" href="/patient" data-exact><span class="tab-ico"><svg class="icon icon-md"><use href="#i-layout-dashboard" /></svg></span><span>Home</span></a>
+      <a class="tab-link" href="/patient/find-doctors"><span class="tab-ico"><svg class="icon icon-md"><use href="#i-search" /></svg></span><span>Doctors</span></a>
+      <a class="tab-link" href="/patient/appointments"><span class="tab-ico"><svg class="icon icon-md"><use href="#i-calendar-days" /></svg></span><span>Visits</span></a>
+      <a class="tab-link" href="/patient/emergency" data-emergency><span class="tab-ico"><svg class="icon icon-md"><use href="#i-siren" /></svg><span class="alert-dot"></span></span><span>SOS</span></a>
+      <button type="button" class="tab-link" data-open-menu aria-label="Open full menu"><span class="tab-ico"><svg class="icon icon-md"><use href="#i-layout-grid" /></svg></span><span>More</span></button>
+    </div>
+  </nav>
+</div>
+<!-- @include common-end.html -->

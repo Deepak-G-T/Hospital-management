@@ -1,0 +1,34 @@
+<!-- Notification inbox (all roles), fully declarative: see src/js/core/auto.js -->
+<div id="inbox">
+  <div class="row between mb-4">
+    <div class="row">
+      <div class="tabs" data-inbox-tabs data-name="status"><button class="tab" data-value="">All</button><button class="tab" data-value="unread">Unread<span class="count" data-unread-count data-source="/notifications" data-params="limit=1" data-text="unread" data-live="notification:new">0</span></button></div>
+      <select class="input" style="width:auto" data-inbox-type name="type" aria-label="Filter by type">
+        <option value="">All types</option><option value="APPOINTMENT">Appointment</option><option value="EMERGENCY">Emergency</option><option value="COMPLAINT">Complaint</option>
+        <option value="PRESCRIPTION">Prescription</option><option value="REPORT">Report</option><option value="REFERRAL">Referral</option><option value="MESSAGE">Message</option>
+        <option value="REVIEW">Review</option><option value="SYSTEM">System</option>
+      </select>
+    </div>
+    <button type="button" class="btn btn-secondary btn-sm" data-markall data-call="PATCH /notifications/read-all"><svg class="icon icon-sm"><use href="#i-check-check" /></svg>Mark all as read</button>
+  </div>
+  <div class="card" data-state="loading" data-inbox-box data-source="/notifications" data-template="tpl-notification" data-filters="#inbox [data-inbox-tabs], #inbox [data-inbox-type]" data-limit="15" data-live="notification:new">
+    <!-- @include load-states.html -->
+    <div class="when-empty"><div class="empty"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-bell" /></svg></span><p class="empty-title">No notifications</p><p class="empty-text">You're all caught up.</p></div></div>
+    <ul class="when-ready list list-pad" data-list></ul>
+    <!-- @include pager.html -->
+  </div>
+</div>
+<template id="tpl-notification">
+  <li data-class="!isRead:is-unread" style="align-items:flex-start">
+    <span class="notif-icon" data-class="type=EMERGENCY:is-emergency" style="padding:0.5rem"><svg class="icon icon-md"><use data-attr="href:{type|notif}" /></svg></span>
+    <button type="button" class="grow" style="text-align:left" data-call="PATCH /notifications/{id}/read" data-go="{link}">
+      <span class="strong" style="display:block" data-text="title"></span>
+      <span class="small muted" style="display:block" data-text="message"></span>
+      <span class="xsmall soft" style="display:block;margin-top:0.25rem" data-attr="title:{createdAt|datetime}" data-text="{type|enum} · {createdAt|relative}"></span>
+    </button>
+    <span class="row shrink-0" style="--gap:0.25rem">
+      <button type="button" class="btn-icon" data-call="PATCH /notifications/{id}/read" data-if="!isRead" title="Mark as read" aria-label="Mark as read"><svg class="icon icon-sm"><use href="#i-check-check" /></svg></button>
+      <button type="button" class="btn-icon is-red" data-call="DELETE /notifications/{id}" title="Delete" aria-label="Delete notification"><svg class="icon icon-sm"><use href="#i-trash-2" /></svg></button>
+    </span>
+  </li>
+</template>

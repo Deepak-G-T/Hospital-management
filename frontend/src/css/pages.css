@@ -1,0 +1,94 @@
+/* Page-specific touches that don't belong to a shared component */
+
+/* Doctor card (public directory, patient portal) */
+.doctor-card { display: flex; flex-direction: column; padding: 1.25rem; }
+.doctor-card .spec { color: var(--accent-700); font-size: var(--fs-sm); }
+html[data-theme='dark'] .doctor-card .spec { color: var(--accent-400); }
+.doctor-card .meta { margin-top: 1rem; display: grid; gap: 0.375rem; font-size: var(--fs-sm); color: var(--text-muted); }
+.doctor-card .meta span { display: flex; align-items: center; gap: 0.5rem; }
+.doctor-card .actions { margin-top: auto; padding-top: 1.25rem; display: flex; gap: 0.5rem; }
+.doctor-card .actions > * { flex: 1; }
+
+/* Profile cover */
+.profile-cover { height: 6rem; background: linear-gradient(to right, var(--brand-600), var(--accent-500)); border-radius: var(--r-lg) var(--r-lg) 0 0; }
+.profile-top { display: flex; flex-direction: column; gap: 1rem; margin-top: -3rem; }
+@media (min-width: 640px) { .profile-top { flex-direction: row; align-items: flex-end; } }
+.facts { display: grid; gap: 1rem; margin-top: 1.5rem; }
+@media (min-width: 640px) { .facts { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.fact { padding: 1rem; border-radius: var(--r); background: var(--surface-2); }
+html:not([data-theme='dark']) .fact { background: #f8fafc; }
+.fact .icon { color: var(--brand-600); }
+.fact small { display: block; margin-top: 0.5rem; font-size: var(--fs-xs); color: var(--text-muted); }
+.fact strong { color: var(--text-strong); }
+.hours li { display: flex; justify-content: space-between; gap: 0.75rem; padding: 0.625rem 0; border-bottom: 1px solid var(--divider); font-size: var(--fs-sm); }
+.hours li span:last-child { text-align: right; color: var(--text-muted); }
+
+/* Department & feature cards */
+.dept-card { display: flex; flex-direction: column; align-items: center; padding: 1.25rem; text-align: center; }
+.dept-card p { margin-top: 0.75rem; font-size: var(--fs-sm); font-weight: 600; color: var(--text-strong); }
+.feature-card { padding: 1.5rem; }
+.feature-card h3 { margin-top: 1rem; font-size: var(--fs-base); font-weight: 600; }
+.feature-card p { margin-top: 0.5rem; font-size: var(--fs-sm); color: var(--text-muted); }
+.hero-stat { padding: 1rem; border-radius: var(--r); background: var(--surface-2); }
+html:not([data-theme='dark']) .hero-stat { background: #f8fafc; }
+.hero-stat strong { display: block; margin-top: 0.5rem; font-size: var(--fs-2xl); font-weight: 700; color: var(--text-strong); }
+.hero-stat small { font-size: var(--fs-xs); color: var(--text-muted); }
+.hero-callout { display: flex; align-items: center; gap: 0.75rem; margin-top: 1rem; padding: 1rem; border-radius: var(--r); color: #fff; background: linear-gradient(to right, var(--brand-600), var(--accent-600)); }
+.checks { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; margin-top: 2rem; font-size: var(--fs-sm); color: var(--text-muted); }
+.checks span { display: inline-flex; align-items: center; gap: 0.375rem; }
+.checks .icon { color: var(--accent-600); }
+
+/* Schedule editor */
+.day-row { display: flex; flex-direction: column; gap: 0.75rem; padding: 1rem; }
+.day-row .blocks { flex: 1; display: grid; gap: 0.5rem; }
+.block { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.block .input { width: 8.5rem; }
+@media (min-width: 768px) { .day-row { flex-direction: row; align-items: flex-start; } .day-row > .day-name { width: 8rem; padding-top: 0.5rem; } }
+
+/* Prescription medicine rows */
+.med-row { display: grid; gap: 0.5rem; padding: 0.75rem; border-radius: var(--r); border: 1px solid var(--border); }
+@media (min-width: 640px) { .med-row { grid-template-columns: 3fr 2fr 2fr 1fr 3fr auto; } }
+
+/* Schedule timeline on doctor dashboard */
+.agenda { position: relative; margin-left: 0.25rem; border-left: 2px dashed var(--border-strong); }
+.agenda li { position: relative; margin: 0 0 0.5rem 1.25rem; }
+.agenda li::before { content: ''; position: absolute; left: -1.85rem; top: 1rem; width: 0.875rem; height: 0.875rem; border-radius: 50%; background: var(--dot, #cbd5e1); box-shadow: 0 0 0 4px var(--surface); }
+.agenda li.is-done { --dot: #10b981; }
+.agenda li.is-next { --dot: var(--brand-600); }
+.agenda a { display: flex; align-items: center; gap: 0.75rem; min-width: 0; padding: 0.625rem; border-radius: var(--r); transition: background var(--t); }
+.agenda a:hover { background: var(--hover); }
+.agenda li.is-next a { background: var(--tint-brand); box-shadow: inset 0 0 0 1px var(--tint-brand-ring); }
+.agenda time { width: 4.5rem; flex-shrink: 0; font-size: var(--fs-sm); font-weight: 600; color: var(--tint-brand-text); font-variant-numeric: tabular-nums; }
+
+/* Login demo buttons */
+.demo-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; margin-top: 0.75rem; }
+.demo-grid button { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; padding: 0.75rem; border-radius: var(--r); border: 1px solid var(--border); font-size: var(--fs-xs); font-weight: 500; transition: all var(--t); }
+.demo-grid button:hover { border-color: var(--brand-400); background: var(--tint-brand); }
+.demo-grid .icon { color: var(--brand-600); }
+
+/* 404 */
+.big-404 { font-size: 4.5rem; font-weight: 800; background: linear-gradient(to right, var(--brand-600), var(--accent-500)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* Broadcast read bar, reviews distribution */
+.read-bar { margin-top: 0.5rem; max-width: 20rem; }
+.dist-row { display: flex; align-items: center; gap: 0.5rem; font-size: var(--fs-sm); }
+.dist-row > span:first-child { width: 2rem; text-align: right; }
+.dist-row > span:last-child { width: 2rem; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.dist-row .bar-track { flex: 1; }
+
+/* Unread rows in the notification inbox; live status text in the bell */
+.list > li.is-unread { background: var(--tint-brand); }
+.live-label::before { content: '● Reconnecting…'; }
+html.is-live .live-label::before { content: '● Live updates on'; color: #10b981; }
+.list-comma + .list-comma::before { content: ", "; }
+.list-dot + .list-dot::before { content: " · "; }
+[data-panel=received] .only-sent, [data-panel=sent] .only-received { display: none; }
+body:has(#scope input[value=active]) .only-history, body:not(:has(#scope input[value=active])) .only-active { display: none; }
+#complaint-form:not(:has([name=category] option[value=DOCTOR]:checked)) [data-doctor-field] { display: none; }
+.top-3 > :nth-child(n+4) { display: none; }
+.top-10 > :nth-child(n+11) { display: none; }
+/* "N doctors found" is counted by CSS: the counter runs through the cards, the label shows it first */
+[data-results] .when-ready { display: flex; flex-direction: column; counter-reset: found; }
+[data-results] [data-list] > * { counter-increment: found; }
+[data-results] [data-count] { order: -1; }
+[data-results] [data-count]::before { content: "Doctors found: " counter(found); }

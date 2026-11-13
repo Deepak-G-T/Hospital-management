@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>My prescriptions · MediCore</title>
+</head>
+<body data-title="Prescriptions" data-roles="PATIENT">
+<!-- @include portal-start.html -->
+<div class="page-header"><div><h1>My prescriptions</h1><p>Digital prescriptions from your doctors — download as PDF anytime</p></div></div>
+<div data-state="loading" id="rx" data-source="/patient/prescriptions" data-template="tpl-rx" data-limit="10" data-live="notification:new">
+  <!-- @include load-states.html -->
+  <div class="when-empty card"><div class="empty"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-pill" /></svg></span><p class="empty-title">No prescriptions yet</p></div></div>
+  <div class="when-ready stack stagger" data-list></div>
+  <!-- @include pager.html -->
+</div>
+<template id="tpl-rx">
+  <article class="card card-pad">
+    <div class="row between items-start">
+      <div>
+        <p class="mono muted" data-text="prescriptionNumber"></p>
+        <p class="strong" style="font-size:1.125rem" data-text="diagnosis"></p>
+        <p class="small muted" data-text="Dr. {doctor.fullName} · {doctor.specialization} · {createdAt|date}"></p>
+      </div>
+      <button type="button" class="btn btn-primary btn-sm" data-download="/files/prescriptions/{id}/pdf" data-done="Prescription downloaded"><svg class="icon icon-sm"><use href="#i-download" /></svg>Download PDF</button>
+    </div>
+    <div class="table-wrap mt-4" style="border:1px solid var(--border);border-radius:var(--r)">
+      <table class="table">
+        <thead><tr><th>Medicine</th><th>Dosage</th><th>Frequency</th><th>Duration</th><th>Instructions</th></tr></thead>
+        <tbody data-each="items:tpl-rx-item"></tbody>
+      </table>
+    </div>
+    <p class="small mt-3" data-if="advice"><span class="muted">Advice:</span> <span data-text="advice"></span></p>
+    <p class="row small text-brand mt-1" style="--gap:0.375rem;font-weight:500" data-if="followUpDate"><svg class="icon icon-sm"><use href="#i-calendar-clock" /></svg><span data-text="Follow-up on {followUpDate|date}"></span></p>
+  </article>
+</template>
+<template id="tpl-rx-item">
+  <tr>
+    <td data-label="Medicine" class="strong" data-text="medicineName"></td>
+    <td data-label="Dosage" data-text="dosage"></td>
+    <td data-label="Frequency" data-text="frequency"></td>
+    <td data-label="Duration" data-text="{durationDays} days"></td>
+    <td data-label="Instructions" class="xsmall muted" data-text="instructions"></td>
+  </tr>
+</template>
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/portal.js"></script>
+</body>
+</html>

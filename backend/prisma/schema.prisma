@@ -1,0 +1,779 @@
+// Smart Hospital Management System — Prisma schema (PostgreSQL)
+// All tables use UUID primary keys, TIMESTAMPTZ timestamps and snake_case names.
+// Extra CHECK constraints and the partial unique index that prevents double booking
+// live in prisma/migrations/*_init/migration.sql (Prisma cannot express them natively).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────────── Enums ─────────────────────────────
+
+enum Role {
+  ADMIN
+  DOCTOR
+  PATIENT
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum BloodGroup {
+  A_POS
+  A_NEG
+  B_POS
+  B_NEG
+  AB_POS
+  AB_NEG
+  O_POS
+  O_NEG
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum AppointmentType {
+  CONSULTATION
+  FOLLOW_UP
+  REFERRAL
+  EMERGENCY
+}
+
+enum MedicalRecordType {
+  CONDITION
+  DIAGNOSIS
+  SURGERY
+  MEDICATION
+  FAMILY_HISTORY
+  VACCINATION
+  OTHER
+}
+
+enum RecordStatus {
+  ACTIVE
+  RESOLVED
+}
+
+enum AllergyType {
+  DRUG
+  FOOD
+  ENVIRONMENTAL
+  OTHER
+}
+
+enum AllergySeverity {
+  MILD
+  MODERATE
+  SEVERE
+  LIFE_THREATENING
+}
+
+enum EmergencyPriority {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum EmergencyStatus {
+  PENDING
+  NOTIFIED
+  ACCEPTED
+  ESCALATED
+  RESOLVED
+  CANCELLED
+}
+
+enum EmergencyNotificationStatus {
+  SENT
+  SEEN
+  ACCEPTED
+  ESCALATED
+  EXPIRED
+}
+
+enum ReportType {
+  LAB
+  IMAGING
+  CONSULTATION
+  DISCHARGE
+  OTHER
+}
+
+enum ComplaintStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum ComplaintCategory {
+  SERVICE
+  DOCTOR
+  BILLING
+  FACILITY
+  APPOINTMENT
+  TECHNICAL
+  GENERAL_INQUIRY
+  OTHER
+}
+
+// RETAINED BUT UNUSED. The transactional email feature was removed from the application, but its table (email_outbox) and this enum stay in
+// the schema because migration 20261113090000_email_outbox is part of the applied migration history: dropping them here would make Prisma
+// generate a destructive DROP on the next migration. No application code reads or writes them.
+enum EmailStatus {
+  PENDING
+  PROCESSING
+  SENT
+  FAILED
+}
+
+enum NotificationType {
+  APPOINTMENT
+  EMERGENCY
+  COMPLAINT
+  PRESCRIPTION
+  REPORT
+  REFERRAL
+  MESSAGE
+  REVIEW
+  SYSTEM
+}
+
+enum ReferralStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  COMPLETED
+}
+
+// ───────────────────────────── Identity ─────────────────────────────
+
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  email        String    @unique @db.VarChar(255)
+  passwordHash String    @map("password_hash") @db.VarChar(255)
+  role         Role
+  isActive     Boolean   @default(true) @map("is_active")
+  lastLoginAt  DateTime? @map("last_login_at") @db.Timestamptz(6)
+  // Set when the password changes or is reset; tokens issued before it are rejected. NULL = never changed.
+  passwordChangedAt DateTime? @map("password_changed_at") @db.Timestamptz(6)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  admin   Admin?
+  doctor  Doctor?
+  patient Patient?
+
+  notifications           Notification[]
+  emailOutbox             EmailOutbox[]
+  auditLogs               AuditLog[]
+  complaintsFiled         Complaint[]           @relation("ComplaintAuthor")
+  complaintsResponded     Complaint[]           @relation("ComplaintResponder")
+  uploadedReports         MedicalReport[]       @relation("ReportUploader")
+  createdMedicalRecords   PatientMedicalRecord[] @relation("RecordAuthor")
+  emergencyEvents         EmergencyEvent[]
+  acknowledgedEmergencies EmergencyRequest[]    @relation("EmergencyAcknowledgedBy")
+
+  @@index([role])
+  @@index([isActive])
+  @@map("users")
+}
+
+model Admin {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @unique @map("user_id") @db.Uuid
+  fullName    String   @map("full_name") @db.VarChar(150)
+  phone       String?  @db.VarChar(30)
+  designation String?  @db.VarChar(100)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("admins")
+}
+
+model Doctor {
+  id                      String   @id @default(uuid()) @db.Uuid
+  userId                  String   @unique @map("user_id") @db.Uuid
+  fullName                String   @map("full_name") @db.VarChar(150)
+  phone                   String?  @db.VarChar(30)
+  gender                  Gender?
+  specialization          String   @db.VarChar(150)
+  qualification           String?  @db.VarChar(255)
+  experienceYears         Int      @default(0) @map("experience_years")
+  consultationFee         Decimal  @default(0) @map("consultation_fee") @db.Decimal(10, 2)
+  licenseNumber           String   @unique @map("license_number") @db.VarChar(80)
+  bio                     String?  @db.Text
+  avatarUrl               String?  @map("avatar_url") @db.VarChar(500)
+  slotDurationMinutes     Int      @default(30) @map("slot_duration_minutes")
+  isAvailableForEmergency Boolean  @default(true) @map("is_available_for_emergency")
+  createdAt               DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt               DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt         DateTime? @map("deleted_at") @db.Timestamptz(6) // soft deletion: the row is kept, hidden from ordinary views
+  deletedByUserId   String?   @map("deleted_by_user_id") @db.Uuid
+
+  user                   User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  departments            DoctorDepartment[]
+  appointments           Appointment[]
+  availability           DoctorAvailability[]
+  prescriptions          Prescription[]
+  reviews                DoctorReview[]
+  medicalReports         MedicalReport[]
+  emergencyNotifications EmergencyNotification[]
+  assignedEmergencies    EmergencyRequest[]      @relation("EmergencyAssignedDoctor")
+  complaintsAgainst      Complaint[]             @relation("ComplaintAgainstDoctor")
+  referralsSent          Referral[]              @relation("ReferralFrom")
+  referralsReceived      Referral[]              @relation("ReferralTo")
+  departmentMessages     DepartmentMessage[]
+  headOfDepartments      Department[]            @relation("DepartmentHead")
+
+  @@index([specialization])
+  @@index([isAvailableForEmergency])
+  @@map("doctors")
+}
+
+model Patient {
+  id                    String      @id @default(uuid()) @db.Uuid
+  userId                String      @unique @map("user_id") @db.Uuid
+  fullName              String      @map("full_name") @db.VarChar(150)
+  phone                 String?     @db.VarChar(30)
+  dateOfBirth           DateTime?   @map("date_of_birth") @db.Date
+  gender                Gender?
+  bloodGroup            BloodGroup? @map("blood_group")
+  address               String?     @db.VarChar(500)
+  heightCm              Decimal?    @map("height_cm") @db.Decimal(5, 2)
+  weightKg              Decimal?    @map("weight_kg") @db.Decimal(5, 2)
+  emergencyContactName  String?     @map("emergency_contact_name") @db.VarChar(150)
+  emergencyContactPhone String?     @map("emergency_contact_phone") @db.VarChar(30)
+  createdAt             DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user              User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointments      Appointment[]
+  medicalRecords    PatientMedicalRecord[]
+  allergies         Allergy[]
+  emergencyRequests EmergencyRequest[]
+  prescriptions     Prescription[]
+  medicalReports    MedicalReport[]
+  reviews           DoctorReview[]
+  referrals         Referral[]
+
+  @@index([fullName])
+  @@index([createdAt])
+  @@map("patients")
+}
+
+// ───────────────────────────── Departments ─────────────────────────────
+
+model Department {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String   @unique @db.VarChar(120)
+  description  String?  @db.Text
+  location     String?  @db.VarChar(150)
+  phone        String?  @db.VarChar(30)
+  icon         String?  @db.VarChar(50)
+  keywords     String?  @db.Text // comma separated symptom keywords used for emergency routing
+  isEmergency  Boolean  @default(false) @map("is_emergency")
+  isActive     Boolean  @default(true) @map("is_active")
+  headDoctorId String?  @map("head_doctor_id") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt         DateTime? @map("deleted_at") @db.Timestamptz(6) // soft deletion: the row is kept, hidden from ordinary views
+  deletedByUserId   String?   @map("deleted_by_user_id") @db.Uuid
+
+  headDoctor         Doctor?             @relation("DepartmentHead", fields: [headDoctorId], references: [id], onDelete: SetNull)
+  doctors            DoctorDepartment[]
+  appointments       Appointment[]
+  emergencyRequests  EmergencyRequest[]
+  referrals          Referral[]
+  messagesSent       DepartmentMessage[] @relation("MessageFromDepartment")
+  messagesReceived   DepartmentMessage[] @relation("MessageToDepartment")
+
+  @@index([isActive])
+  @@map("departments")
+}
+
+model DoctorDepartment {
+  id           String   @id @default(uuid()) @db.Uuid
+  doctorId     String   @map("doctor_id") @db.Uuid
+  departmentId String   @map("department_id") @db.Uuid
+  isPrimary    Boolean  @default(false) @map("is_primary")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  doctor     Doctor     @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  department Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  @@unique([doctorId, departmentId])
+  @@index([departmentId])
+  @@map("doctor_departments")
+}
+
+// ───────────────────────────── Scheduling ─────────────────────────────
+
+model DoctorAvailability {
+  id        String   @id @default(uuid()) @db.Uuid
+  doctorId  String   @map("doctor_id") @db.Uuid
+  dayOfWeek Int      @map("day_of_week") // 0 = Sunday … 6 = Saturday
+  startTime String   @map("start_time") @db.VarChar(5) // "HH:MM"
+  endTime   String   @map("end_time") @db.VarChar(5)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  doctor Doctor @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  @@unique([doctorId, dayOfWeek, startTime])
+  @@index([doctorId, dayOfWeek])
+  @@map("doctor_availability")
+}
+
+model Appointment {
+  id                 String            @id @default(uuid()) @db.Uuid
+  patientId          String            @map("patient_id") @db.Uuid
+  doctorId           String            @map("doctor_id") @db.Uuid
+  departmentId       String?           @map("department_id") @db.Uuid
+  startAt            DateTime          @map("start_at") @db.Timestamptz(6)
+  endAt              DateTime          @map("end_at") @db.Timestamptz(6)
+  status             AppointmentStatus @default(PENDING)
+  type               AppointmentType   @default(CONSULTATION)
+  reason             String?           @db.Text
+  notes              String?           @db.Text
+  diagnosis          String?           @db.Text
+  treatment          String?           @db.Text
+  statusReason       String?           @map("status_reason") @db.Text
+  approvedByAdmin    Boolean           @default(false) @map("approved_by_admin")
+  rescheduledCount   Int               @default(0) @map("rescheduled_count")
+  completedAt        DateTime?         @map("completed_at") @db.Timestamptz(6)
+  cancelledAt        DateTime?         @map("cancelled_at") @db.Timestamptz(6)
+  createdAt          DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  patient       Patient         @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctor        Doctor          @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  department    Department?     @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  prescriptions Prescription[]
+  reports       MedicalReport[]
+  review        DoctorReview?
+  records       PatientMedicalRecord[]
+  referral      Referral?       @relation("ReferralAppointment")
+
+  @@index([doctorId, startAt])
+  @@index([patientId, startAt])
+  @@index([status])
+  @@index([startAt])
+  @@index([departmentId])
+  @@map("appointments")
+}
+
+// ───────────────────────────── Medical data ─────────────────────────────
+
+model PatientMedicalRecord {
+  id              String            @id @default(uuid()) @db.Uuid
+  patientId       String            @map("patient_id") @db.Uuid
+  appointmentId   String?           @map("appointment_id") @db.Uuid
+  createdByUserId String?           @map("created_by_user_id") @db.Uuid
+  recordType      MedicalRecordType @map("record_type")
+  title           String            @db.VarChar(200)
+  description     String?           @db.Text
+  status          RecordStatus      @default(ACTIVE)
+  diagnosedOn     DateTime?         @map("diagnosed_on") @db.Date
+  createdAt       DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt         DateTime? @map("deleted_at") @db.Timestamptz(6) // soft deletion: the row is kept, hidden from ordinary views
+  deletedByUserId   String?   @map("deleted_by_user_id") @db.Uuid
+
+  patient     Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  appointment Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+  createdBy   User?        @relation("RecordAuthor", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  @@index([patientId, recordType])
+  @@map("patient_medical_records")
+}
+
+model Allergy {
+  id        String          @id @default(uuid()) @db.Uuid
+  patientId String          @map("patient_id") @db.Uuid
+  allergen  String          @db.VarChar(150)
+  type      AllergyType
+  severity  AllergySeverity @default(MODERATE)
+  reaction  String?         @db.VarChar(255)
+  notes     String?         @db.Text
+  createdAt DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt         DateTime? @map("deleted_at") @db.Timestamptz(6) // soft deletion: the row is kept, hidden from ordinary views
+  deletedByUserId   String?   @map("deleted_by_user_id") @db.Uuid
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@unique([patientId, allergen, type])
+  @@map("allergies")
+}
+
+// ───────────────────────────── Emergency ─────────────────────────────
+
+model EmergencyRequest {
+  id                String            @id @default(uuid()) @db.Uuid
+  patientId         String            @map("patient_id") @db.Uuid
+  departmentId      String?           @map("department_id") @db.Uuid
+  assignedDoctorId  String?           @map("assigned_doctor_id") @db.Uuid
+  priority          EmergencyPriority
+  status            EmergencyStatus   @default(PENDING)
+  symptoms          String            @db.Text
+  description       String?           @db.Text
+  contactPhone      String?           @map("contact_phone") @db.VarChar(30)
+  locationConsent   Boolean           @default(false) @map("location_consent")
+  latitude          Decimal?          @db.Decimal(9, 6)
+  longitude         Decimal?          @db.Decimal(9, 6)
+  address           String?           @db.VarChar(500)
+  escalationLevel   Int               @default(0) @map("escalation_level")
+  escalationReason  String?           @map("escalation_reason") @db.Text
+  // Automatic escalation (notification only; never changes priority, assignment or status — see services/escalation.service.js)
+  autoEscalationEnabled Boolean @default(true) @map("auto_escalation_enabled") // false for emergencies that existed before automatic escalation
+  autoEscalationLevel  Int       @default(0) @map("auto_escalation_level")
+  nextEscalationAt     DateTime? @map("next_escalation_at") @db.Timestamptz(6)
+  acknowledgedAt       DateTime? @map("acknowledged_at") @db.Timestamptz(6)
+  acknowledgedByUserId String?   @map("acknowledged_by_user_id") @db.Uuid
+  acknowledgedLevel    Int?      @map("acknowledged_level")
+  resolutionNotes   String?           @map("resolution_notes") @db.Text
+  notifiedAt        DateTime?         @map("notified_at") @db.Timestamptz(6)
+  acceptedAt        DateTime?         @map("accepted_at") @db.Timestamptz(6)
+  resolvedAt        DateTime?         @map("resolved_at") @db.Timestamptz(6)
+  createdAt         DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  patient        Patient                 @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  department     Department?             @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  assignedDoctor Doctor?                 @relation("EmergencyAssignedDoctor", fields: [assignedDoctorId], references: [id], onDelete: SetNull)
+  acknowledgedBy User?                   @relation("EmergencyAcknowledgedBy", fields: [acknowledgedByUserId], references: [id], onDelete: SetNull)
+  notifications  EmergencyNotification[]
+  events         EmergencyEvent[]
+  escalations    EmergencyEscalation[]
+
+  @@index([status, priority])
+  @@index([patientId])
+  @@index([assignedDoctorId])
+  @@index([createdAt])
+  @@map("emergency_requests")
+}
+
+model EmergencyNotification {
+  id           String                      @id @default(uuid()) @db.Uuid
+  emergencyId  String                      @map("emergency_id") @db.Uuid
+  doctorId     String                      @map("doctor_id") @db.Uuid
+  status       EmergencyNotificationStatus @default(SENT)
+  responseNote String?                     @map("response_note") @db.Text
+  sentAt       DateTime                    @default(now()) @map("sent_at") @db.Timestamptz(6)
+  respondedAt  DateTime?                   @map("responded_at") @db.Timestamptz(6)
+  createdAt    DateTime                    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime                    @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  emergency EmergencyRequest @relation(fields: [emergencyId], references: [id], onDelete: Cascade)
+  doctor    Doctor           @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  @@unique([emergencyId, doctorId])
+  @@index([doctorId, status])
+  @@map("emergency_notifications")
+}
+
+// Timeline of everything that happened to an emergency (response tracking)
+/// One row per automatic escalation level of an emergency (unique per level, so a retry can never escalate twice)
+model EmergencyEscalation {
+  id              String            @id @default(uuid()) @db.Uuid
+  emergencyId     String            @map("emergency_id") @db.Uuid
+  level           Int
+  priority        EmergencyPriority // priority at the time — automatic escalation never changes it
+  targetMinutes   Float             @map("target_minutes")
+  dueAt           DateTime          @map("due_at") @db.Timestamptz(6)
+  notifiedUserIds String[]          @default([]) @map("notified_user_ids") @db.Uuid
+  notifiedDoctors Int               @map("notified_doctors")
+  notifiedAdmins  Int               @map("notified_admins")
+  createdAt       DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  emergency EmergencyRequest @relation(fields: [emergencyId], references: [id], onDelete: Cascade)
+
+  @@unique([emergencyId, level])
+  @@map("emergency_escalations")
+}
+
+model EmergencyEvent {
+  id          String   @id @default(uuid()) @db.Uuid
+  emergencyId String   @map("emergency_id") @db.Uuid
+  actorUserId String?  @map("actor_user_id") @db.Uuid
+  eventType   String   @map("event_type") @db.VarChar(50)
+  message     String   @db.Text
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  emergency EmergencyRequest @relation(fields: [emergencyId], references: [id], onDelete: Cascade)
+  actor     User?            @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([emergencyId, createdAt])
+  @@map("emergency_events")
+}
+
+// ───────────────────────────── Clinical documents ─────────────────────────────
+
+model Prescription {
+  id                 String    @id @default(uuid()) @db.Uuid
+  prescriptionNumber String    @unique @map("prescription_number") @db.VarChar(40)
+  appointmentId      String?   @map("appointment_id") @db.Uuid
+  doctorId           String    @map("doctor_id") @db.Uuid
+  patientId          String    @map("patient_id") @db.Uuid
+  diagnosis          String    @db.Text
+  advice             String?   @db.Text
+  followUpDate       DateTime? @map("follow_up_date") @db.Date
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  appointment Appointment?       @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+  doctor      Doctor             @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  patient     Patient            @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  items       PrescriptionItem[]
+
+  @@index([patientId, createdAt])
+  @@index([doctorId, createdAt])
+  @@map("prescriptions")
+}
+
+model PrescriptionItem {
+  id             String   @id @default(uuid()) @db.Uuid
+  prescriptionId String   @map("prescription_id") @db.Uuid
+  medicineName   String   @map("medicine_name") @db.VarChar(200)
+  dosage         String   @db.VarChar(100)
+  frequency      String   @db.VarChar(100)
+  durationDays   Int      @map("duration_days")
+  instructions   String?  @db.VarChar(500)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  prescription Prescription @relation(fields: [prescriptionId], references: [id], onDelete: Cascade)
+
+  @@index([prescriptionId])
+  @@map("prescription_items")
+}
+
+model MedicalReport {
+  id               String     @id @default(uuid()) @db.Uuid
+  patientId        String     @map("patient_id") @db.Uuid
+  doctorId         String?    @map("doctor_id") @db.Uuid
+  appointmentId    String?    @map("appointment_id") @db.Uuid
+  uploadedByUserId String     @map("uploaded_by_user_id") @db.Uuid
+  title            String     @db.VarChar(200)
+  reportType       ReportType @map("report_type")
+  notes            String?    @db.Text
+  fileName         String     @map("file_name") @db.VarChar(255)
+  storedName       String     @unique @map("stored_name") @db.VarChar(255)
+  mimeType         String     @map("mime_type") @db.VarChar(100)
+  fileSize         Int        @map("file_size")
+  createdAt        DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt         DateTime? @map("deleted_at") @db.Timestamptz(6) // soft deletion: the row is kept, hidden from ordinary views
+  deletedByUserId   String?   @map("deleted_by_user_id") @db.Uuid
+
+  patient     Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctor      Doctor?      @relation(fields: [doctorId], references: [id], onDelete: SetNull)
+  appointment Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+  uploadedBy  User         @relation("ReportUploader", fields: [uploadedByUserId], references: [id], onDelete: Cascade)
+
+  @@index([patientId, createdAt])
+  @@map("medical_reports")
+}
+
+// ───────────────────────────── Feedback & communication ─────────────────────────────
+
+model Complaint {
+  id                 String            @id @default(uuid()) @db.Uuid
+  complainantUserId  String?           @map("complainant_user_id") @db.Uuid
+  guestName          String?           @map("guest_name") @db.VarChar(150)
+  guestEmail         String?           @map("guest_email") @db.VarChar(255)
+  againstDoctorId    String?           @map("against_doctor_id") @db.Uuid
+  category           ComplaintCategory @default(OTHER)
+  subject            String            @db.VarChar(200)
+  description        String            @db.Text
+  status             ComplaintStatus   @default(OPEN)
+  response           String?           @db.Text
+  respondedByUserId  String?           @map("responded_by_user_id") @db.Uuid
+  respondedAt        DateTime?         @map("responded_at") @db.Timestamptz(6)
+  createdAt          DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  complainant   User?   @relation("ComplaintAuthor", fields: [complainantUserId], references: [id], onDelete: SetNull)
+  againstDoctor Doctor? @relation("ComplaintAgainstDoctor", fields: [againstDoctorId], references: [id], onDelete: SetNull)
+  respondedBy   User?   @relation("ComplaintResponder", fields: [respondedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([complainantUserId])
+  @@map("complaints")
+}
+
+model Notification {
+  id        String           @id @default(uuid()) @db.Uuid
+  userId    String           @map("user_id") @db.Uuid
+  type      NotificationType @default(SYSTEM)
+  title     String           @db.VarChar(200)
+  message   String           @db.Text
+  link      String?          @db.VarChar(300)
+  isRead    Boolean          @default(false) @map("is_read")
+  readAt    DateTime?        @map("read_at") @db.Timestamptz(6)
+  broadcastId String?        @map("broadcast_id") @db.Uuid
+  createdAt DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt])
+  @@index([broadcastId])
+  @@map("notifications")
+}
+
+model DoctorReview {
+  id            String   @id @default(uuid()) @db.Uuid
+  doctorId      String   @map("doctor_id") @db.Uuid
+  patientId     String   @map("patient_id") @db.Uuid
+  appointmentId String   @unique @map("appointment_id") @db.Uuid
+  rating        Int      @db.SmallInt
+  comment       String?  @db.Text
+  isVisible     Boolean  @default(true) @map("is_visible")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  doctor      Doctor      @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  patient     Patient     @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  appointment Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  @@index([doctorId, createdAt])
+  @@map("doctor_reviews")
+}
+
+model Referral {
+  id                 String         @id @default(uuid()) @db.Uuid
+  patientId          String         @map("patient_id") @db.Uuid
+  fromDoctorId       String         @map("from_doctor_id") @db.Uuid
+  toDoctorId         String         @map("to_doctor_id") @db.Uuid
+  departmentId       String?        @map("department_id") @db.Uuid
+  appointmentId      String?        @unique @map("appointment_id") @db.Uuid
+  reason             String         @db.Text
+  notes              String?        @db.Text
+  status             ReferralStatus @default(PENDING)
+  createdAt          DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  patient     Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  fromDoctor  Doctor       @relation("ReferralFrom", fields: [fromDoctorId], references: [id], onDelete: Cascade)
+  toDoctor    Doctor       @relation("ReferralTo", fields: [toDoctorId], references: [id], onDelete: Cascade)
+  department  Department?  @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  appointment Appointment? @relation("ReferralAppointment", fields: [appointmentId], references: [id], onDelete: SetNull)
+
+  @@index([toDoctorId, status])
+  @@index([fromDoctorId])
+  @@map("referrals")
+}
+
+model DepartmentMessage {
+  id               String   @id @default(uuid()) @db.Uuid
+  senderDoctorId   String   @map("sender_doctor_id") @db.Uuid
+  fromDepartmentId String?  @map("from_department_id") @db.Uuid
+  toDepartmentId   String   @map("to_department_id") @db.Uuid
+  subject          String   @db.VarChar(200)
+  body             String   @db.Text
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  sender         Doctor      @relation(fields: [senderDoctorId], references: [id], onDelete: Cascade)
+  fromDepartment Department? @relation("MessageFromDepartment", fields: [fromDepartmentId], references: [id], onDelete: SetNull)
+  toDepartment   Department  @relation("MessageToDepartment", fields: [toDepartmentId], references: [id], onDelete: Cascade)
+
+  @@index([toDepartmentId, createdAt])
+  @@map("department_messages")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String?  @map("user_id") @db.Uuid
+  userRole   Role?    @map("user_role")
+  action     String   @db.VarChar(100)
+  entityType String?  @map("entity_type") @db.VarChar(60)
+  entityId   String?  @map("entity_id") @db.VarChar(60)
+  details    Json?
+  ipAddress  String?  @map("ip_address") @db.VarChar(64)
+  userAgent  String?  @map("user_agent") @db.VarChar(500)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  // tamper-evident hash chain, filled in by a database trigger (see migration 20261112090000_audit_append_only)
+  seq        BigInt   @unique @default(0)
+  prevHash   String   @default("") @map("prev_hash")
+  rowHash    String   @default("") @map("row_hash")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([userId, createdAt])
+  @@index([action])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+/// Where the audit hash chain stood when it was established (written once by a migration; append-only).
+model AuditChainBaseline {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  establishedAt DateTime @default(now()) @map("established_at") @db.Timestamptz(6)
+  rowsCovered   BigInt   @map("rows_covered")
+  lastSeq       BigInt   @map("last_seq")
+  lastHash      String   @map("last_hash")
+  note          String
+
+  @@map("audit_chain_baseline")
+}
+
+/// Single-row marker: 'production' unless database/roles.sql sets 'development' or 'test'. Read by the audit TRUNCATE protection.
+model AppEnvironment {
+  id   Boolean @id @default(true)
+  name String  @default("production")
+
+  @@map("medicore_environment")
+}
+
+// RETAINED BUT UNUSED (see EmailStatus above): the former email outbox. It never held an address, a credential or clinical data.
+// Nothing in the application creates or reads these rows any more.
+model EmailOutbox {
+  id            String      @id @default(uuid()) @db.Uuid
+  dedupeKey     String      @unique @map("dedupe_key") @db.VarChar(255)
+  template      String      @db.VarChar(80)
+  userId        String      @map("user_id") @db.Uuid
+  params        Json        @default("{}")
+  status        EmailStatus @default(PENDING)
+  attempts      Int         @default(0)
+  maxAttempts   Int         @default(6) @map("max_attempts")
+  nextAttemptAt DateTime    @default(now()) @map("next_attempt_at") @db.Timestamptz(6)
+  lockedAt      DateTime?   @map("locked_at") @db.Timestamptz(6)
+  lockedBy      String?     @map("locked_by") @db.VarChar(80)
+  sentAt        DateTime?   @map("sent_at") @db.Timestamptz(6)
+  lastErrorCode String?     @map("last_error_code") @db.VarChar(60)
+  lastError     String?     @map("last_error") @db.VarChar(200)
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status, nextAttemptAt])
+  @@index([userId, createdAt])
+  @@index([sentAt])
+  @@map("email_outbox")
+}

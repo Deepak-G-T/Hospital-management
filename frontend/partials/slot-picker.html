@@ -1,0 +1,10 @@
+<!-- Date strip + time slots. Driven by src/js/core/slots.js -->
+<div class="slot-picker" data-slot-picker>
+  <div class="days scroll-thin" data-days role="group" aria-label="Choose a day"></div>
+  <div class="mt-3" data-state="loading" data-slots-state style="min-height:6rem">
+    <div class="when-loading center" style="padding:1.5rem"><svg class="icon icon-md spin text-brand"><use href="#i-loader-2" /></svg></div>
+    <p class="when-error small text-red" data-error-text></p>
+    <p class="when-empty center small muted" style="padding:1.5rem 0" data-slots-empty>The doctor is not available on this day. Try another date.</p>
+    <div class="when-ready slots is-grid" data-slots role="group" aria-label="Available times"></div>
+  </div>
+</div>

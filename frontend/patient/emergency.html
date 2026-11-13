@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>Emergency · MediCore</title>
+</head>
+<body data-title="Emergency">
+<!-- @include portal-start.html -->
+<div class="page-header"><div><h1>Emergency assistance</h1><p>Alert MediCore's on-duty doctors and track the response in real time</p></div></div>
+<div class="stack" style="--gap:1.5rem">
+  <!-- @include emergency-notice.html -->
+
+  <div data-state="loading" id="em" data-source="/patient/emergencies" data-where="status=PENDING,NOTIFIED,ACCEPTED,ESCALATED" data-template="tpl-active" data-live="emergency:updated">
+    <!-- @include load-states.html -->
+
+    <div class="when-ready" data-list></div>
+
+    <!-- New request form -->
+    <form class="when-empty card card-pad stack" style="padding:1.5rem;--gap:1.25rem" id="em-form" data-api="POST /patient/emergencies" data-done="Emergency request sent — hospital staff have been alerted">
+      <fieldset style="border:0;padding:0;margin:0">
+        <legend class="label">Priority <span class="req">*</span></legend>
+        <div class="choice-grid">
+          <label class="choice"><input type="radio" name="priority" value="CRITICAL" /><span class="priority" data-priority="CRITICAL">Critical</span><p>Life-threatening — also call emergency services now</p></label>
+          <label class="choice"><input type="radio" name="priority" value="HIGH" checked /><span class="priority" data-priority="HIGH">High</span><p>Severe symptoms needing urgent attention</p></label>
+          <label class="choice"><input type="radio" name="priority" value="MEDIUM" /><span class="priority" data-priority="MEDIUM">Medium</span><p>Needs prompt care but is stable</p></label>
+          <label class="choice"><input type="radio" name="priority" value="LOW" /><span class="priority" data-priority="LOW">Low</span><p>Non-urgent, but you need advice soon</p></label>
+        </div>
+      </fieldset>
+      <div class="field">
+        <label class="label" for="em-symptoms">What's happening? <span class="req">*</span></label>
+        <textarea class="input" id="em-symptoms" name="symptoms" rows="3" required minlength="5" maxlength="2000" placeholder="e.g. Severe chest pain and shortness of breath for 20 minutes"></textarea>
+        <p class="hint">Describe the main symptoms — this is used to route your request to the right department</p>
+      </div>
+      <div class="form-grid cols-2">
+        <div class="field"><label class="label" for="em-dept">Department (optional)</label><select class="input" id="em-dept" name="departmentId" data-null data-options="/public/departments"><option value="">Identify automatically</option></select><p class="hint">Leave blank to let us identify it from your symptoms</p></div>
+        <div class="field"><label class="label" for="em-phone">Contact phone</label><input class="input" id="em-phone" name="contactPhone" /></div>
+      </div>
+      <div class="field"><label class="label" for="em-desc">Additional details</label><textarea class="input" id="em-desc" name="description" rows="2"></textarea></div>
+      <div class="card-pad" style="border:1px solid var(--border);border-radius:var(--r-lg)">
+        <label class="check"><input type="checkbox" name="locationConsent" /><span><strong>I consent to share my current location</strong> with MediCore staff handling this request. It is used only for this emergency and you can submit without it.</span></label>
+        <div class="row mt-3">
+          <button type="button" class="btn btn-secondary btn-sm" data-locate disabled><svg class="icon icon-sm"><use href="#i-locate-fixed" /></svg>Use my current location</button>
+          <span class="row small" style="color:var(--teal-fg);--gap:0.25rem" data-coords hidden><svg class="icon icon-sm"><use href="#i-map-pin" /></svg><span></span></span>
+        </div>
+        <div class="field mt-3"><label class="label" for="em-address">Address / landmark (optional)</label><input class="input" id="em-address" name="address" /></div>
+      </div>
+      <button type="submit" class="btn btn-danger btn-lg btn-block"><svg class="icon icon-md"><use href="#i-siren" /></svg>Send emergency request</button>
+    </form>
+  </div>
+
+  <section class="card" data-state="loading" id="em-history" data-source="/patient/emergencies" data-where="!status=PENDING,NOTIFIED,ACCEPTED,ESCALATED" data-template="tpl-em-row" data-live="emergency:updated">
+    <div class="card-head"><h2 class="section-title">Emergency history</h2></div>
+    <!-- @include load-states.html -->
+    <div class="when-empty"><div class="empty"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-siren" /></svg></span><p class="empty-title">No previous emergency requests</p></div></div>
+    <div class="when-ready table-wrap">
+      <table class="table">
+        <thead><tr><th>Date</th><th>Priority</th><th>Symptoms</th><th>Department</th><th>Doctor</th><th>Response</th><th>Status</th></tr></thead>
+        <tbody data-list></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<template id="tpl-active">
+    <section class="card" style="overflow:hidden" data-active>
+      <div class="card-head" style="background:var(--red-bg)">
+        <div class="row row-nowrap grow" style="--gap:0.75rem">
+          <svg class="icon icon-lg text-red" style="animation:blink 1.4s infinite"><use href="#i-siren" /></svg>
+          <div class="grow"><p class="strong text-red">Your emergency request is active</p><p class="small text-red" data-text="Submitted {createdAt|relative} · updates appear automatically"></p></div>
+        </div>
+        <span class="row"><span data-priority-of="priority"></span><span data-badge="status"></span></span>
+      </div>
+      <div class="grid lg-grid-2" style="--gap:1.5rem;padding:1.5rem">
+        <div>
+          <ol class="steps"><li data-class="progress>0:is-done"><span>1</span><span>Submitted</span></li><li data-class="progress>1:is-done"><span>2</span><span>Department identified</span></li><li data-class="progress>2:is-done"><span>3</span><span>Doctors alerted</span></li><li data-class="progress>3:is-done"><span>4</span><span>Doctor accepted</span></li><li data-class="progress>4:is-done"><span>5</span><span>Resolved</span></li></ol>
+          <div class="stack stack-sm small mt-6">
+            <p><span class="muted">Symptoms:</span> <span data-text="symptoms"></span></p>
+            <p><span class="muted">Department:</span> <span data-text="department.name|or:Being identified"></span></p>
+            <p class="alert alert-info row row-nowrap" data-if="assignedDoctor"><svg class="icon icon-md"><use href="#i-user-check" /></svg><span data-text="Dr. {assignedDoctor.fullName} ({assignedDoctor.specialization}) is handling your case{responseText}"></span></p>
+            <p class="row muted" data-if="!assignedDoctor"><svg class="icon icon-sm"><use href="#i-clock" /></svg><span data-text="{notifications.length} doctor(s) alerted — waiting for a response"></span></p>
+            <p style="color:var(--purple-fg)" data-if="escalationLevel>0">Your case was escalated to additional specialists.</p>
+          </div>
+          <button type="button" class="btn btn-secondary mt-4 text-red" data-cancel data-call="POST /patient/emergencies/{id}/cancel" data-confirm="Cancel emergency request?" data-confirm-text="Only cancel if you no longer need assistance. Doctors who were alerted will be informed." data-confirm-ok="Cancel request" data-danger data-done="Emergency request cancelled"><svg class="icon icon-sm"><use href="#i-x-circle" /></svg>Cancel request</button>
+        </div>
+        <div><p class="strong mb-3">Live timeline</p><ol class="timeline" data-each="events:tpl-event"></ol></div>
+      </div>
+    </section>
+</template>
+<template id="tpl-event"><li data-attr="data-event:{eventType}"><p class="small" data-text="message"></p><p class="xsmall muted" data-text="createdAt|datetime"></p></li></template>
+<template id="tpl-em-row">
+  <tr>
+    <td data-label="Date" class="nowrap" data-text="createdAt|datetime"></td>
+    <td data-label="Priority"><span data-priority-of="priority"></span></td>
+    <td data-label="Symptoms"><span class="truncate" style="display:block;max-width:18rem" data-text="symptoms"></span></td>
+    <td data-label="Department" data-text="department.name"></td>
+    <td data-label="Doctor" data-text="assignedDoctor.fullName|dr"></td>
+    <td data-label="Response"><span data-if="acceptedAt" data-text="{responseMin} min"></span><span data-if="!acceptedAt">—</span></td>
+    <td data-label="Status"><span data-badge="status"></span></td>
+  </tr>
+</template>
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/pages/patient/emergency.js"></script>
+</body>
+</html>

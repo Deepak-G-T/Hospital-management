@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>Emergency board · MediCore</title>
+</head>
+<body data-title="Emergencies">
+<!-- @include portal-start.html -->
+<div class="page-header"><div><h1>Emergency board</h1><p>Real-time alerts for your departments. Accept to take the case, acknowledge if you are assessing it, or escalate if it needs other specialists.</p></div></div>
+<div class="tabs mb-4" id="scope" data-name="scope" data-initial="active"><button class="tab" data-value="active">Active alerts</button><button class="tab" data-value="history">History</button><button class="tab" data-value="all">All</button></div>
+<div data-state="loading" id="board" data-source="/doctor/emergencies" data-template="tpl-em" data-filters="#scope" data-live="emergency:alert emergency:updated">
+  <!-- @include load-states.html -->
+  <div class="when-empty card"><div class="empty"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-siren" /></svg></span><p class="empty-title only-active">No active emergencies</p><p class="empty-title only-history">No emergency history</p><p class="empty-text">New alerts arrive here instantly with a notification.</p></div></div>
+  <div class="when-ready grid lg-grid-2 stagger is-grid" data-list></div>
+</div>
+
+<template id="tpl-em">
+  <article class="card card-pad stack" style="--gap:0.5rem" data-class="priority=CRITICAL&status=PENDING,NOTIFIED,ESCALATED:card-danger">
+    <div class="row between items-start">
+      <div class="row" style="--gap:0.5rem"><span data-priority-of="priority"></span><span data-badge="status"></span><span class="chip tone-teal" data-if="mine">Assigned to you</span></div>
+      <span class="xsmall muted" data-attr="title:{createdAt|datetime}" data-text="createdAt|relative"></span>
+    </div>
+    <p class="strong" style="font-size:1.125rem" data-text="patient.fullName"></p>
+    <p class="xsmall muted" data-text="{patient.dateOfBirth|age} yrs · {patient.gender|enum} · Blood {patient.bloodGroup|blood} · {department.name|or:No department}"></p>
+    <p class="small" data-text="symptoms"></p>
+    <p class="small muted" data-if="description" data-text="description"></p>
+    <p class="row row-nowrap xsmall text-red items-start" style="--gap:0.375rem;font-weight:500" data-if="patient.allergies"><svg class="icon icon-sm"><use href="#i-alert-triangle" /></svg><span>Allergies: <span data-each="patient.allergies:tpl-allergy"></span></span></p>
+    <div class="row xsmall" style="--gap:0.25rem 1rem">
+      <a class="link" data-if="contactPhone" data-attr="href:tel:{contactPhone}"><svg class="icon icon-sm"><use href="#i-phone" /></svg><span data-text="contactPhone"></span></a>
+      <a class="link" target="_blank" rel="noreferrer" data-if="locationConsent&latitude" data-attr="href:https://www.openstreetmap.org/?mlat={latitude}&amp;mlon={longitude}#map=16/{latitude}/{longitude}"><svg class="icon icon-sm"><use href="#i-map-pin" /></svg>View shared location</a>
+      <span class="muted" data-if="address" data-text="address"></span>
+      <span class="muted" data-if="acceptedAt" data-text="Response time {responseMin} min"></span>
+      <span style="color:var(--purple-fg)" data-if="escalationLevel>0"><span data-text="Escalation level {escalationLevel}"></span><span data-if="escalationReason" data-text=": {escalationReason}"></span></span>
+      <span class="row" style="--gap:0.25rem;color:var(--purple-fg)" data-if="autoEscalationLevel>0"><svg class="icon icon-sm"><use href="#i-bell-ring" /></svg><span data-text="Auto-alert level {autoEscalationLevel} of 3"></span></span>
+      <span class="muted" data-if="nextEscalationAt" data-text="Next automatic alert at {nextEscalationAt|time} unless accepted"></span>
+      <span class="muted" data-if="acknowledgedAt" data-text="Acknowledged by {acknowledgedBy.email|or:staff} {acknowledgedAt|relative} — assessing, not accepted"></span>
+    </div>
+    <div class="row mt-2" style="padding-top:0.75rem;border-top:1px solid var(--divider)">
+      <button type="button" class="btn btn-accent btn-sm" data-open="accept-dialog" data-if="status=PENDING,NOTIFIED,ESCALATED"><svg class="icon icon-sm"><use href="#i-hand-heart" /></svg>Accept case</button>
+      <button type="button" class="btn btn-secondary btn-sm" data-if="canAcknowledge" data-call="POST /doctor/emergencies/{id}/acknowledge" data-confirm="Acknowledge this emergency?" data-confirm-text="Tells the team you have seen it and are assessing it. This does not accept or assign the case. The next automatic alert is paused for one target interval; if nobody accepts, alerts resume." data-confirm-ok="Acknowledge" data-done="Acknowledged — accept the case when you take it on"><svg class="icon icon-sm"><use href="#i-eye" /></svg>Acknowledge</button>
+      <button type="button" class="btn btn-secondary btn-sm" data-open="escalate-dialog" data-if="canEscalate"><svg class="icon icon-sm"><use href="#i-arrow-up-circle" /></svg>Escalate</button>
+      <button type="button" class="btn btn-primary btn-sm" data-open="resolve-dialog" data-if="mine&status=ACCEPTED"><svg class="icon icon-sm"><use href="#i-check-circle-2" /></svg>Resolve</button>
+      <button type="button" class="btn btn-ghost btn-sm" style="margin-left:auto" data-open="timeline-dialog">Timeline</button>
+    </div>
+  </article>
+</template>
+
+<dialog class="modal size-sm" id="accept-dialog" aria-labelledby="accept-dialog-title">
+  <form class="modal-panel" data-api="POST /doctor/emergencies/{id}/accept" data-done="You accepted the case — the patient and admin were notified">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><div><h3 id="accept-dialog-title">Accept emergency</h3><p data-text="{patient.fullName} · {priority|enum}"></p></div><button type="button" class="btn-icon" data-close aria-label="Close"><svg class="icon icon-md"><use href="#i-x" /></svg></button></div>
+    <div class="modal-body stack">
+      <div class="field"><label class="label" for="accept-dialog-text">Note (optional, e.g. ETA)</label><textarea class="input" id="accept-dialog-text" name="note" rows="3" data-null></textarea></div>
+    </div>
+    <div class="modal-foot"><button type="button" class="btn btn-secondary" data-close>Cancel</button><button type="submit" class="btn btn-primary">Confirm</button></div>
+  </form>
+</dialog>
+<dialog class="modal size-sm" id="escalate-dialog" aria-labelledby="escalate-dialog-title">
+  <form class="modal-panel" data-api="POST /doctor/emergencies/{id}/escalate" data-done="Case escalated to additional doctors">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><div><h3 id="escalate-dialog-title">Escalate emergency</h3><p data-text="{patient.fullName} · {priority|enum}"></p></div><button type="button" class="btn-icon" data-close aria-label="Close"><svg class="icon icon-md"><use href="#i-x" /></svg></button></div>
+    <div class="modal-body stack">
+      <div class="field"><label class="label" for="escalate-dialog-text">Reason for escalation (required)</label><textarea class="input" id="escalate-dialog-text" name="reason" rows="3" required minlength="3"></textarea></div>
+      <p class="xsmall muted">Escalation raises the priority one level and alerts the emergency department and all available doctors.</p>
+    </div>
+    <div class="modal-foot"><button type="button" class="btn btn-secondary" data-close>Cancel</button><button type="submit" class="btn btn-danger">Escalate</button></div>
+  </form>
+</dialog>
+<dialog class="modal size-sm" id="resolve-dialog" aria-labelledby="resolve-dialog-title">
+  <form class="modal-panel" data-api="POST /doctor/emergencies/{id}/resolve" data-done="Emergency resolved">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><div><h3 id="resolve-dialog-title">Resolve emergency</h3><p data-text="{patient.fullName} · {priority|enum}"></p></div><button type="button" class="btn-icon" data-close aria-label="Close"><svg class="icon icon-md"><use href="#i-x" /></svg></button></div>
+    <div class="modal-body stack">
+      <div class="field"><label class="label" for="resolve-dialog-text">Resolution notes</label><textarea class="input" id="resolve-dialog-text" name="notes" rows="3" data-null></textarea></div>
+    </div>
+    <div class="modal-foot"><button type="button" class="btn btn-secondary" data-close>Cancel</button><button type="submit" class="btn btn-primary">Resolve</button></div>
+  </form>
+</dialog>
+<dialog class="modal" id="timeline-dialog" aria-labelledby="tl-title">
+  <div class="modal-panel">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><div><h3 id="tl-title">Response timeline</h3><p data-text="patient.fullName"></p></div><button type="button" class="btn-icon" data-close aria-label="Close"><svg class="icon icon-md"><use href="#i-x" /></svg></button></div>
+    <div class="modal-body"><ol class="timeline" data-each="events:tpl-event"></ol></div>
+  </div>
+</dialog>
+<template id="tpl-allergy"><span class="list-comma" data-text="{allergen} ({severity|enum})"></span></template>
+<template id="tpl-event"><li data-attr="data-event:{eventType}"><p class="small" data-text="message"></p><p class="xsmall muted" data-text="createdAt|datetime"></p></li></template>
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/pages/doctor/emergencies.js"></script>
+</body>
+</html>

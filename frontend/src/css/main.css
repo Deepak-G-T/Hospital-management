@@ -1,0 +1,7 @@
+/* MediCore stylesheet entry — imported once per page from partials/head.html */
+@import './tokens.css';
+@import './base.css';
+@import './layout.css';
+@import './components.css';
+@import './tables-charts.css';
+@import './pages.css';

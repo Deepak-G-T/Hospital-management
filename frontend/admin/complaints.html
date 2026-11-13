@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>Complaints · MediCore</title>
+</head>
+<body data-title="Complaints" data-roles="ADMIN">
+<!-- @include portal-start.html -->
+<div class="page-header"><div><h1>Complaints</h1><p>Feedback and complaints from patients, doctors and website visitors</p></div></div>
+<div class="row mb-4" style="--gap:0.75rem">
+  <div class="tabs" id="status" data-name="status" data-initial="OPEN"><button class="tab" data-value="OPEN">Open</button><button class="tab" data-value="IN_PROGRESS">In progress</button><button class="tab" data-value="RESOLVED">Resolved</button><button class="tab" data-value="CLOSED">Closed</button><button class="tab" data-value="">All</button></div>
+  <select class="input" style="width:auto" id="role" name="role" aria-label="From"><option value="">From anyone</option><option value="PATIENT">Patients</option><option value="DOCTOR">Doctors</option><option value="GUEST">Website contact form</option></select>
+</div>
+<div class="card" data-state="loading" id="list" data-source="/admin/complaints" data-template="tpl-complaint" data-filters="#status, #role" data-limit="15">
+  <!-- @include load-states.html -->
+  <div class="when-empty"><div class="empty"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-message-square-warning" /></svg></span><p class="empty-title">No complaints here</p></div></div>
+  <ul class="when-ready list list-pad" data-list></ul>
+  <!-- @include pager.html -->
+</div>
+<template id="tpl-complaint">
+  <li class="items-start" style="flex-wrap:wrap">
+    <div class="grow" style="min-width:16rem">
+      <div class="row" style="--gap:0.5rem"><p class="strong" data-text="subject"></p><span data-badge="status"></span><span class="chip" data-text="category|enum"></span></div>
+      <p class="xsmall muted mt-1"><span data-if="complainant"><span data-if="complainant.doctor">Dr. </span><span data-text="{complainant.doctor.fullName}{complainant.patient.fullName}"></span> (<span data-text="complainant.role|enum"></span>)</span><span data-if="!complainant" data-text="{guestName} &lt;{guestEmail}&gt; (website)"></span> · <span data-text="createdAt|datetime"></span><span data-if="againstDoctor" data-text=" · regarding Dr. {againstDoctor.fullName}"></span></p>
+      <p class="small muted mt-2" data-text="description"></p>
+      <p class="box box-accent small mt-2" data-if="response"><strong>Response:</strong> <span data-text="response"></span></p>
+    </div>
+    <div class="row" style="--gap:0.5rem">
+      <a class="btn btn-secondary btn-sm" data-if="!complainant" data-attr="href:mailto:{guestEmail}?subject=Re%3A%20{subject|uri}"><svg class="icon icon-sm"><use href="#i-mail" /></svg>Email</a>
+      <button type="button" class="btn btn-primary btn-sm" data-open="respond-dialog"><svg class="icon icon-sm"><use href="#i-reply" /></svg><span data-text="response|pick:Update,Respond"></span></button>
+    </div>
+  </li>
+</template>
+<dialog class="modal" id="respond-dialog" aria-labelledby="rs-title">
+  <form class="modal-panel" id="respond-form" data-api="PATCH /admin/complaints/{id}/respond" data-fill data-done="{complainant|pick:Response sent — the user has been notified,Response saved}">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><div><h3 id="rs-title" data-text="Respond: {subject}">Respond</h3><p><span data-if="complainant"><span data-if="complainant.doctor">Dr. </span><span data-text="{complainant.doctor.fullName}{complainant.patient.fullName}"></span> (<span data-text="complainant.role|enum"></span>)</span><span data-if="!complainant" data-text="{guestName} &lt;{guestEmail}&gt; (website)"></span></p></div><button type="button" class="btn-icon" data-close aria-label="Close"><svg class="icon icon-md"><use href="#i-x" /></svg></button></div>
+    <div class="modal-body stack">
+      <p class="box" data-text="description"></p>
+      <div class="field"><label class="label" for="rs-text">Response <span class="req">*</span></label><textarea class="input" id="rs-text" name="response" rows="5" required minlength="2"></textarea></div>
+      <div class="field"><label class="label" for="rs-status">Set status</label><select class="input" id="rs-status" name="status"><option value="IN_PROGRESS">In progress</option><option value="RESOLVED">Resolved</option><option value="CLOSED">Closed</option></select></div>
+    </div>
+    <div class="modal-foot"><button type="button" class="btn btn-secondary" data-close>Cancel</button><button type="submit" class="btn btn-primary">Send response</button></div>
+  </form>
+</dialog>
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/portal.js"></script>
+</body>
+</html>

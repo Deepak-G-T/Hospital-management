@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>Departments · MediCore</title>
+</head>
+<body>
+<!-- @include public-header.html -->
+
+<div class="container page-pad">
+  <div class="page-intro">
+    <h1>Departments</h1>
+    <p>Specialised teams working together under one roof.</p>
+    <div class="input-wrap mt-6" style="max-width:28rem;margin-left:auto;margin-right:auto">
+      <svg class="icon icon-sm"><use href="#i-search" /></svg>
+      <input class="input" type="search" id="dept-search" name="search" placeholder="Search departments…" aria-label="Search departments" />
+    </div>
+  </div>
+
+  <div data-state="loading" id="dept-list" data-source="/public/departments" data-template="tpl-department" data-filters="#dept-search">
+    <!-- @include load-states.html -->
+    <div class="when-empty card"><div class="empty"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-building-2" /></svg></span><p class="empty-title">No departments found</p><p class="empty-text">Try a different search.</p></div></div>
+    <div class="when-ready grid md-grid-2 lg-grid-3 stagger is-grid" style="--gap:1.5rem" data-list></div>
+  </div>
+</div>
+
+<template id="tpl-department">
+  <article class="card card-hover card-pad stack" style="padding:1.5rem">
+    <div class="row row-nowrap" style="--gap:1rem">
+      <span class="icon-tile" data-attr="data-tone:{isEmergency|pick:red,brand}"><svg class="icon icon-lg"><use data-attr="href:{icon|icon}" /></svg></span>
+      <div class="grow">
+        <h2 style="font-size:1.125rem" data-text="name"></h2>
+        <p class="xsmall muted" data-if="headDoctor" data-text="Head: Dr. {headDoctor.fullName}"></p>
+      </div>
+    </div>
+    <p class="small muted grow" data-text="description"></p>
+    <div class="stack-sm stack small muted">
+      <span class="row" data-if="location"><svg class="icon icon-sm"><use href="#i-map-pin" /></svg><span data-text="location"></span></span>
+      <span class="row" data-if="phone"><svg class="icon icon-sm"><use href="#i-phone" /></svg><span data-text="phone"></span></span>
+      <span class="row"><svg class="icon icon-sm"><use href="#i-users" /></svg><span data-text="{_count.doctors} doctor(s)"></span></span>
+    </div>
+    <a class="btn btn-secondary" data-attr="href:/doctors?departmentId={id}">View doctors<svg class="icon icon-sm"><use href="#i-arrow-right" /></svg></a>
+  </article>
+</template>
+
+<!-- @include public-footer.html -->
+<script type="module" src="/src/js/public.js"></script>
+</body>
+</html>

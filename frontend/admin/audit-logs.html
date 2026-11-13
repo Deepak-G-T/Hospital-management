@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>Audit logs · MediCore</title>
+</head>
+<body data-title="Audit logs">
+<!-- @include portal-start.html -->
+<div class="page-header"><div><h1>Audit logs</h1><p>Immutable record of security-relevant and data-access events</p></div></div>
+<form class="card toolbar mb-4" id="filters" style="--cols:1fr 1fr 1fr 1fr" data-no-submit>
+  <select class="input" name="action" aria-label="Action"><option value="">All actions</option></select>
+  <select class="input" name="role" aria-label="Role"><option value="">All roles</option><option value="ADMIN">Admin</option><option value="DOCTOR">Doctor</option><option value="PATIENT">Patient</option></select>
+  <input class="input" type="date" name="from" aria-label="From" />
+  <input class="input" type="date" name="to" aria-label="To" />
+</form>
+<div class="card" data-state="loading" id="list" data-source="/admin/audit-logs" data-template="tpl-row" data-filters="#filters" data-limit="30">
+  <!-- @include load-states.html -->
+  <div class="when-empty"><div class="empty"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-scroll-text" /></svg></span><p class="empty-title">No audit entries</p></div></div>
+  <div class="when-ready table-wrap">
+    <table class="table">
+      <thead><tr><th>Timestamp</th><th>User</th><th>Role</th><th>Action</th><th>Entity</th><th>IP address</th><th>Details</th></tr></thead>
+      <tbody data-list></tbody>
+    </table>
+  </div>
+  <!-- @include pager.html -->
+</div>
+<template id="tpl-row">
+  <tr>
+    <td data-label="Timestamp" class="nowrap xsmall" data-text="createdAt|datetime"></td>
+    <td data-label="User" class="xsmall" data-text="user.email|or:Anonymous"></td>
+    <td data-label="Role" class="xsmall" data-text="userRole|enum"></td>
+    <td data-label="Action"><span class="chip" data-class="action~FAILED,DELETED,DEACTIVATED:tone-red" data-text="action"></span></td>
+    <td data-label="Entity" class="xsmall muted"><span data-text="entityType"></span><span data-if="entityType&entityId" data-text=" · {entityId|short}"></span></td>
+    <td data-label="IP address" class="xsmall muted" data-text="ipAddress"></td>
+    <td data-label="Details">
+      <details data-if="details"><summary class="link xsmall" style="cursor:pointer">View</summary><pre class="json mt-2" data-text="details|json"></pre></details>
+      <span class="xsmall muted" data-if="!details">—</span>
+    </td>
+  </tr>
+</template>
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/pages/admin/audit-logs.js"></script>
+</body>
+</html>

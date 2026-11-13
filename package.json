@@ -1,0 +1,16 @@
+{
+  "name": "smart-hospital",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Smart Hospital Management & Doctor Appointment System (React + Express + PostgreSQL + Prisma + Socket.IO)",
+  "scripts": {
+    "install:all": "npm --prefix backend install && npm --prefix frontend install",
+    "setup": "echo 'Run ./database/setup-dev.sh <admin database url> (creates roles, tables and demo data; see README)'",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "test": "npm --prefix backend test",
+    "test:ui": "npm --prefix frontend run test:ui",
+    "test:flow": "npm --prefix frontend run test:flow"
+  }
+}

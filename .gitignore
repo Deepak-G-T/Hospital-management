@@ -1,0 +1,45 @@
+# Dependencies and builds
+node_modules/
+dist/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Backups and archive files
+backups/
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+
+# Database dumps and SQL files
+*.sql
+*.dump
+*.bak
+*.db
+*.sqlite
+*.sqlite3
+
+# Certificates, keys, and credentials
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+id_rsa*
+.npmrc
+.netrc
+
+# Logs and test artifacts
+*.log
+*.pdf
+backend/uploads/reports/*
+!backend/uploads/reports/.gitkeep
+
+# System and OS files
+.DS_Store
+Thumbs.db

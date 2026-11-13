@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>Activity · MediCore</title>
+</head>
+<body data-title="Activity">
+<!-- @include portal-start.html -->
+<div class="page-header"><div><h1>Doctor &amp; patient activity</h1><p>What users are doing across the portals</p></div></div>
+<div class="stack" style="--gap:1.25rem">
+  <div class="card range-bar" data-range data-days="7">
+    <!-- @include date-range-fields.html -->
+    <div class="field"><span class="label">User type</span><div class="tabs tabs-sm" id="role" data-name="role"><button class="tab" data-value="">All</button><button class="tab" data-value="DOCTOR">Doctors</button><button class="tab" data-value="PATIENT">Patients</button></div></div>
+  </div>
+  <div data-state="loading" id="body" data-source="/admin/activity" data-template="tpl-row" data-filters="[data-range], #role" data-limit="20">
+    <!-- @include load-states.html -->
+    <div class="when-ready stack" style="--gap:1.25rem">
+      <div class="grid lg-grid-3" style="--gap:1.25rem">
+        <section class="card card-pad chart-card lg-span-2">
+          <div class="chart-head"><h3 class="section-title">Most frequent actions</h3><!-- @include chart-card.html --></div>
+          <div class="chart-body" data-chart="actions" data-kind="hbar" data-rows="byAction" data-name-format="enum" data-series="value:Events" data-columns="name:Action,value:Count"></div><div class="chart-table" data-chart-table="actions"></div>
+        </section>
+        <section class="card card-pad">
+          <h3 class="section-title mb-3">Most active users</h3>
+          <p class="small muted" data-no-active hidden>No activity</p>
+          <ul class="stack stack-sm" data-most-active></ul>
+        </section>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>When</th><th>User</th><th>Role</th><th>Action</th><th>Entity</th></tr></thead>
+            <tbody data-list></tbody>
+          </table>
+        </div>
+        <div class="empty" data-no-rows hidden><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-activity" /></svg></span><p class="empty-title">No activity in this range</p></div>
+        <!-- @include pager.html -->
+      </div>
+    </div>
+  </div>
+</div>
+<template id="tpl-active"><li class="row row-nowrap"><span class="avatar avatar-sm" data-initials="{doctor.fullName}{patient.fullName}"></span><span class="grow"><span class="truncate small strong" style="display:block"><span data-if="doctor">Dr. </span><span data-text="{doctor.fullName}{patient.fullName}"></span></span><span class="xsmall muted" data-text="role|enum"></span></span><strong data-text="actions"></strong></li></template>
+<template id="tpl-row">
+  <tr>
+    <td data-label="When" class="nowrap xsmall" data-text="createdAt|datetime"></td>
+    <td data-label="User"><span data-if="user.doctor">Dr. </span><span data-text="{user.doctor.fullName}{user.patient.fullName}"></span></td>
+    <td data-label="Role" data-text="userRole|enum"></td>
+    <td data-label="Action"><span class="chip tone-brand" data-text="action|enum"></span></td>
+    <td data-label="Entity" class="xsmall muted" data-text="entityType"></td>
+  </tr>
+</template>
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/pages/admin/activity.js"></script>
+</body>
+</html>

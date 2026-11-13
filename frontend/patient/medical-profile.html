@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>Medical profile · MediCore</title>
+</head>
+<body data-title="Medical profile" data-roles="PATIENT">
+<!-- @include portal-start.html -->
+<div class="page-header"><div><h1>Medical profile</h1><p>Keep this up to date — your doctors see it before every consultation and during emergencies</p></div></div>
+
+<div class="stack" style="--gap:1.5rem">
+  <div class="grid lg-grid-3" style="--gap:1.5rem">
+    <section class="card card-pad" data-source="/patient/profile">
+      <h2 class="section-title"><svg class="icon icon-md text-red"><use href="#i-droplet" /></svg>Blood group</h2>
+      <p style="font-size:2.25rem;font-weight:800;margin:1rem 0" class="strong" id="blood-value" data-text="bloodGroup|blood">—</p>
+      <form class="row row-nowrap" id="blood-form" data-api="PUT /patient/profile" data-fill data-done="Blood group saved">
+        <select class="input grow" name="bloodGroup" aria-label="Blood group" data-null>
+          <option value="">Unknown</option><option value="A_POS">A+</option><option value="A_NEG">A−</option><option value="B_POS">B+</option><option value="B_NEG">B−</option>
+          <option value="AB_POS">AB+</option><option value="AB_NEG">AB−</option><option value="O_POS">O+</option><option value="O_NEG">O−</option>
+        </select>
+        <button type="submit" class="btn btn-primary" aria-label="Save blood group"><svg class="icon icon-sm"><use href="#i-save" /></svg></button>
+      </form>
+    </section>
+
+    <section class="card lg-span-2" data-state="loading" id="allergies" data-source="/patient/allergies" data-template="tpl-allergy">
+      <div class="card-head"><h2 class="section-title"><svg class="icon icon-md text-red"><use href="#i-alert-triangle" /></svg>Drug &amp; food allergies</h2><button type="button" class="btn btn-primary btn-sm" data-add-allergy data-open="allergy-dialog" data-new><svg class="icon icon-sm"><use href="#i-plus" /></svg>Add allergy</button></div>
+      <!-- @include load-states.html -->
+      <div class="when-empty"><div class="empty"><p class="empty-title">No allergies recorded</p><p class="empty-text">Add any drug, food or environmental allergies.</p></div></div>
+      <ul class="when-ready list list-pad" data-list></ul>
+    </section>
+  </div>
+
+  <section class="card" data-state="loading" id="conditions" data-source="/patient/medical-records" data-where="recordType=CONDITION" data-template="tpl-record">
+    <div class="card-head"><h2 class="section-title"><svg class="icon icon-md text-brand"><use href="#i-heart-pulse" /></svg>Existing medical conditions</h2><button type="button" class="btn btn-primary btn-sm" data-add-record="CONDITION" data-open="record-dialog" data-new data-preset="recordType:CONDITION;status:ACTIVE"><svg class="icon icon-sm"><use href="#i-plus" /></svg>Add condition</button></div>
+    <!-- @include load-states.html -->
+    <div class="when-empty"><div class="empty"><p class="empty-title">No existing conditions recorded</p></div></div>
+    <ul class="when-ready list list-pad" data-list></ul>
+  </section>
+
+  <section class="card" data-state="loading" id="history" data-source="/patient/medical-records" data-where="recordType!=CONDITION" data-template="tpl-record">
+    <div class="card-head"><h2 class="section-title">Medical history</h2><button type="button" class="btn btn-secondary btn-sm" data-add-record="SURGERY" data-open="record-dialog" data-new data-preset="recordType:SURGERY;status:ACTIVE"><svg class="icon icon-sm"><use href="#i-plus" /></svg>Add history</button></div>
+    <!-- @include load-states.html -->
+    <div class="when-empty"><div class="empty"><p class="empty-title">No medical history recorded</p></div></div>
+    <ul class="when-ready list list-pad" data-list></ul>
+  </section>
+</div>
+
+<template id="tpl-allergy">
+  <li>
+    <span class="chip" data-attr="class:chip sev-{severity}" data-text="severity|enum"></span>
+    <span class="grow"><span class="strong" data-text="allergen"></span> <span class="xsmall muted" data-text="· {type|enum}"></span><span class="xsmall muted" style="display:block" data-if="reaction" data-text="Reaction: {reaction}"></span></span>
+    <button type="button" class="btn-icon" data-open="allergy-dialog" aria-label="Edit allergy"><svg class="icon icon-sm"><use href="#i-pencil" /></svg></button>
+    <button type="button" class="btn-icon is-red" data-call="DELETE /patient/allergies/{id}" data-confirm="Remove this entry?" data-confirm-text="{allergen} will move to Recently deleted. You can restore it later; your doctors can still see it, marked as removed." data-confirm-ok="Remove" data-danger data-done="Removed" aria-label="Delete allergy"><svg class="icon icon-sm"><use href="#i-trash-2" /></svg></button>
+  </li>
+</template>
+<template id="tpl-record">
+  <li style="align-items:flex-start">
+    <span class="grow">
+      <span class="row" style="--gap:0.5rem"><span class="strong" data-text="title"></span><span class="chip" data-text="recordType|enum"></span><span data-badge="status"></span></span>
+      <span class="small muted" style="display:block;margin-top:0.25rem" data-if="description" data-text="description"></span>
+      <span class="xsmall muted" style="display:block;margin-top:0.25rem"><span data-if="diagnosedOn" data-text="Since {diagnosedOn|date} · "></span><span data-if="createdBy.role=DOCTOR" data-text="Added by Dr. {createdBy.doctor.fullName}"></span><span data-if="createdBy.role!=DOCTOR">Added by you</span></span>
+    </span>
+    <span class="row shrink-0" data-if="createdBy.role!=DOCTOR" style="--gap:0.25rem">
+      <button type="button" class="btn-icon" data-open="record-dialog" aria-label="Edit record"><svg class="icon icon-sm"><use href="#i-pencil" /></svg></button>
+      <button type="button" class="btn-icon is-red" data-call="DELETE /patient/medical-records/{id}" data-confirm="Remove this entry?" data-confirm-text="{title}" data-confirm-ok="Remove" data-danger data-done="Removed" aria-label="Delete record"><svg class="icon icon-sm"><use href="#i-trash-2" /></svg></button>
+    </span>
+  </li>
+</template>
+
+<dialog class="modal" id="allergy-dialog" aria-labelledby="al-title">
+  <form class="modal-panel" id="allergy-form" data-api="POST /patient/allergies" data-api-edit="PUT /patient/allergies/{id}" data-fill data-done="Saved">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><h3 id="al-title"><span data-if="id">Edit allergy</span><span data-if="!id">Add allergy</span></h3><button type="button" class="btn-icon" data-close aria-label="Close"><svg class="icon icon-md"><use href="#i-x" /></svg></button></div>
+    <div class="modal-body form-grid cols-2">
+      <div class="field span-2"><label class="label" for="al-allergen">Allergen <span class="req">*</span></label><input class="input" id="al-allergen" name="allergen" required placeholder="e.g. Penicillin, Peanuts" /></div>
+      <div class="field"><label class="label" for="al-type">Type</label><select class="input" id="al-type" name="type"><option value="DRUG">Drug</option><option value="FOOD">Food</option><option value="ENVIRONMENTAL">Environmental</option><option value="OTHER">Other</option></select></div>
+      <div class="field"><label class="label" for="al-sev">Severity</label><select class="input" id="al-sev" name="severity"><option value="MILD">Mild</option><option value="MODERATE" selected>Moderate</option><option value="SEVERE">Severe</option><option value="LIFE_THREATENING">Life threatening</option></select></div>
+      <div class="field span-2"><label class="label" for="al-reaction">Reaction</label><input class="input" id="al-reaction" name="reaction" placeholder="e.g. Hives, swelling" /></div>
+      <div class="field span-2"><label class="label" for="al-notes">Notes</label><textarea class="input" id="al-notes" name="notes" rows="2"></textarea></div>
+    </div>
+    <div class="modal-foot"><button type="button" class="btn btn-secondary" data-close>Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+  </form>
+</dialog>
+
+<dialog class="modal" id="record-dialog" aria-labelledby="rec-title">
+  <form class="modal-panel" id="record-form" data-api="POST /patient/medical-records" data-api-edit="PUT /patient/medical-records/{id}" data-fill data-done="Saved">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><h3 id="rec-title"><span data-if="id">Edit medical record</span><span data-if="!id">Add medical record</span></h3><button type="button" class="btn-icon" data-close aria-label="Close"><svg class="icon icon-md"><use href="#i-x" /></svg></button></div>
+    <div class="modal-body form-grid cols-2">
+      <div class="field"><label class="label" for="rec-type">Type</label>
+        <select class="input" id="rec-type" name="recordType"><option value="CONDITION">Condition</option><option value="SURGERY">Surgery</option><option value="MEDICATION">Medication</option><option value="FAMILY_HISTORY">Family history</option><option value="VACCINATION">Vaccination</option><option value="DIAGNOSIS">Diagnosis</option><option value="OTHER">Other</option></select></div>
+      <div class="field"><label class="label" for="rec-status">Status</label><select class="input" id="rec-status" name="status"><option value="ACTIVE">Active / ongoing</option><option value="RESOLVED">Resolved</option></select></div>
+      <div class="field span-2"><label class="label" for="rec-title-input">Title <span class="req">*</span></label><input class="input" id="rec-title-input" name="title" required minlength="2" placeholder="e.g. Type 2 Diabetes" /></div>
+      <div class="field span-2"><label class="label" for="rec-desc">Details</label><textarea class="input" id="rec-desc" name="description" rows="3"></textarea></div>
+      <div class="field"><label class="label" for="rec-date">Since / date</label><input class="input" id="rec-date" name="diagnosedOn" type="date" data-max-today /></div>
+    </div>
+    <div class="modal-foot"><button type="button" class="btn btn-secondary" data-close>Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+  </form>
+</dialog>
+<section class="card mt-4" data-state="loading" id="deleted-allergies" data-source="/patient/allergies" data-params="deleted=true" data-template="tpl-deleted-allergy">
+  <div class="card-head"><h2 class="section-title">Recently deleted allergies</h2><p class="xsmall muted">Deleted entries are kept and can be restored. Your doctors can still see them, marked as removed.</p></div>
+  <!-- @include load-states.html -->
+  <div class="when-empty"><div class="empty"><p class="empty-text">No deleted allergies</p></div></div>
+  <ul class="when-ready list list-pad" data-list></ul>
+</section>
+<section class="card mt-4" data-state="loading" id="deleted-records" data-source="/patient/medical-records" data-params="deleted=true" data-template="tpl-deleted-record">
+  <div class="card-head"><h2 class="section-title">Recently deleted history entries</h2></div>
+  <!-- @include load-states.html -->
+  <div class="when-empty"><div class="empty"><p class="empty-text">No deleted entries</p></div></div>
+  <ul class="when-ready list list-pad" data-list></ul>
+</section>
+<template id="tpl-deleted-allergy"><li><span class="grow"><span class="strong" data-text="allergen"></span> <span class="xsmall muted" data-text="· deleted {deletedAt|date}"></span></span><button type="button" class="btn btn-secondary btn-sm" data-call="POST /patient/allergies/{id}/restore" data-done="Allergy restored">Restore</button></li></template>
+<template id="tpl-deleted-record"><li><span class="grow"><span class="strong" data-text="title"></span> <span class="xsmall muted" data-text="· deleted {deletedAt|date}"></span></span><button type="button" class="btn btn-secondary btn-sm" data-call="POST /patient/medical-records/{id}/restore" data-done="Entry restored">Restore</button></li></template>
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/portal.js"></script>
+</body>
+</html>

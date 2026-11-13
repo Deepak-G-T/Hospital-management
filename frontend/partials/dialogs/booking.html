@@ -1,0 +1,39 @@
+<!-- Appointment booking (patients). Opened by src/js/core/booking.js -->
+<dialog class="modal size-lg" id="booking-dialog" aria-labelledby="booking-title">
+  <form class="modal-panel" id="booking-form" novalidate>
+    <div class="modal-handle"></div>
+    <div class="modal-head">
+      <div><h3 id="booking-title" data-text="Book with Dr. {fullName}">Book an appointment</h3><p data-text="{specialization} · Consultation fee {consultationFee|currency}"></p></div>
+      <button type="button" class="btn-icon" data-close aria-label="Close"><svg class="icon icon-md"><use href="#i-x" /></svg></button>
+    </div>
+    <div class="modal-body stack">
+      <div class="form-grid cols-2">
+        <div class="field" data-booking-dept>
+          <label class="label" for="bk-dept">Department</label>
+          <select class="input" id="bk-dept" name="departmentId"></select>
+        </div>
+        <div class="field">
+          <label class="label" for="bk-type">Visit type</label>
+          <select class="input" id="bk-type" name="type">
+            <option value="CONSULTATION">New consultation</option>
+            <option value="FOLLOW_UP">Follow-up</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <span class="label">Choose a date &amp; time</span>
+        <!-- @include slot-picker.html -->
+      </div>
+      <div class="field">
+        <label class="label" for="bk-reason">Reason for visit</label>
+        <textarea class="input" id="bk-reason" name="reason" rows="3" maxlength="2000" placeholder="e.g. Recurring headaches for two weeks"></textarea>
+        <p class="hint">Briefly describe your symptoms or the purpose of the visit</p>
+      </div>
+      <p class="alert alert-info" data-slot-selected hidden>Selected: <strong></strong></p>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-secondary" data-close>Cancel</button>
+      <button type="submit" class="btn btn-primary" data-booking-submit disabled><svg class="icon icon-sm"><use href="#i-calendar-check" /></svg>Confirm booking</button>
+    </div>
+  </form>
+</dialog>

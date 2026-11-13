@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>Doctors · MediCore</title>
+</head>
+<body data-title="Doctors">
+<!-- @include portal-start.html -->
+<div class="page-header">
+  <div><h1>Doctors</h1><p>Add, edit and manage medical staff and their departments</p></div>
+  <div class="page-actions"><button type="button" class="btn btn-primary" id="add" data-open="doctor-dialog" data-new><svg class="icon icon-sm"><use href="#i-plus" /></svg>Add doctor</button></div>
+</div>
+<form class="card toolbar mb-4" id="filters" style="--cols:1fr 14rem 11rem" data-no-submit>
+  <div class="input-wrap"><svg class="icon icon-sm"><use href="#i-search" /></svg><input class="input" type="search" name="search" placeholder="Search name, specialty, license, email…" aria-label="Search doctors" /></div>
+  <select class="input" name="departmentId" aria-label="Department" data-options="/admin/departments"><option value="">All departments</option></select>
+  <select class="input" name="status" aria-label="Status"><option value="">All statuses</option><option value="active">Active</option><option value="inactive">Inactive</option><option value="deleted">Deleted</option></select>
+</form>
+<div class="card" data-state="loading" id="list" data-source="/admin/doctors" data-template="tpl-row" data-filters="#filters" data-limit="15">
+  <!-- @include load-states.html -->
+  <div class="when-empty"><div class="empty"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-stethoscope" /></svg></span><p class="empty-title">No doctors found</p></div></div>
+  <div class="when-ready table-wrap">
+    <table class="table">
+      <thead><tr><th>Doctor</th><th>Departments</th><th>Experience</th><th>Fee</th><th>Activity</th><th>Status</th><th class="right">Actions</th></tr></thead>
+      <tbody data-list></tbody>
+    </table>
+  </div>
+  <!-- @include pager.html -->
+</div>
+
+<template id="tpl-row">
+  <tr>
+    <td data-label="Doctor"><button type="button" class="cell-person" style="text-align:left" data-open="view-dialog"><span class="avatar avatar-sm" data-initials="fullName"></span><span><strong data-text="Dr. {fullName}"></strong><small data-text="{specialization} · {user.email}"></small></span></button></td>
+    <td data-label="Departments"><div class="row" style="--gap:0.25rem;max-width:18rem" data-each="departments:tpl-dept-chip"></div><span class="xsmall muted" data-if="!departments">None</span></td>
+    <td data-label="Experience" data-text="{experienceYears} yrs"></td>
+    <td data-label="Fee" data-text="consultationFee|currency"></td>
+    <td data-label="Activity" class="xsmall muted" data-text="{_count.appointments} appts · {_count.assignedEmergencies} emerg."></td>
+    <td data-label="Status"><span data-badge="{user.isActive|pick:ACTIVE,INACTIVE}"></span></td>
+    <td class="cell-actions">
+      <div class="actions">
+        <button type="button" class="btn-icon" data-if="!deletedAt" data-open="doctor-dialog" title="Edit" aria-label="Edit"><svg class="icon icon-sm"><use href="#i-pencil" /></svg></button>
+        <button type="button" class="btn-icon" data-if="!deletedAt" data-open="depts-dialog" title="Assign departments" aria-label="Assign departments"><svg class="icon icon-sm"><use href="#i-building-2" /></svg></button>
+        <button type="button" class="btn-icon is-green" data-if="user.isActive&!deletedAt" title="Deactivate" aria-label="Deactivate" data-call="PATCH /admin/users/{user.id}/status" data-body="isActive:false" data-done="Doctor deactivated"><svg class="icon icon-sm"><use href="#i-power" /></svg></button>
+        <button type="button" class="btn-icon" data-if="!user.isActive&!deletedAt" title="Activate" aria-label="Activate" data-call="PATCH /admin/users/{user.id}/status" data-body="isActive:true" data-done="Doctor activated"><svg class="icon icon-sm"><use href="#i-power" /></svg></button>
+        <button type="button" class="btn btn-secondary btn-sm" data-if="deletedAt" data-call="POST /admin/doctors/{id}/restore" data-done="{message}">Restore</button>
+        <button type="button" class="btn-icon is-red" data-if="!deletedAt" data-call="DELETE /admin/doctors/{id}" data-confirm="Delete doctor?" data-confirm-text="Dr. {fullName} will be hidden and their account deactivated; future appointments are cancelled. All clinical records and history are kept, and you can restore the doctor later." data-confirm-ok="Delete" data-danger data-done="{message}" title="Delete" aria-label="Delete"><svg class="icon icon-sm"><use href="#i-trash-2" /></svg></button>
+      </div>
+    </td>
+  </tr>
+</template>
+<template id="tpl-dept-chip"><span class="chip" data-class="isPrimary:tone-brand" data-text="department.name"></span></template>
+<template id="tpl-dept-pick">
+  <div class="row between card-pad" style="padding:0.5rem 0.75rem;border:1px solid var(--border);border-radius:var(--r)">
+    <label class="check grow"><input type="checkbox" name="departmentIds[]" data-attr="value:{id}" /><span data-text="name"></span></label>
+    <label class="check xsmall muted"><input type="radio" name="primaryDepartmentId" data-attr="value:{id}" />Primary</label>
+  </div>
+</template>
+<template id="tpl-avail"><li class="row between box" style="margin-bottom:0.25rem"><span data-text="dayOfWeek|day"></span><span data-text="{startTime|timestr} – {endTime|timestr}"></span></li></template>
+
+<dialog class="modal size-lg" id="doctor-dialog" aria-labelledby="dd-title">
+  <form class="modal-panel" id="doctor-form" data-api="POST /admin/doctors" data-api-edit="PUT /admin/doctors/{id}" data-fill data-done="Doctor added — they can now log in to the doctor portal" data-done-edit="Doctor updated">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><h3 id="dd-title"><span data-if="id" data-text="Edit Dr. {fullName}"></span><span data-if="!id">Add doctor</span></h3><button type="button" class="btn-icon" data-close aria-label="Close"><svg class="icon icon-md"><use href="#i-x" /></svg></button></div>
+    <div class="modal-body stack">
+      <div class="form-grid cols-2">
+        <div class="field"><label class="label" for="d-name">Full name <span class="req">*</span></label><input class="input" id="d-name" name="fullName" required /></div>
+        <div class="field"><label class="label" for="d-email">Email (login) <span class="req">*</span></label><input class="input" id="d-email" name="email" type="email" required data-from="user.email" /></div>
+        <fieldset class="contents" data-if="!id"><div class="field"><label class="label" for="d-pass">Temporary password <span class="req">*</span></label><input class="input" id="d-pass" name="password" minlength="8" required /><p class="hint">Min. 8 chars, letter + number</p></div></fieldset>
+        <div class="field"><label class="label" for="d-phone">Phone</label><input class="input" id="d-phone" name="phone" /></div>
+        <div class="field"><label class="label" for="d-gender">Gender</label><select class="input" id="d-gender" name="gender"><option value="">—</option><option value="MALE">Male</option><option value="FEMALE">Female</option><option value="OTHER">Other</option></select></div>
+        <div class="field"><label class="label" for="d-spec">Specialization <span class="req">*</span></label><input class="input" id="d-spec" name="specialization" required /></div>
+        <div class="field"><label class="label" for="d-qual">Qualification</label><input class="input" id="d-qual" name="qualification" /></div>
+        <div class="field"><label class="label" for="d-lic">License number <span class="req">*</span></label><input class="input" id="d-lic" name="licenseNumber" required /></div>
+        <div class="field"><label class="label" for="d-exp">Experience (years)</label><input class="input" id="d-exp" name="experienceYears" data-number type="number" min="0" max="80" value="0" /></div>
+        <div class="field"><label class="label" for="d-fee">Consultation fee (USD)</label><input class="input" id="d-fee" name="consultationFee" data-number type="number" min="0" step="0.01" value="0" /></div>
+        <div class="field"><label class="label" for="d-slot">Slot duration (minutes)</label><select class="input" id="d-slot" name="slotDurationMinutes" data-number><option>15</option><option>20</option><option selected>30</option><option>45</option><option>60</option></select></div>
+      </div>
+      <div class="field"><label class="label" for="d-bio">Bio</label><textarea class="input" id="d-bio" name="bio" rows="3"></textarea></div>
+      <label class="check"><input type="checkbox" name="isAvailableForEmergency" checked />Available for emergency alerts</label>
+      <div class="field"><span class="label">Departments</span><div class="grid sm-grid-2" style="--gap:0.5rem" data-source="/admin/departments" data-template="tpl-dept-pick" data-list></div><p class="hint">Doctors can belong to multiple departments; one is primary</p></div>
+      <p class="xsmall muted" data-if="!id">A default Mon–Fri 9:00–17:00 schedule is created; the doctor can change it from their portal.</p>
+    </div>
+    <div class="modal-foot"><button type="button" class="btn btn-secondary" data-close>Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+  </form>
+</dialog>
+
+<dialog class="modal" id="depts-dialog" aria-labelledby="ad-title">
+  <form class="modal-panel" id="depts-form" data-api="PUT /admin/doctors/{id}/departments" data-fill data-done="Departments assigned">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><div><h3 id="ad-title">Assign departments</h3><p data-text="Dr. {fullName}"></p></div><button type="button" class="btn-icon" data-close aria-label="Close"><svg class="icon icon-md"><use href="#i-x" /></svg></button></div>
+    <div class="modal-body"><div class="grid sm-grid-2" style="--gap:0.5rem" data-source="/admin/departments" data-template="tpl-dept-pick" data-list></div></div>
+    <div class="modal-foot"><button type="button" class="btn btn-secondary" data-close>Cancel</button><button type="submit" class="btn btn-primary">Save assignments</button></div>
+  </form>
+</dialog>
+
+<dialog class="modal" id="view-dialog" aria-labelledby="vd-title">
+  <div class="modal-panel">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><div><h3 id="vd-title" data-text="Dr. {fullName}"></h3><p data-text="specialization"></p></div><button type="button" class="btn-icon" data-close aria-label="Close"><svg class="icon icon-md"><use href="#i-x" /></svg></button></div>
+    <div class="modal-body stack">
+      <dl class="kv">
+        <div><dt>Email</dt><dd data-text="user.email"></dd></div><div><dt>Phone</dt><dd data-text="phone"></dd></div>
+        <div><dt>License</dt><dd data-text="licenseNumber"></dd></div><div><dt>Qualification</dt><dd data-text="qualification"></dd></div>
+        <div><dt>Appointments</dt><dd data-text="_count.appointments"></dd></div><div><dt>Reviews</dt><dd data-text="_count.reviews"></dd></div>
+        <div><dt>Emergency alerts</dt><dd data-text="isAvailableForEmergency|pick:Enabled,Disabled"></dd></div><div><dt>Last login</dt><dd data-text="user.lastLoginAt|datetime"></dd></div>
+      </dl>
+      <div><p class="strong mb-2">Weekly schedule</p><p class="muted small" data-if="!availability">No availability set</p><ul data-each="availability:tpl-avail"></ul></div>
+    </div>
+  </div>
+</dialog>
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/pages/admin/doctors.js"></script>
+</body>
+</html>

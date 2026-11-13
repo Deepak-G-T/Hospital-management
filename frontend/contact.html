@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>Contact · MediCore</title>
+</head>
+<body>
+<!-- @include public-header.html -->
+<div class="container page-pad" style="max-width:72rem">
+  <div class="page-intro">
+    <h1>Contact us</h1>
+    <p>Questions about appointments, billing or our services? We're here to help.</p>
+  </div>
+  <div class="grid lg-grid-5" style="--gap:2rem">
+    <div class="stack lg-span-2 stagger">
+      <div class="card card-pad row row-nowrap" style="--gap:1rem"><span class="icon-tile" data-tone="brand"><svg class="icon icon-md"><use href="#i-map-pin" /></svg></span><div><p class="xsmall muted">Address</p><p class="strong">120 Health Avenue, Springfield</p></div></div>
+      <div class="card card-pad row row-nowrap" style="--gap:1rem"><span class="icon-tile" data-tone="brand"><svg class="icon icon-md"><use href="#i-phone" /></svg></span><div><p class="xsmall muted">Phone</p><p class="strong">+1 555 0100</p></div></div>
+      <div class="card card-pad row row-nowrap" style="--gap:1rem"><span class="icon-tile" data-tone="brand"><svg class="icon icon-md"><use href="#i-mail" /></svg></span><div><p class="xsmall muted">Email</p><p class="strong">care@medicore.com</p></div></div>
+      <div class="card card-pad row row-nowrap" style="--gap:1rem"><span class="icon-tile" data-tone="brand"><svg class="icon icon-md"><use href="#i-clock" /></svg></span><div><p class="xsmall muted">Reception hours</p><p class="strong">Mon–Sat, 8:00 AM – 8:00 PM</p></div></div>
+      <div class="notice notice-danger notice-compact" role="note">
+        <svg class="icon shrink-0"><use href="#i-phone-call" /></svg>
+        <p><strong>Not a substitute for emergency services.</strong> If someone is in immediate danger, <strong>call your local emergency number right away</strong>.</p>
+      </div>
+    </div>
+    <form class="card card-pad stack lg-span-3" id="contact-form" style="padding:1.5rem" data-api="POST /public/contact" data-done="{message}" data-reset data-reload="none">
+      <div class="form-grid cols-2">
+        <div class="field"><label class="label" for="c-name">Full name <span class="req">*</span></label><input class="input" id="c-name" name="name" required minlength="2" maxlength="150" autocomplete="name" /></div>
+        <div class="field"><label class="label" for="c-email">Email <span class="req">*</span></label><input class="input" id="c-email" name="email" type="email" required autocomplete="email" /></div>
+      </div>
+      <div class="field"><label class="label" for="c-subject">Subject <span class="req">*</span></label><input class="input" id="c-subject" name="subject" required minlength="3" maxlength="200" /></div>
+      <div class="field"><label class="label" for="c-message">Message <span class="req">*</span></label><textarea class="input" id="c-message" name="message" rows="6" required minlength="10" maxlength="5000"></textarea><p class="hint">At least 10 characters</p></div>
+      <div><button type="submit" class="btn btn-primary"><svg class="icon icon-sm"><use href="#i-send" /></svg>Send message</button></div>
+    </form>
+  </div>
+</div>
+<!-- @include public-footer.html -->
+<script type="module" src="/src/js/public.js"></script>
+</body>
+</html>

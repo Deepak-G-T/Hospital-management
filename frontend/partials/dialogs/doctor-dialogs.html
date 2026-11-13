@@ -1,0 +1,68 @@
+<!-- Clinical dialogs for the doctor portal. Prescription logic: src/js/pages/doctor/dialogs.js -->
+
+<!-- Digital prescription -->
+<dialog class="modal size-xl" id="rx-dialog" aria-labelledby="rx-title">
+  <form class="modal-panel" id="rx-form" novalidate>
+    <div class="modal-handle"></div>
+    <div class="modal-head"><div><h3 id="rx-title">New digital prescription</h3><p data-rx-sub>Choose a patient</p></div><button type="button" class="btn-icon" data-close aria-label="Close"><svg class="icon icon-md"><use href="#i-x" /></svg></button></div>
+    <div class="modal-body stack">
+      <div class="form-grid cols-2">
+        <div class="field" data-rx-patient-field><label class="label" for="rx-patient">Patient <span class="req">*</span></label><select class="input" id="rx-patient" name="patientId"><option value="">Select patient</option></select></div>
+        <div class="field"><label class="label" for="rx-appt">Linked appointment</label><select class="input" id="rx-appt" name="appointmentId"><option value="">None</option></select></div>
+      </div>
+      <p class="alert alert-error row row-nowrap" data-rx-allergies hidden><svg class="icon icon-md shrink-0"><use href="#i-alert-triangle" /></svg><span><strong>Known allergies:</strong> <span data-rx-allergy-text></span></span></p>
+      <div class="field"><label class="label" for="rx-diagnosis">Diagnosis <span class="req">*</span></label><textarea class="input" id="rx-diagnosis" name="diagnosis" rows="2" required minlength="2"></textarea></div>
+      <div>
+        <div class="row between mb-2"><span class="label" style="margin:0">Medicines</span><button type="button" class="btn btn-secondary btn-sm" data-add-med><svg class="icon icon-sm"><use href="#i-plus" /></svg>Add medicine</button></div>
+        <div class="stack stack-sm" data-meds></div>
+      </div>
+      <div class="form-grid" style="grid-template-columns:repeat(auto-fit,minmax(12rem,1fr))">
+        <div class="field"><label class="label" for="rx-advice">Advice</label><textarea class="input" id="rx-advice" name="advice" rows="2"></textarea></div>
+        <div class="field"><label class="label" for="rx-follow">Follow-up date</label><input class="input" id="rx-follow" name="followUpDate" type="date" /></div>
+      </div>
+    </div>
+    <div class="modal-foot"><button type="button" class="btn btn-secondary" data-close>Cancel</button><button type="submit" class="btn btn-primary">Issue prescription</button></div>
+  </form>
+</dialog>
+<template id="tpl-med-row">
+  <div class="med-row">
+    <input class="input" name="medicineName" placeholder="Medicine" required aria-label="Medicine name" />
+    <input class="input" name="dosage" placeholder="Dosage" required aria-label="Dosage" />
+    <input class="input" name="frequency" placeholder="Frequency" required aria-label="Frequency" />
+    <input class="input" name="durationDays" type="number" min="1" max="365" value="5" required aria-label="Days" title="Days" />
+    <input class="input" name="instructions" placeholder="Instructions" aria-label="Instructions" />
+    <button type="button" class="btn-icon is-red" data-remove-med aria-label="Remove medicine"><svg class="icon icon-sm"><use href="#i-trash-2" /></svg></button>
+  </div>
+</template>
+
+<!-- Consultation notes -->
+<dialog class="modal size-lg" id="consult-dialog" aria-labelledby="cs-title">
+  <form class="modal-panel" id="consult-form" data-api="PATCH /doctor/appointments/{id}/consultation" data-fill data-done="Consultation saved">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><div><h3 id="cs-title" data-text="Consultation — {patient.fullName}">Consultation</h3><p data-text="startAt|datetime"></p></div><button type="button" class="btn-icon" data-close aria-label="Close"><svg class="icon icon-md"><use href="#i-x" /></svg></button></div>
+    <div class="modal-body stack">
+      <p class="box" data-if="reason"><strong>Reason for visit:</strong> <span data-text="reason"></span></p>
+      <div class="field"><label class="label" for="cs-dx">Diagnosis</label><textarea class="input" id="cs-dx" name="diagnosis" rows="2"></textarea></div>
+      <div class="field"><label class="label" for="cs-tx">Treatment plan</label><textarea class="input" id="cs-tx" name="treatment" rows="3"></textarea></div>
+      <div class="field"><label class="label" for="cs-notes">Clinical notes</label><textarea class="input" id="cs-notes" name="notes" rows="2"></textarea><p class="hint">Visible to the patient in their appointment history</p></div>
+      <label class="check"><input type="checkbox" name="addToHistory" data-from="!diagnosis" />Also add the diagnosis to the patient's medical history</label>
+    </div>
+    <div class="modal-foot"><button type="button" class="btn btn-secondary" data-close>Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+  </form>
+</dialog>
+
+<!-- Referral -->
+<dialog class="modal" id="referral-dialog" aria-labelledby="rf-title">
+  <form class="modal-panel" id="referral-form" data-api="POST /doctor/referrals" data-done="Referral sent — the doctor and patient were notified">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><div><h3 id="rf-title">Refer patient</h3><p data-text="fullName"></p></div><button type="button" class="btn-icon" data-close aria-label="Close"><svg class="icon icon-md"><use href="#i-x" /></svg></button></div>
+    <div class="modal-body stack">
+      <fieldset class="contents" data-if="!id"><div class="field"><label class="label" for="rf-patient">Patient <span class="req">*</span></label><select class="input" id="rf-patient" name="patientId" required data-options="/doctor/patients?treating=true" data-option-label="{fullName}"><option value="">Select patient</option></select></div></fieldset>
+      <div class="field"><label class="label" for="rf-doctor">Refer to <span class="req">*</span></label><select class="input" id="rf-doctor" name="toDoctorId" required data-options="/doctor/colleagues" data-option-label="Dr. {fullName} — {specialization}"><option value="">Select doctor</option></select></div>
+      <div class="field" data-rf-dept-field hidden><label class="label" for="rf-dept">Department</label><select class="input" id="rf-dept" name="departmentId" data-null><option value="">Any</option></select></div>
+      <div class="field"><label class="label" for="rf-reason">Reason for referral <span class="req">*</span></label><textarea class="input" id="rf-reason" name="reason" rows="3" required minlength="3"></textarea></div>
+      <div class="field"><label class="label" for="rf-notes">Clinical notes for the receiving doctor</label><textarea class="input" id="rf-notes" name="notes" rows="3"></textarea></div>
+    </div>
+    <div class="modal-foot"><button type="button" class="btn btn-secondary" data-close>Cancel</button><button type="submit" class="btn btn-primary">Send referral</button></div>
+  </form>
+</dialog>

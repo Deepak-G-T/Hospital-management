@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>Prescriptions · MediCore</title>
+</head>
+<body data-title="Prescriptions">
+<!-- @include portal-start.html -->
+<div class="page-header">
+  <div><h1>Digital prescriptions</h1><p>Prescriptions you have issued</p></div>
+  <div class="page-actions"><button type="button" class="btn btn-primary" id="new-rx"><svg class="icon icon-sm"><use href="#i-plus" /></svg>New prescription</button></div>
+</div>
+<div class="input-wrap mb-4" style="max-width:28rem"><svg class="icon icon-sm"><use href="#i-search" /></svg><input class="input" type="search" id="search" name="search" placeholder="Search by patient…" aria-label="Search by patient" /></div>
+<div class="card" data-state="loading" id="rx" data-source="/doctor/prescriptions" data-template="tpl-rx" data-filters="#search" data-limit="15">
+  <!-- @include load-states.html -->
+  <div class="when-empty"><div class="empty"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-pill" /></svg></span><p class="empty-title">No prescriptions yet</p></div></div>
+  <div class="when-ready table-wrap">
+    <table class="table">
+      <thead><tr><th>Number</th><th>Date</th><th>Patient</th><th>Diagnosis</th><th>Medicines</th><th>Follow-up</th><th>PDF</th></tr></thead>
+      <tbody data-list></tbody>
+    </table>
+  </div>
+  <!-- @include pager.html -->
+</div>
+<template id="tpl-rx">
+  <tr>
+    <td data-label="Number" class="mono nowrap" data-text="prescriptionNumber"></td>
+    <td data-label="Date" class="nowrap" data-text="createdAt|date"></td>
+    <td data-label="Patient" data-text="patient.fullName"></td>
+    <td data-label="Diagnosis"><span class="truncate" style="display:block;max-width:14rem" data-attr="title:{diagnosis}" data-text="diagnosis"></span></td>
+    <td data-label="Medicines" class="xsmall muted"><span class="truncate" style="display:block;max-width:16rem" data-text="items|pluck:medicineName"></span></td>
+    <td data-label="Follow-up" class="xsmall nowrap" data-text="followUpDate|date"></td>
+    <td class="cell-actions"><button type="button" class="btn btn-secondary btn-sm" data-download="/files/prescriptions/{id}/pdf"><svg class="icon icon-sm"><use href="#i-download" /></svg>PDF</button></td>
+  </tr>
+</template>
+<!-- @include dialogs/doctor-dialogs.html -->
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/pages/doctor/prescriptions.js"></script>
+</body>
+</html>

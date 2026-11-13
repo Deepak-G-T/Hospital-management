@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>My profile · MediCore</title>
+</head>
+<body data-title="Profile" data-roles="DOCTOR">
+<!-- @include portal-start.html -->
+<div style="max-width:56rem">
+  <div class="page-header"><div><h1>My profile</h1><p>This information is shown to patients on your public profile</p></div></div>
+  <div data-state="loading" id="profile-box" data-source="/doctor/profile">
+    <!-- @include load-states.html -->
+    <form class="when-ready card card-pad stack" style="padding:1.5rem;--gap:1.25rem" id="profile-form" data-api="PUT /doctor/profile" data-fill data-done="Profile updated">
+      <div class="row row-nowrap" style="--gap:1rem">
+        <span class="avatar avatar-xl" data-initials="fullName"></span>
+        <div class="grow">
+          <p class="strong" style="font-size:1.125rem" data-text="Dr. {fullName}"></p>
+          <p class="muted small" data-text="{specialization} · License {licenseNumber}"></p>
+          <div class="row mt-2" style="--gap:0.375rem" data-each="departments:tpl-dept"></div>
+        </div>
+      </div>
+      <div class="form-grid cols-2">
+        <div class="field"><label class="label" for="dp-name">Full name <span class="req">*</span></label><input class="input" id="dp-name" name="fullName" required minlength="2" /></div>
+        <div class="field"><label class="label" for="dp-phone">Phone</label><input class="input" id="dp-phone" name="phone" /></div>
+        <div class="field"><label class="label" for="dp-qual">Qualification</label><input class="input" id="dp-qual" name="qualification" /></div>
+        <div class="field"><label class="label" for="dp-fee">Consultation fee (USD)</label><input class="input" id="dp-fee" name="consultationFee" data-number type="number" min="0" /></div>
+        <div class="field span-2"><label class="label" for="dp-photo">Photo URL</label><input class="input" id="dp-photo" name="avatarUrl" type="url" /><p class="hint">Optional link to a profile photo</p></div>
+        <div class="field span-2"><label class="label" for="dp-bio">Bio</label><textarea class="input" id="dp-bio" name="bio" rows="5"></textarea></div>
+      </div>
+      <p class="xsmall muted">Specialization, license number and departments are managed by the hospital administration.</p>
+      <div><button type="submit" class="btn btn-primary"><svg class="icon icon-sm"><use href="#i-save" /></svg>Save profile</button></div>
+    </form>
+  </div>
+</div>
+<template id="tpl-dept"><span class="chip tone-brand"><span data-text="department.name"></span><span data-if="isPrimary"> · Primary</span></span></template>
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/portal.js"></script>
+</body>
+</html>

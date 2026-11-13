@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>Referrals · MediCore</title>
+</head>
+<body data-title="Referrals" data-roles="DOCTOR">
+<!-- @include portal-start.html -->
+<div class="page-header">
+  <div><h1>Referrals</h1><p>Refer patients to colleagues and manage referrals you receive</p></div>
+  <div class="page-actions"><button type="button" class="btn btn-primary" id="new-ref" data-open="referral-dialog" data-new><svg class="icon icon-sm"><use href="#i-plus" /></svg>New referral</button></div>
+</div>
+<div data-state="loading" id="refs" data-source="/doctor/referrals">
+<div class="tabs mb-4" id="tabs" data-name="tab" data-panels="#refs"><button class="tab" data-value="received">Received<span class="count" data-text="received.length">0</span></button><button class="tab" data-value="sent">Sent<span class="count" data-text="sent.length">0</span></button></div>
+
+  <!-- @include load-states.html -->
+<div class="when-ready stack stack-sm stagger" data-panel="received">
+    <div class="card" data-if="!received"><div class="empty"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-arrow-right-left" /></svg></span><p class="empty-title">No referrals</p></div></div>
+    <div class="stack stack-sm" data-each="received:tpl-ref"></div>
+  </div>
+  <div class="when-ready stack stack-sm stagger" data-panel="sent" hidden>
+    <div class="card" data-if="!sent"><div class="empty"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-arrow-right-left" /></svg></span><p class="empty-title">No referrals</p></div></div>
+    <div class="stack stack-sm" data-each="sent:tpl-ref"></div>
+  </div>
+</div></div>
+<template id="tpl-ref">
+  <article class="card card-pad">
+    <div class="row between items-start">
+      <div>
+        <a class="strong" data-attr="href:/doctor/patients/{patient.id}" data-text="patient.fullName"></a>
+        <p class="xsmall muted"><span class="only-received" data-text="From Dr. {fromDoctor.fullName} ({fromDoctor.specialization})"></span><span class="only-sent" data-text="To Dr. {toDoctor.fullName} ({toDoctor.specialization})"></span><span data-if="department" data-text=" · {department.name}"></span> · <span data-text="createdAt|datetime"></span></p>
+      </div>
+      <span data-badge="status"></span>
+    </div>
+    <p class="small mt-2"><strong>Reason:</strong> <span data-text="reason"></span></p>
+    <p class="small muted mt-1" data-if="notes" data-text="notes"></p>
+    <div class="row mt-3 only-received">
+      <button type="button" class="btn btn-accent btn-sm" data-call="PATCH /doctor/referrals/{id}" data-body="status:ACCEPTED" data-done="Referral accepted" data-if="status=PENDING">Accept</button>
+      <button type="button" class="btn btn-secondary btn-sm" data-call="PATCH /doctor/referrals/{id}" data-body="status:DECLINED" data-done="Referral declined" data-if="status=PENDING">Decline</button>
+      <button type="button" class="btn btn-primary btn-sm" data-call="PATCH /doctor/referrals/{id}" data-body="status:COMPLETED" data-done="Referral completed" data-if="status=ACCEPTED">Mark completed</button>
+    </div>
+  </article>
+</template>
+<!-- @include dialogs/doctor-dialogs.html -->
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/pages/doctor/referrals.js"></script>
+</body>
+</html>

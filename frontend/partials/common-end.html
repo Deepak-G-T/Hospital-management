@@ -1,0 +1,41 @@
+<!-- Toasts -->
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<!-- Confirmation dialog (used through confirmDialog() in ui.js) -->
+<dialog class="modal size-sm" id="confirm-dialog" aria-labelledby="confirm-title">
+  <div class="modal-panel">
+    <div class="modal-handle"></div>
+    <div class="modal-head">
+      <div><h3 id="confirm-title" data-confirm-title>Are you sure?</h3></div>
+      <button type="button" class="btn-icon" data-close aria-label="Close"><svg class="icon icon-md"><use href="#i-x" /></svg></button>
+    </div>
+    <div class="modal-body stack">
+      <p class="small" data-confirm-message></p>
+      <div class="field" data-confirm-reason hidden>
+        <label class="label" for="confirm-reason-input"></label>
+        <textarea class="input" id="confirm-reason-input" rows="2" maxlength="1000"></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-secondary" data-close>Cancel</button>
+      <button type="button" class="btn btn-primary" data-confirm-ok>Confirm</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Notification row (bell dropdown) -->
+<template id="tpl-bell-item">
+  <li>
+    <button type="button" class="bell-item" data-class="!isRead:is-unread">
+      <span class="notif-icon" data-class="type=EMERGENCY:is-emergency"><svg class="icon icon-sm"><use data-attr="href:{type|notif}" /></svg></span>
+      <span class="grow">
+        <span class="truncate small strong" style="display:block" data-text="title"></span>
+        <span class="clamp-2 xsmall muted" data-text="message"></span>
+        <span class="xsmall soft" style="display:block" data-text="createdAt|relative"></span>
+      </span>
+      <span class="unread-dot" data-if="!isRead"></span>
+    </button>
+  </li>
+</template>
+
+<!-- @include icons.html -->

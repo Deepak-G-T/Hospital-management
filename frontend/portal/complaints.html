@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>Complaints · MediCore</title>
+</head>
+<body data-title="Complaints">
+<!-- @include portal-start.html -->
+<div class="page-header">
+  <div><h1>Complaints &amp; feedback</h1><p>Raise an issue with the hospital administration and track the response</p></div>
+  <div class="page-actions"><button type="button" class="btn btn-primary" id="new-complaint" data-open="complaint-dialog" data-new><svg class="icon icon-sm"><use href="#i-plus" /></svg>New complaint</button></div>
+</div>
+<div data-state="loading" id="complaints" data-source="/complaints" data-template="tpl-complaint" data-limit="10">
+  <!-- @include load-states.html -->
+  <div class="when-empty card"><div class="empty"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-message-square-warning" /></svg></span><p class="empty-title">No complaints submitted</p><p class="empty-text">If something didn't go right, let us know — we respond to every submission.</p></div></div>
+  <div class="when-ready stack stagger" data-list></div>
+  <!-- @include pager.html -->
+</div>
+
+<template id="tpl-complaint">
+  <article class="card card-pad">
+    <div class="row between items-start">
+      <div>
+        <p class="strong" data-text="subject"></p>
+        <p class="xsmall muted"><span data-text="category|enum"></span><span data-if="againstDoctor" data-text=" · regarding Dr. {againstDoctor.fullName}"></span> · <span data-text="createdAt|datetime"></span></p>
+      </div>
+      <span data-badge="status"></span>
+    </div>
+    <p class="small muted mt-3" data-text="description"></p>
+    <div class="box box-accent mt-4" data-if="response">
+      <p class="xsmall strong" style="color:var(--teal-fg)" data-text="Response from administration · {respondedAt|datetime}"></p>
+      <p class="small mt-1" data-text="response"></p>
+    </div>
+  </article>
+</template>
+
+<dialog class="modal" id="complaint-dialog" aria-labelledby="complaint-title">
+  <form class="modal-panel" id="complaint-form" data-api="POST /complaints" data-done="Complaint submitted. The administration has been notified.">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><h3 id="complaint-title">Submit a complaint</h3><button type="button" class="btn-icon" data-close aria-label="Close"><svg class="icon icon-md"><use href="#i-x" /></svg></button></div>
+    <div class="modal-body stack">
+      <div class="field">
+        <label class="label" for="cp-category">Category <span class="req">*</span></label>
+        <select class="input" id="cp-category" name="category">
+          <option value="SERVICE">Service</option><option value="DOCTOR">Doctor</option><option value="BILLING">Billing</option><option value="FACILITY">Facility</option>
+          <option value="APPOINTMENT">Appointment</option><option value="TECHNICAL">Technical</option><option value="OTHER">Other</option>
+        </select>
+      </div>
+      <div class="field" data-doctor-field>
+        <label class="label" for="cp-doctor">Doctor concerned</label>
+        <select class="input" id="cp-doctor" name="againstDoctorId" data-options="/public/doctors" data-option-label="Dr. {fullName} — {specialization}"><option value="">Select a doctor</option></select>
+      </div>
+      <div class="field"><label class="label" for="cp-subject">Subject <span class="req">*</span></label><input class="input" id="cp-subject" name="subject" required minlength="3" maxlength="200" /></div>
+      <div class="field"><label class="label" for="cp-desc">Details <span class="req">*</span></label><textarea class="input" id="cp-desc" name="description" rows="5" required minlength="10" maxlength="5000"></textarea><p class="hint">At least 10 characters</p></div>
+    </div>
+    <div class="modal-foot"><button type="button" class="btn btn-secondary" data-close>Cancel</button><button type="submit" class="btn btn-primary">Submit</button></div>
+  </form>
+</dialog>
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/pages/portal/complaints.js"></script>
+</body>
+</html>

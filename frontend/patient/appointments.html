@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>My appointments · MediCore</title>
+</head>
+<body data-title="Appointments">
+<!-- @include portal-start.html -->
+<div class="page-header">
+  <div><h1>My appointments</h1><p>Status updates from your doctor appear here instantly</p></div>
+  <div class="page-actions"><a class="btn btn-primary" href="/patient/find-doctors"><svg class="icon icon-sm"><use href="#i-plus" /></svg>Book new</a></div>
+</div>
+<div class="tabs mb-4" id="scope" data-name="scope" data-param="tab" data-initial="upcoming"><button class="tab" data-value="upcoming">Upcoming</button><button class="tab" data-value="past">History</button><button class="tab" data-value="">All</button></div>
+
+<div data-state="loading" id="appts" data-source="/patient/appointments" data-template="tpl-appt" data-filters="#scope" data-limit="10" data-live="appointment:updated">
+  <!-- @include load-states.html -->
+  <div class="when-empty card"><div class="empty"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-calendar-days" /></svg></span><p class="empty-title">No appointments here</p><a class="btn btn-primary btn-sm mt-2" href="/patient/find-doctors">Find a doctor</a></div></div>
+  <div class="when-ready">
+    <div class="stack stagger" data-list style="--gap:0.75rem"></div>
+    <div class="card mt-3"><!-- @include pager.html --></div>
+  </div>
+</div>
+
+<template id="tpl-appt">
+  <article class="card card-pad">
+    <div class="row between" style="--gap:1rem">
+      <div class="row row-nowrap grow" style="--gap:1rem;min-width:14rem">
+        <span class="avatar avatar-lg" data-initials="doctor.fullName"></span>
+        <div class="grow">
+          <p class="strong" data-text="Dr. {doctor.fullName}"></p>
+          <p class="small muted"><span data-text="doctor.specialization"></span><span data-if="department" data-text=" · {department.name}"></span></p>
+          <p class="row small text-brand mt-1" style="--gap:0.375rem;font-weight:500"><svg class="icon icon-sm"><use href="#i-calendar-clock" /></svg><span data-text="startAt|datetime"></span></p>
+        </div>
+      </div>
+      <div class="row">
+        <span data-badge="status"></span>
+        <button type="button" class="btn btn-secondary btn-sm" data-action="reschedule" data-if="status=PENDING,CONFIRMED&startAt>now"><svg class="icon icon-sm"><use href="#i-calendar-clock" /></svg>Reschedule</button>
+        <button type="button" class="btn btn-ghost btn-sm text-red" data-if="status=PENDING,CONFIRMED&startAt>now" data-call="PATCH /patient/appointments/{id}/cancel" data-confirm="Cancel this appointment?" data-confirm-text="Dr. {doctor.fullName} · {startAt|datetime}" data-confirm-ok="Cancel appointment" data-danger data-reason="Reason (optional)" data-done="Appointment cancelled"><svg class="icon icon-sm"><use href="#i-ban" /></svg>Cancel</button>
+        <button type="button" class="btn btn-accent btn-sm" data-open="review-dialog" data-if="status=COMPLETED&!review"><svg class="icon icon-sm"><use href="#i-star" /></svg>Rate visit</button>
+        <span class="stars stars-sm" data-if="review" data-stars="review.rating"></span>
+      </div>
+    </div>
+    <div class="box mt-4 grid sm-grid-2 hide-if-empty" style="--gap:0.5rem">
+      <p data-if="reason"><span class="muted">Reason:</span> <span data-text="reason"></span></p>
+      <p data-if="statusReason"><span class="muted" data-if="status=CANCELLED">Note from cancellation:</span><span class="muted" data-if="status!=CANCELLED">Note from doctor:</span> <span data-text="statusReason"></span></p>
+      <p data-if="diagnosis"><span class="muted">Diagnosis:</span> <span data-text="diagnosis"></span></p>
+      <p data-if="treatment"><span class="muted">Treatment:</span> <span data-text="treatment"></span></p>
+      <p class="span-full" data-if="notes"><span class="muted">Doctor's notes:</span> <span data-text="notes"></span></p>
+    </div>
+    <p class="xsmall muted mt-2" data-if="prescriptions">Prescription issued: <a class="link" href="/patient/prescriptions" data-text="prescriptions|pluck:prescriptionNumber"></a></p>
+    <p class="xsmall muted mt-1" data-if="rescheduledCount>0" data-text="Rescheduled {rescheduledCount} time(s) · {type|enum}"></p>
+  </article>
+</template>
+
+<!-- Reschedule -->
+<dialog class="modal size-lg" id="reschedule-dialog" aria-labelledby="rs-title">
+  <div class="modal-panel">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><div><h3 id="rs-title">Reschedule appointment</h3><p data-text="Dr. {doctor.fullName} · currently {startAt|datetime}"></p></div><button type="button" class="btn-icon" data-close aria-label="Close"><svg class="icon icon-md"><use href="#i-x" /></svg></button></div>
+    <div class="modal-body stack">
+      <!-- @include slot-picker.html -->
+      <p class="alert alert-info" data-slot-selected hidden>New time: <strong></strong></p>
+    </div>
+    <div class="modal-foot"><button type="button" class="btn btn-secondary" data-close>Close</button><button type="button" class="btn btn-primary" data-rs-confirm disabled>Confirm new time</button></div>
+  </div>
+</dialog>
+
+<!-- Review -->
+<dialog class="modal" id="review-dialog" aria-labelledby="rv-title">
+  <form class="modal-panel" id="review-form" data-api="POST /patient/reviews" data-fill data-done="Thank you for your feedback!">
+    <input type="hidden" name="appointmentId" data-from="id" />
+    <div class="modal-handle"></div>
+    <div class="modal-head"><div><h3 id="rv-title">Rate your visit</h3><p data-text="Dr. {doctor.fullName} · {startAt|datetime}"></p></div><button type="button" class="btn-icon" data-close aria-label="Close"><svg class="icon icon-md"><use href="#i-x" /></svg></button></div>
+    <div class="modal-body stack">
+      <fieldset class="center" style="border:0;padding:0">
+        <legend class="sr-only">Rating</legend>
+        <div class="star-input">
+          <input type="radio" id="r5" name="rating" value="5" checked data-number /><label for="r5" title="5 stars"></label>
+          <input type="radio" id="r4" name="rating" value="4" /><label for="r4" title="4 stars"></label>
+          <input type="radio" id="r3" name="rating" value="3" /><label for="r3" title="3 stars"></label>
+          <input type="radio" id="r2" name="rating" value="2" /><label for="r2" title="2 stars"></label>
+          <input type="radio" id="r1" name="rating" value="1" /><label for="r1" title="1 star"></label>
+        </div>
+      </fieldset>
+      <div class="field"><label class="label" for="rv-comment">Comment (optional)</label><textarea class="input" id="rv-comment" name="comment" rows="4" maxlength="2000" placeholder="How was your experience?"></textarea></div>
+    </div>
+    <div class="modal-foot"><button type="button" class="btn btn-secondary" data-close>Cancel</button><button type="submit" class="btn btn-primary">Submit review</button></div>
+  </form>
+</dialog>
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/pages/patient/appointments.js"></script>
+</body>
+</html>

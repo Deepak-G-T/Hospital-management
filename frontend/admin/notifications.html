@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>Notifications · MediCore</title>
+</head>
+<body data-title="Notifications" data-roles="ADMIN">
+<!-- @include portal-start.html -->
+<div class="page-header"><div><h1>Notifications</h1><p>Send system announcements and review your own inbox</p></div></div>
+<div class="tabs mb-6" id="tabs" data-name="tab" data-panels="main"><button class="tab" data-value="broadcast">System broadcasts</button><button class="tab" data-value="inbox">My inbox</button></div>
+
+<div data-panel="broadcast" class="grid lg-grid-5" style="--gap:1.5rem">
+  <form class="card card-pad stack lg-span-2" style="height:fit-content;padding:1.5rem" id="broadcast-form" data-api="POST /admin/notifications/broadcast" data-done="Sent to {recipients} user(s)" data-reset>
+    <h2 class="section-title"><svg class="icon icon-md text-brand"><use href="#i-megaphone" /></svg>New announcement</h2>
+    <div class="field"><label class="label" for="bc-aud">Audience</label><select class="input" id="bc-aud" name="audience"><option value="ALL">Everyone</option><option value="DOCTOR">All doctors</option><option value="PATIENT">All patients</option><option value="ADMIN">Administrators</option></select></div>
+    <div class="field"><label class="label" for="bc-type">Type</label><select class="input" id="bc-type" name="type"><option value="SYSTEM">System</option><option value="APPOINTMENT">Appointment</option><option value="EMERGENCY">Emergency</option><option value="MESSAGE">Message</option></select></div>
+    <div class="field"><label class="label" for="bc-title">Title <span class="req">*</span></label><input class="input" id="bc-title" name="title" required minlength="2" maxlength="200" /></div>
+    <div class="field"><label class="label" for="bc-msg">Message <span class="req">*</span></label><textarea class="input" id="bc-msg" name="message" rows="4" required minlength="2" maxlength="2000"></textarea></div>
+    <button type="submit" class="btn btn-primary btn-block"><svg class="icon icon-sm"><use href="#i-send" /></svg>Send now</button>
+    <p class="xsmall muted">Recipients receive it instantly via real-time notifications.</p>
+  </form>
+  <section class="card lg-span-3" data-state="loading" id="sent" data-source="/admin/notifications/broadcasts" data-template="tpl-broadcast">
+    <div class="card-head"><h2 class="section-title">Sent broadcasts</h2></div>
+    <!-- @include load-states.html -->
+    <div class="when-empty"><div class="empty"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-megaphone" /></svg></span><p class="empty-title">No broadcasts yet</p></div></div>
+    <ul class="when-ready list list-pad" data-list></ul>
+  </section>
+</div>
+<div data-panel="inbox" hidden><!-- @include notification-inbox.html --></div>
+
+<template id="tpl-broadcast">
+  <li class="items-start">
+    <div class="grow">
+      <p class="strong" data-text="title"></p>
+      <p class="xsmall muted" data-text="{audience|enum} · {recipients} recipients · {readCount} read · {createdAt|datetime} · {sentBy}"></p>
+      <div class="bar-track read-bar"><div class="bar-fill" style="--fill:var(--accent-500)" data-style="--w:calc({readCount} / max({recipients}, 1) * 100%)"></div></div>
+    </div>
+    <button type="button" class="btn btn-ghost btn-sm text-red" data-call="DELETE /admin/notifications/broadcasts/{id}" data-confirm="Recall broadcast?" data-confirm-text="This removes the notification from every recipient's inbox." data-confirm-ok="Recall" data-danger data-done="{message}"><svg class="icon icon-sm"><use href="#i-undo-2" /></svg>Recall</button>
+  </li>
+</template>
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/portal.js"></script>
+</body>
+</html>

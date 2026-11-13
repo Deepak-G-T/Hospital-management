@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>Medical reports · MediCore</title>
+</head>
+<body data-title="Medical reports" data-roles="PATIENT">
+<!-- @include portal-start.html -->
+<div class="page-header">
+  <div><h1>Medical reports</h1><p>Lab results, scans and consultation reports — shared only with your care team</p></div>
+  <div class="page-actions"><button type="button" class="btn btn-primary" id="upload-btn" data-open="upload-dialog" data-new><svg class="icon icon-sm"><use href="#i-upload" /></svg>Upload report</button></div>
+</div>
+<div data-state="loading" id="reports" data-source="/patient/reports" data-template="tpl-report" data-limit="12">
+  <!-- @include load-states.html -->
+  <div class="when-empty card"><div class="empty"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-file-text" /></svg></span><p class="empty-title">No reports yet</p><p class="empty-text">Upload lab results or scans so your doctors can review them.</p></div></div>
+  <div class="when-ready grid md-grid-2 xl-grid-3 stagger is-grid" data-list></div>
+  <!-- @include pager.html -->
+</div>
+
+<template id="tpl-report">
+  <article class="card card-pad stack" style="--gap:0.5rem">
+    <div class="row row-nowrap items-start" style="--gap:0.75rem">
+      <span class="icon-tile" data-tone="brand"><svg class="icon icon-md"><use href="#i-file-text" /></svg></span>
+      <div class="grow"><p class="truncate strong" data-text="title"></p><p class="xsmall muted" data-text="{reportType|enum} · {createdAt|date}"></p></div>
+    </div>
+    <p class="truncate xsmall muted" data-text="{fileName} · {fileSize|filesize}"></p>
+    <p class="xsmall muted" data-text="Uploaded by {doctor.fullName|dr|or:you}"></p>
+    <p class="small clamp-2" data-if="notes" data-text="notes"></p>
+    <div class="row row-nowrap mt-2" style="--gap:0.5rem">
+      <button type="button" class="btn btn-secondary btn-sm grow" data-view-file="/files/reports/{id}"><svg class="icon icon-sm"><use href="#i-eye" /></svg>View</button>
+      <button type="button" class="btn btn-secondary btn-sm grow" data-download="/files/reports/{id}"><svg class="icon icon-sm"><use href="#i-download" /></svg>Download</button>
+      <button type="button" class="btn-icon is-red" data-call="DELETE /patient/reports/{id}" data-confirm="Delete report?" data-confirm-text="{title}" data-confirm-ok="Delete" data-danger data-done="Report deleted" data-if="uploadedBy.role=PATIENT" aria-label="Delete report"><svg class="icon icon-sm"><use href="#i-trash-2" /></svg></button>
+    </div>
+  </article>
+</template>
+
+<dialog class="modal" id="upload-dialog" aria-labelledby="up-title">
+  <form class="modal-panel" id="upload-form" enctype="multipart/form-data" data-api="POST /patient/reports" data-done="Report uploaded securely">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><h3 id="up-title">Upload medical report</h3><button type="button" class="btn-icon" data-close aria-label="Close"><svg class="icon icon-md"><use href="#i-x" /></svg></button></div>
+    <div class="modal-body stack">
+      <div class="field"><label class="label" for="up-title-input">Title <span class="req">*</span></label><input class="input" id="up-title-input" name="title" required minlength="2" placeholder="e.g. Blood test — March" /></div>
+      <div class="field"><label class="label" for="up-type">Report type</label><select class="input" id="up-type" name="reportType"><option value="LAB">Lab</option><option value="IMAGING">Imaging</option><option value="CONSULTATION">Consultation</option><option value="DISCHARGE">Discharge</option><option value="OTHER">Other</option></select></div>
+      <div class="field"><label class="label" for="up-file">File <span class="req">*</span></label><input class="input" id="up-file" name="file" type="file" required accept=".pdf,.jpg,.jpeg,.png,.webp,.txt,.doc,.docx" data-max-mb="10" /><p class="hint">PDF, JPG, PNG, WEBP, TXT, DOC or DOCX · max 10 MB</p></div>
+      <div class="field"><label class="label" for="up-notes">Notes</label><textarea class="input" id="up-notes" name="notes" rows="2"></textarea></div>
+    </div>
+    <div class="modal-foot"><button type="button" class="btn btn-secondary" data-close>Cancel</button><button type="submit" class="btn btn-primary">Upload</button></div>
+  </form>
+</dialog>
+<div class="card mt-4" data-state="loading" id="deleted-reports" data-source="/patient/reports" data-params="deleted=true" data-template="tpl-deleted-report" data-limit="10">
+  <div class="card-head"><h2 class="section-title">Recently deleted</h2><p class="xsmall muted">Deleted reports are kept and can be restored.</p></div>
+  <!-- @include load-states.html -->
+  <div class="when-empty"><div class="empty"><p class="empty-text">No deleted reports</p></div></div>
+  <ul class="when-ready list list-pad" data-list></ul>
+  <!-- @include pager.html -->
+</div>
+<template id="tpl-deleted-report"><li><span class="grow"><span class="strong" data-text="title"></span> <span class="xsmall muted" data-text="· deleted {deletedAt|date}"></span></span><button type="button" class="btn btn-secondary btn-sm" data-call="POST /patient/reports/{id}/restore" data-done="Report restored">Restore</button></li></template>
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/portal.js"></script>
+</body>
+</html>

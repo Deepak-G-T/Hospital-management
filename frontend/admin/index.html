@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>Dashboard · MediCore</title>
+</head>
+<body data-title="Dashboard">
+<!-- @include portal-start.html -->
+<div class="stack" style="--gap:1.25rem" id="dash">
+  <section class="banner" data-block>
+    <div class="banner-grid">
+      <div>
+        <p class="eyebrow">Hospital overview</p>
+        <h1><span data-greeting>Hello</span>, <span data-first-name></span></h1>
+        <p class="banner-sub">Live analytics from the admin, doctor and patient portals.</p>
+        <div class="banner-chips">
+          <a class="banner-chip" href="/admin/appointments"><svg class="icon icon-sm"><use href="#i-calendar-clock" /></svg><span><strong data-text="totals.todayAppointments">—</strong><small>Today's appointments</small></span></a>
+          <a class="banner-chip" href="/admin/emergencies"><svg class="icon icon-sm"><use href="#i-siren" /></svg><span><strong data-text="totals.activeEmergencies">—</strong><small>Active emergencies</small></span></a>
+          <a class="banner-chip" href="/admin/appointments?status=PENDING"><svg class="icon icon-sm"><use href="#i-hourglass" /></svg><span><strong data-text="totals.pendingAppointments">—</strong><small>Pending approval</small></span></a>
+          <a class="banner-chip" href="/admin/complaints"><svg class="icon icon-sm"><use href="#i-message-square-warning" /></svg><span><strong data-text="totals.openComplaints">—</strong><small>Open complaints</small></span></a>
+        </div>
+      </div>
+      <div class="banner-side"><div class="banner-actions"><button type="button" class="btn btn-glass" id="refresh" data-refresh><svg class="icon icon-sm"><use href="#i-refresh-cw" /></svg>Refresh</button></div></div>
+    </div>
+  </section>
+
+  <div class="card range-bar" data-range>
+    <!-- @include date-range-fields.html -->
+    <div class="field range-extra"><label class="label" for="dept">Department</label><select class="input input-sm" id="dept" name="departmentId" data-options="/admin/departments"><option value="">All departments</option></select></div>
+  </div>
+
+  <div data-state="loading" id="body" data-source="/admin/dashboard" data-filters="[data-range], #dept" data-quiet data-live="appointment:updated emergency:new emergency:updated">
+    <!-- @include load-states.html -->
+    <div class="when-ready stack" style="--gap:1.25rem">
+      <div class="grid grid-2 xl-grid-4 stagger">
+        <a class="card stat" href="/admin/doctors" data-tone="brand"><span class="stat-top"><span class="stat-label">Total doctors</span><span class="stat-icon"><svg class="icon"><use href="#i-stethoscope" /></svg></span></span><p class="stat-value" data-stat="totals.totalDoctors">—</p></a>
+        <a class="card stat" href="/admin/patients" data-tone="accent"><span class="stat-top"><span class="stat-label">Total patients</span><span class="stat-icon"><svg class="icon"><use href="#i-users" /></svg></span></span><p class="stat-value" data-stat="totals.totalPatients">—</p></a>
+        <a class="card stat" href="/admin/appointments" data-tone="purple"><span class="stat-top"><span class="stat-label">Appointments in range</span><span class="stat-icon"><svg class="icon"><use href="#i-calendar-days" /></svg></span></span><p class="stat-value" data-stat="totals.totalAppointments">—</p></a>
+        <div class="card stat" data-tone="slate"><span class="stat-top"><span class="stat-label">Today's appointments</span><span class="stat-icon"><svg class="icon"><use href="#i-calendar-clock" /></svg></span></span><p class="stat-value" data-stat="totals.todayAppointments">—</p></div>
+        <a class="card stat" href="/admin/appointments?status=PENDING" data-tone="amber"><span class="stat-top"><span class="stat-label">Pending approval</span><span class="stat-icon"><svg class="icon"><use href="#i-hourglass" /></svg></span></span><p class="stat-value" data-stat="totals.pendingAppointments">—</p></a>
+        <div class="card stat" data-tone="emerald"><span class="stat-top"><span class="stat-label">Completed</span><span class="stat-icon"><svg class="icon"><use href="#i-check-circle-2" /></svg></span></span><p class="stat-value" data-stat="totals.completedAppointments">—</p></div>
+        <div class="card stat" data-tone="red"><span class="stat-top"><span class="stat-label">Cancelled / rejected</span><span class="stat-icon"><svg class="icon"><use href="#i-x-circle" /></svg></span></span><p class="stat-value" data-stat="totals.cancelledAppointments">—</p></div>
+        <a class="card stat" href="/admin/emergencies" data-tone="red"><span class="stat-top"><span class="stat-label">Emergency cases</span><span class="stat-icon"><svg class="icon"><use href="#i-siren" /></svg></span></span><p class="stat-value" data-stat="totals.emergencyCases">—</p><p class="stat-hint" data-text="{totals.activeEmergencies} active now"></p></a>
+      </div>
+
+      <div class="section-heading"><div><h2>Appointments</h2><p class="xsmall muted" data-text="Per {range.granularity} in the selected range"></p></div></div>
+      <div class="grid xl-grid-3" style="--gap:1.25rem">
+        <section class="card card-pad chart-card xl-span-2"><div class="chart-head"><div><h3 class="section-title">Appointment trends</h3><small>Total, completed and cancelled</small></div><!-- @include chart-card.html --></div><div class="chart-body" data-chart="trend" data-kind="line" data-rows="appointmentTrend" data-series="total:Total,completed:Completed,cancelled:Cancelled/Rejected" data-columns="date:Date:shortdate,total:Total,completed:Completed,cancelled:Cancelled"></div><div class="chart-table" data-chart-table="trend"></div></section>
+        <section class="card card-pad chart-card"><div class="chart-head"><h3 class="section-title">By status</h3><!-- @include chart-card.html --></div><div class="chart-body" data-chart="status" data-kind="donut" data-rows="appointmentsByStatus" data-center="Appointments" data-columns="name:Status:enum,value:Count"></div><div class="chart-table" data-chart-table="status"></div></section>
+      </div>
+
+      <div class="section-heading"><h2>Departments &amp; emergencies</h2></div>
+      <div class="grid xl-grid-3" style="--gap:1.25rem">
+        <section class="card card-pad chart-card xl-span-2"><div class="chart-head"><h3 class="section-title">Department-wise statistics</h3><!-- @include chart-card.html --></div><div class="chart-body" data-chart="depts" data-kind="bar" data-rows="departmentStats" data-height="300" data-series="appointments:Appointments,completed:Completed,emergencies:Emergencies" data-columns="name:Department,doctors:Doctors,appointments:Appointments,completed:Completed,emergencies:Emergencies"></div><div class="chart-table" data-chart-table="depts"></div></section>
+        <section class="card card-pad chart-card">
+          <div class="chart-head"><h3 class="section-title">Emergencies by priority</h3><!-- @include chart-card.html --></div>
+          <div class="chart-body" data-chart="priority" data-kind="donut" data-rows="emergenciesByPriority" data-colors="priority" data-center="Cases" data-columns="name:Priority:enum,value:Cases"></div><div class="chart-table" data-chart-table="priority"></div>
+          <p class="box row center mt-3" style="justify-content:center;--gap:0.375rem"><svg class="icon icon-sm"><use href="#i-timer" /></svg>Avg. response <strong class="tnum" data-text="{totals.avgEmergencyResponseMinutes|or:—} min"></strong></p>
+        </section>
+      </div>
+
+      <div class="section-heading"><h2>Patients &amp; satisfaction</h2></div>
+      <div class="grid xl-grid-3" style="--gap:1.25rem">
+        <section class="card card-pad chart-card xl-span-2"><div class="chart-head"><div><h3 class="section-title">Patient registration trends</h3><small data-text="New patients per {range.granularity}"></small></div><!-- @include chart-card.html --></div><div class="chart-body" data-chart="registrations" data-kind="line" data-rows="registrationTrend" data-height="240" data-area data-series="patients:New patients" data-columns="date:Date:shortdate,patients:New patients"></div><div class="chart-table" data-chart-table="registrations"></div></section>
+        <section class="card card-pad chart-card">
+          <div class="chart-head"><div><h3 class="section-title">Patient satisfaction</h3><small data-text="{satisfaction.total} reviews in range"></small></div><!-- @include chart-card.html --></div>
+          <div class="row mb-3" style="--gap:0.75rem"><span style="font-size:2.25rem;font-weight:700" class="strong tnum" data-text="satisfaction.average|or:—">—</span><div><span class="stars" data-stars="satisfaction.average"></span><p class="xsmall muted">average rating</p></div></div>
+          <div class="chart-body" data-chart="satisfaction" data-kind="bar" data-rows="satisfaction.distribution" data-height="170" data-series="value:Reviews" data-columns="name:Rating,value:Reviews"></div><div class="chart-table" data-chart-table="satisfaction"></div>
+        </section>
+      </div>
+
+      <section class="card card-pad chart-card">
+        <div class="chart-head"><div><h3 class="section-title">Doctor performance</h3><small>Ranked by appointments in the selected range</small></div><!-- @include chart-card.html --></div>
+        <div class="chart-body" data-chart="doctors" data-kind="hbar" data-rows="doctorPerformance" data-take="10" data-series="completed:Completed,cancelled:Cancelled/No-show" data-columns="name:Doctor,appointments:Appts,completed:Completed,completionRate:Completion %,emergencies:Emergencies,rating:Rating"></div><div class="chart-table" data-chart-table="doctors"></div>
+      </section>
+
+      <div class="section-heading"><h2>Live activity</h2></div>
+      <div class="grid lg-grid-2" style="--gap:1.25rem" data-block>
+        <section class="card card-pad">
+          <div class="row between mb-2"><h3 class="section-title"><span class="live-dot"></span>Active emergencies</h3><a class="link small" href="/admin/emergencies">Monitor<svg class="icon icon-sm"><use href="#i-arrow-right" /></svg></a></div>
+          <div class="empty" data-if="!recentEmergencies"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-siren" /></svg></span><p class="empty-title">No active emergencies</p><p class="empty-text">New requests appear here instantly.</p></div>
+          <ul class="list" data-each="recentEmergencies:tpl-em"></ul>
+        </section>
+        <section class="card card-pad">
+          <div class="row between mb-2"><h3 class="section-title">Latest bookings</h3><a class="link small" href="/admin/appointments">View all<svg class="icon icon-sm"><use href="#i-arrow-right" /></svg></a></div>
+          <ul class="list" data-each="recentAppointments:tpl-booking"></ul>
+        </section>
+      </div>
+
+      <div class="grid grid-2 lg-grid-3 stagger">
+        <div class="card stat" data-tone="amber"><span class="stat-top"><span class="stat-label">Average rating (range)</span><span class="stat-icon"><svg class="icon"><use href="#i-star" /></svg></span></span><p class="stat-value" data-stat="totals.avgRating">—</p><p class="stat-hint" data-text="{totals.totalReviews} reviews"></p></div>
+        <a class="card stat" href="/admin/complaints" data-tone="red"><span class="stat-top"><span class="stat-label">Open complaints</span><span class="stat-icon"><svg class="icon"><use href="#i-message-square-warning" /></svg></span></span><p class="stat-value" data-stat="totals.openComplaints">—</p></a>
+        <a class="card stat" href="/admin/users" data-tone="accent"><span class="stat-top"><span class="stat-label">Active user accounts</span><span class="stat-icon"><svg class="icon"><use href="#i-user-check" /></svg></span></span><p class="stat-value" data-stat="totals.activeUsers">—</p></a>
+      </div>
+    </div>
+  </div>
+</div>
+<template id="tpl-em">
+  <li class="items-start">
+    <span data-priority-of="priority"></span>
+    <span class="grow"><span class="truncate small strong" style="display:block" data-text="{patient.fullName} — {symptoms}"></span><span class="truncate xsmall muted" style="display:block" data-text="{department.name|or:Unassigned} · {assignedDoctor.fullName|dr|or:awaiting doctor} · {createdAt|relative}"></span></span>
+    <span data-badge="status"></span>
+  </li>
+</template>
+<template id="tpl-booking">
+  <li>
+    <span class="avatar avatar-sm" data-initials="patient.fullName"></span>
+    <span class="grow"><span class="truncate small strong" style="display:block" data-text="{patient.fullName} → Dr. {doctor.fullName}"></span><span class="truncate xsmall muted" style="display:block" data-text="{startAt|datetime} · {department.name}"></span></span>
+    <span data-badge="status"></span>
+  </li>
+</template>
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/pages/admin/dashboard.js"></script>
+</body>
+</html>

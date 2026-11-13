@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>Log in · MediCore</title>
+</head>
+<body>
+<!-- @include public-header.html -->
+<div class="auth-wrap">
+  <div style="width:100%;max-width:28rem" class="animate-up">
+    <form class="card card-pad stack" id="login-form" style="padding:2rem" novalidate>
+      <div>
+        <h1 style="font-size:1.5rem">Welcome back</h1>
+        <p class="small muted mt-1">Sign in to your admin, doctor or patient portal.</p>
+      </div>
+      <p class="alert alert-info" id="expired" hidden>Your session has expired. Please log in again.</p>
+      <p class="alert alert-error" id="login-error" role="alert" hidden></p>
+      <div class="field"><label class="label" for="email">Email</label><input class="input" id="email" name="email" type="email" autocomplete="email" required /></div>
+      <div class="field">
+        <label class="label" for="password">Password</label>
+        <div class="input-wrap">
+          <input class="input" style="padding-left:0.875rem;padding-right:2.5rem" id="password" name="password" type="password" autocomplete="current-password" required />
+          <button type="button" class="input-action" data-toggle-password aria-label="Show password"><svg class="icon icon-sm"><use href="#i-eye" /></svg></button>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block btn-lg"><svg class="icon icon-sm"><use href="#i-log-in" /></svg>Sign in</button>
+      <p class="center small muted">New patient? <a class="link" href="/register">Create an account</a></p>
+    </form>
+    <div class="card card-pad mt-4">
+      <p class="xsmall strong muted" style="text-transform:uppercase;letter-spacing:0.05em">Demo accounts (seed data)</p>
+      <div class="demo-grid">
+        <button type="button" data-demo="admin@medicore.com:Admin@123"><svg class="icon icon-md"><use href="#i-shield-check" /></svg>Admin</button>
+        <button type="button" data-demo="david.chen@medicore.com:Doctor@123"><svg class="icon icon-md"><use href="#i-stethoscope" /></svg>Doctor</button>
+        <button type="button" data-demo="patient@medicore.com:Patient@123"><svg class="icon icon-md"><use href="#i-user" /></svg>Patient</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- @include public-footer.html -->
+<script type="module" src="/src/js/pages/public/login.js"></script>
+</body>
+</html>

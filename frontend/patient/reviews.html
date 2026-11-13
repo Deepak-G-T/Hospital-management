@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>My reviews · MediCore</title>
+</head>
+<body data-title="My reviews" data-roles="PATIENT">
+<!-- @include portal-start.html -->
+<div class="page-header">
+  <div><h1>My reviews</h1><p>Ratings you've given to doctors after completed visits</p></div>
+  <div class="page-actions"><a class="btn btn-primary" href="/patient/appointments?tab=past"><svg class="icon icon-sm"><use href="#i-star" /></svg>Rate a visit</a></div>
+</div>
+<div data-state="loading" id="reviews" data-source="/patient/reviews" data-template="tpl-review-card" data-limit="12">
+  <!-- @include load-states.html -->
+  <div class="when-empty card"><div class="empty"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-star" /></svg></span><p class="empty-title">No reviews yet</p><p class="empty-text">After a completed appointment, you can rate your doctor from the appointment history.</p></div></div>
+  <div class="when-ready grid md-grid-2 stagger is-grid" data-list></div>
+  <!-- @include pager.html -->
+</div>
+<template id="tpl-review-card">
+  <article class="card card-pad">
+    <div class="row between"><p class="strong" data-text="Dr. {doctor.fullName}"></p><span class="xsmall muted" data-text="createdAt|date"></span></div>
+    <p class="xsmall muted" data-text="doctor.specialization"></p>
+    <span class="stars mt-2" data-stars="rating"></span>
+    <p class="small muted mt-2" data-if="comment" data-text="“{comment}”"></p>
+  </article>
+</template>
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/portal.js"></script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>Dashboard · MediCore</title>
+</head>
+<body data-title="Dashboard" data-roles="PATIENT">
+<!-- @include portal-start.html -->
+<div data-state="loading" id="dash" data-source="/patient/dashboard" data-live="appointment:updated emergency:updated notification:new">
+  <div class="when-loading"><div class="stack"><div class="skeleton" style="height:12rem;border-radius:1.5rem"></div><div class="grid grid-2 lg-grid-4"><div class="skeleton" style="height:6rem"></div><div class="skeleton" style="height:6rem"></div><div class="skeleton" style="height:6rem"></div><div class="skeleton" style="height:6rem"></div></div></div></div>
+  <div class="when-error"><div class="card error-state"><span class="icon-tile"><svg class="icon icon-xl"><use href="#i-alert-triangle" /></svg></span><p class="strong" data-error-text></p><button type="button" class="btn btn-secondary btn-sm" data-retry>Try again</button></div></div>
+
+  <div class="when-ready stack" style="--gap:1.25rem">
+    <!-- Welcome banner -->
+    <section class="banner">
+      <div class="banner-grid">
+        <div>
+          <p class="eyebrow">Your care at a glance</p>
+          <h1><span data-greeting>Hello</span>, <span data-first-name></span></h1>
+          <p class="banner-sub">Book visits, keep your records up to date and follow your appointments in real time.</p>
+        </div>
+        <div class="banner-side">
+          <div class="banner-aside">
+            <p class="eyebrow">Next appointment</p>
+            <a href="/patient/appointments" class="row row-nowrap mt-2" style="--gap:0.75rem;color:#fff" data-if="upcoming">
+              <span class="avatar" style="box-shadow:0 0 0 2px rgba(255,255,255,.4)" data-initials="upcoming.0.doctor.fullName"></span>
+              <span class="grow">
+                <strong class="truncate" style="display:block" data-text="Dr. {upcoming.0.doctor.fullName}"></strong>
+                <small class="truncate xsmall" style="display:block;color:rgba(255,255,255,.8)" data-text="upcoming.0.startAt|datetime"></small>
+              </span>
+              <span class="chip" style="background:rgba(255,255,255,.2);color:#fff" data-text="upcoming.0.status|enum"></span>
+            </a>
+            <p class="small mt-2" style="color:rgba(255,255,255,.85)" data-if="!upcoming">Nothing booked yet — find a doctor to get started.</p>
+          </div>
+          <div class="banner-actions">
+            <a class="btn btn-white" href="/patient/find-doctors"><svg class="icon icon-sm"><use href="#i-search" /></svg>Book appointment</a>
+            <a class="btn btn-danger" href="/patient/emergency"><svg class="icon icon-sm"><use href="#i-siren" /></svg>Emergency</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Active emergency -->
+    <a class="card card-hover card-danger card-pad row" href="/patient/emergency" data-if="activeEmergency">
+      <span class="icon-tile" data-tone="red"><svg class="icon icon-md"><use href="#i-siren" /></svg></span>
+      <span class="grow">
+        <strong class="text-red" style="display:block">Active emergency request</strong>
+        <span class="small text-red" data-text="{activeEmergency.assignedDoctor.fullName|dr|or:Alerting available doctors…}"></span><span class="small text-red" data-if="activeEmergency.assignedDoctor"> is handling your case</span>
+      </span>
+      <span data-priority-of="activeEmergency.priority"></span><span data-badge="activeEmergency.status"></span>
+    </a>
+
+    <!-- Quick actions -->
+    <div class="grid grid-2 lg-grid-4 stagger">
+      <a class="card card-hover tile" href="/patient/find-doctors"><span class="tile-icon grad-brand"><svg class="icon icon-md"><use href="#i-search" /></svg></span><span class="grow"><span class="tile-title">Find a doctor</span><span class="xsmall muted">Search &amp; book</span></span><svg class="icon icon-sm chev"><use href="#i-chevron-right" /></svg></a>
+      <a class="card card-hover tile" href="/patient/medical-profile"><span class="tile-icon grad-accent"><svg class="icon icon-md"><use href="#i-heart-pulse" /></svg></span><span class="grow"><span class="tile-title">Medical profile</span><span class="xsmall muted">Allergies &amp; history</span></span><svg class="icon icon-sm chev"><use href="#i-chevron-right" /></svg></a>
+      <a class="card card-hover tile" href="/patient/reports"><span class="tile-icon grad-purple"><svg class="icon icon-md"><use href="#i-file-text" /></svg></span><span class="grow"><span class="tile-title">Reports</span><span class="xsmall muted">Upload &amp; view</span></span><svg class="icon icon-sm chev"><use href="#i-chevron-right" /></svg></a>
+      <a class="card card-hover tile" href="/patient/prescriptions"><span class="tile-icon grad-amber"><svg class="icon icon-md"><use href="#i-pill" /></svg></span><span class="grow"><span class="tile-title">Prescriptions</span><span class="xsmall muted">Download PDFs</span></span><svg class="icon icon-sm chev"><use href="#i-chevron-right" /></svg></a>
+    </div>
+
+    <!-- Profile completeness -->
+    <div class="card card-pad row" style="--gap:1rem" data-if="profileCompleteness<100">
+      <div class="ring" data-style="--p:{profileCompleteness}"><span data-text="{profileCompleteness}%"></span></div>
+      <div class="grow" style="min-width:11rem"><p class="strong">Complete your medical profile</p><p class="small muted">Doctors see this before every visit and during emergencies.</p></div>
+      <a class="btn btn-secondary btn-sm" href="/patient/profile">Complete profile</a>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-2 xl-grid-4 stagger">
+      <a class="card stat" href="/patient/appointments" data-tone="brand"><span class="stat-top"><span class="stat-label">Upcoming</span><span class="stat-icon"><svg class="icon"><use href="#i-calendar-days" /></svg></span></span><p class="stat-value" data-stat="stats.upcoming">—</p></a>
+      <div class="card stat" data-tone="amber"><span class="stat-top"><span class="stat-label">Awaiting confirmation</span><span class="stat-icon"><svg class="icon"><use href="#i-hourglass" /></svg></span></span><p class="stat-value" data-stat="stats.pending">—</p></div>
+      <div class="card stat" data-tone="emerald"><span class="stat-top"><span class="stat-label">Completed visits</span><span class="stat-icon"><svg class="icon"><use href="#i-check-circle-2" /></svg></span></span><p class="stat-value" data-stat="stats.completed">—</p></div>
+      <div class="card stat" data-tone="slate"><span class="stat-top"><span class="stat-label">Cancelled / rejected</span><span class="stat-icon"><svg class="icon"><use href="#i-x-circle" /></svg></span></span><p class="stat-value" data-stat="stats.cancelled">—</p></div>
+    </div>
+
+    <div class="grid lg-grid-3" style="--gap:1.25rem">
+      <section class="card card-pad lg-span-2">
+        <div class="row between mb-2"><h2 class="section-title">Upcoming appointments</h2><a class="link small" href="/patient/appointments">View all<svg class="icon icon-sm"><use href="#i-arrow-right" /></svg></a></div>
+        <div class="empty" data-if="!upcoming"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-calendar-days" /></svg></span><p class="empty-title">No upcoming appointments</p><a class="btn btn-primary btn-sm mt-2" href="/patient/find-doctors">Find a doctor</a></div>
+        <ul class="list" data-each="upcoming:tpl-upcoming"></ul>
+      </section>
+      <div class="stack" style="--gap:1.25rem">
+        <section class="card card-pad">
+          <h2 class="section-title mb-3"><svg class="icon icon-sm text-red"><use href="#i-alert-triangle" /></svg>My allergies</h2>
+          <p class="small muted" data-if="!allergies">None recorded. <a class="link" href="/patient/medical-profile">Add allergies</a></p>
+          <div class="row" data-each="allergies:tpl-allergy-chip"></div>
+        </section>
+        <a class="card card-hover card-pad row row-nowrap" href="/patient/appointments?tab=past" data-if="pendingReviews>0">
+          <span class="icon-tile" data-tone="amber"><svg class="icon icon-md"><use href="#i-star" /></svg></span>
+          <span class="small grow"><strong data-text="pendingReviews"></strong> completed visit(s) waiting for your review</span>
+          <svg class="icon icon-sm muted"><use href="#i-chevron-right" /></svg>
+        </a>
+      </div>
+    </div>
+
+    <section class="card card-pad">
+      <div class="row between mb-2"><h2 class="section-title">Recent prescriptions</h2><a class="link small" href="/patient/prescriptions">View all<svg class="icon icon-sm"><use href="#i-arrow-right" /></svg></a></div>
+      <div class="empty" data-if="!recentPrescriptions"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-pill" /></svg></span><p class="empty-title">No prescriptions yet</p></div>
+      <ul class="list" data-each="recentPrescriptions:tpl-rx-row"></ul>
+    </section>
+  </div>
+</div>
+
+<template id="tpl-upcoming">
+  <li>
+    <span class="avatar" data-initials="doctor.fullName"></span>
+    <span class="grow">
+      <span class="truncate strong" style="display:block" data-text="Dr. {doctor.fullName}"></span>
+      <span class="truncate xsmall muted" style="display:block" data-text="doctor.specialization"></span>
+      <span class="truncate xsmall text-brand" style="display:block;font-weight:500" data-text="startAt|datetime"></span>
+    </span>
+    <span data-badge="status"></span>
+  </li>
+</template>
+<template id="tpl-allergy-chip"><span class="chip tone-red" data-text="{allergen} · {severity|enum}"></span></template>
+<template id="tpl-rx-row">
+  <li>
+    <span class="icon-tile" data-tone="accent" style="padding:0.5rem"><svg class="icon icon-sm"><use href="#i-pill" /></svg></span>
+    <span class="grow"><span class="truncate strong" style="display:block" data-text="diagnosis"></span><span class="truncate xsmall muted" style="display:block" data-text="Dr. {doctor.fullName} · {createdAt|date} · {items.length} medicine(s)"></span></span>
+    <button type="button" class="btn btn-secondary btn-sm" data-download="/files/prescriptions/{id}/pdf" data-attr="aria-label:Download prescription {prescriptionNumber}"><svg class="icon icon-sm"><use href="#i-download" /></svg><span class="hide-phone">PDF</span></button>
+  </li>
+</template>
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/portal.js"></script>
+</body>
+</html>

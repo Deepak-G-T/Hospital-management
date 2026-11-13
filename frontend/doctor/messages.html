@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>Department messages · MediCore</title>
+</head>
+<body data-title="Departments" data-roles="DOCTOR">
+<!-- @include portal-start.html -->
+<div data-state="loading" id="msgs" data-source="/doctor/messages" data-live="notification:new">
+<div class="page-header">
+  <div><h1>Inter-department communication</h1><p data-text="Your departments: {myDepartments|pluck:name|or:none}">Your departments</p></div>
+  <div class="page-actions"><button type="button" class="btn btn-primary" id="new-msg" data-open="msg-dialog" data-new><svg class="icon icon-sm"><use href="#i-send" /></svg>New message</button></div>
+</div>
+<div class="tabs mb-4" id="tabs" data-name="tab" data-panels="#msgs"><button class="tab" data-value="inbox">Department inbox<span class="count" data-text="inbox.length">0</span></button><button class="tab" data-value="sent">Sent<span class="count" data-text="sent.length">0</span></button></div>
+
+  <!-- @include load-states.html -->
+<div class="when-ready stack stack-sm stagger" data-panel="inbox">
+    <div class="card" data-if="!inbox"><div class="empty"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-messages-square" /></svg></span><p class="empty-title">No messages</p></div></div>
+    <div class="stack stack-sm" data-each="inbox:tpl-msg"></div>
+  </div>
+  <div class="when-ready stack stack-sm stagger" data-panel="sent" hidden>
+    <div class="card" data-if="!sent"><div class="empty"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-messages-square" /></svg></span><p class="empty-title">No messages</p></div></div>
+    <div class="stack stack-sm" data-each="sent:tpl-msg"></div>
+  </div>
+</div></div>
+<template id="tpl-msg">
+  <article class="card card-pad row row-nowrap items-start" style="--gap:1rem">
+    <span class="avatar" data-initials="sender.fullName"></span>
+    <div class="grow">
+      <div class="row between"><p class="strong" data-text="subject"></p><span class="xsmall muted" data-text="createdAt|datetime"></span></div>
+      <p class="xsmall muted"><span data-text="Dr. {sender.fullName}"></span><span data-if="fromDepartment" data-text=" ({fromDepartment.name})"></span><span data-text=" → {toDepartment.name}"></span></p>
+      <p class="small mt-2 pre-line" data-text="body"></p>
+    </div>
+  </article>
+</template>
+<dialog class="modal" id="msg-dialog" aria-labelledby="msg-title">
+  <form class="modal-panel" id="msg-form" data-api="POST /doctor/messages" data-done="Message sent to the department">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><h3 id="msg-title">Message a department</h3><button type="button" class="btn-icon" data-close aria-label="Close"><svg class="icon icon-md"><use href="#i-x" /></svg></button></div>
+    <div class="modal-body stack">
+      <div class="form-grid cols-2">
+        <div class="field"><label class="label" for="msg-to">To department <span class="req">*</span></label><select class="input" id="msg-to" name="toDepartmentId" required data-options="/public/departments"><option value="">Select</option></select></div>
+        <div class="field"><label class="label" for="msg-from">On behalf of</label><select class="input" id="msg-from" name="fromDepartmentId" data-null data-options="/doctor/messages" data-items="myDepartments"><option value="">Primary department</option></select></div>
+      </div>
+      <div class="field"><label class="label" for="msg-subject">Subject <span class="req">*</span></label><input class="input" id="msg-subject" name="subject" required minlength="2" /></div>
+      <div class="field"><label class="label" for="msg-body">Message <span class="req">*</span></label><textarea class="input" id="msg-body" name="body" rows="5" required minlength="2"></textarea></div>
+      <p class="xsmall muted">All doctors in the selected department are notified in real time.</p>
+    </div>
+    <div class="modal-foot"><button type="button" class="btn btn-secondary" data-close>Cancel</button><button type="submit" class="btn btn-primary">Send</button></div>
+  </form>
+</dialog>
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/portal.js"></script>
+</body>
+</html>

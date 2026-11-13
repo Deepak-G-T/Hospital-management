@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- @include head.html -->
+  <title>Appointments · MediCore</title>
+</head>
+<body data-title="Appointments">
+<!-- @include portal-start.html -->
+<div class="page-header"><div><h1>Appointments</h1><p>Review requests, manage your schedule and record consultations</p></div></div>
+<div class="row mb-4" style="--gap:0.75rem">
+  <div class="tabs" id="scope" data-name="scope" data-initial="upcoming"><button class="tab" data-value="upcoming">Upcoming</button><button class="tab" data-value="today">Today</button><button class="tab" data-value="past">Past</button><button class="tab" data-value="">All</button></div>
+  <select class="input" style="width:auto" id="status" name="status" aria-label="Status">
+    <option value="">Any status</option><option value="PENDING">Pending</option><option value="CONFIRMED">Confirmed</option><option value="COMPLETED">Completed</option><option value="CANCELLED">Cancelled</option><option value="REJECTED">Rejected</option><option value="NO_SHOW">No Show</option>
+  </select>
+  <div class="input-wrap grow" style="min-width:12rem;max-width:20rem;margin-left:auto"><svg class="icon icon-sm"><use href="#i-search" /></svg><input class="input" type="search" id="search" name="search" placeholder="Search patient…" aria-label="Search patient" /></div>
+</div>
+<div class="card" data-state="loading" id="appts" data-source="/doctor/appointments" data-template="tpl-row" data-filters="#scope, #status, #search" data-limit="15" data-live="appointment:updated">
+  <!-- @include load-states.html -->
+  <div class="when-empty"><div class="empty"><span class="empty-icon"><svg class="icon icon-lg"><use href="#i-calendar-days" /></svg></span><p class="empty-title">No appointments</p><p class="empty-text">Appointment requests from patients appear here in real time.</p></div></div>
+  <div class="when-ready table-wrap">
+    <table class="table">
+      <thead><tr><th>Date &amp; time</th><th>Patient</th><th>Type</th><th>Reason</th><th>Status</th><th class="right">Actions</th></tr></thead>
+      <tbody data-list></tbody>
+    </table>
+  </div>
+  <!-- @include pager.html -->
+</div>
+<template id="tpl-row">
+  <tr>
+    <td data-label="Date &amp; time" class="nowrap strong" data-text="startAt|datetime"></td>
+    <td data-label="Patient"><a class="cell-person" data-attr="href:/doctor/patients/{patient.id}"><span class="avatar avatar-sm" data-initials="patient.fullName"></span><strong data-text="patient.fullName"></strong></a></td>
+    <td data-label="Type" class="xsmall" data-text="type|enum"></td>
+    <td data-label="Reason" class="xsmall muted" style="max-width:14rem"><span class="truncate" style="display:block" data-text="reason"></span><span class="truncate text-green" style="display:block" data-if="diagnosis" data-text="Dx: {diagnosis}"></span></td>
+    <td data-label="Status"><span data-badge="status"></span></td>
+    <td class="cell-actions">
+      <div class="actions">
+        <button type="button" class="btn btn-ghost btn-sm text-green" data-if="status=PENDING" data-call="PATCH /doctor/appointments/{id}/status" data-body="status:CONFIRMED" data-confirm="Accept appointment?" data-confirm-text="{patient.fullName} · {startAt|datetime}. The patient will be notified immediately." data-confirm-ok="Accept" data-done="Appointment confirmed — patient notified" title="Accept"><svg class="icon icon-sm"><use href="#i-check" /></svg>Accept</button>
+        <button type="button" class="btn btn-ghost btn-sm text-red" data-if="status=PENDING" data-call="PATCH /doctor/appointments/{id}/status" data-body="status:REJECTED" data-confirm="Reject appointment?" data-confirm-text="{patient.fullName} · {startAt|datetime}. The patient will be notified immediately." data-confirm-ok="Reject" data-danger data-reason="Reason (shared with patient)" data-done="Appointment rejected — patient notified" title="Reject"><svg class="icon icon-sm"><use href="#i-x" /></svg>Reject</button>
+        <button type="button" class="btn btn-ghost btn-sm text-green" data-if="status=CONFIRMED&startAt<now" data-call="PATCH /doctor/appointments/{id}/status" data-body="status:COMPLETED" data-confirm="Complete appointment?" data-confirm-text="{patient.fullName} · {startAt|datetime}. The patient will be notified immediately." data-confirm-ok="Complete" data-done="Appointment completed — patient notified" title="Complete"><svg class="icon icon-sm"><use href="#i-check-circle-2" /></svg>Complete</button>
+        <button type="button" class="btn btn-ghost btn-sm" style="color:#ea580c" data-if="status=CONFIRMED&startAt<now" data-call="PATCH /doctor/appointments/{id}/status" data-body="status:NO_SHOW" data-confirm="No-show appointment?" data-confirm-text="{patient.fullName} · {startAt|datetime}. The patient will be notified immediately." data-confirm-ok="No-show" data-danger data-done="Appointment no show — patient notified" title="No-show"><svg class="icon icon-sm"><use href="#i-user-x" /></svg>No-show</button>
+        <button type="button" class="btn btn-ghost btn-sm text-red" data-if="status=CONFIRMED" data-call="PATCH /doctor/appointments/{id}/status" data-body="status:CANCELLED" data-confirm="Cancel appointment?" data-confirm-text="{patient.fullName} · {startAt|datetime}. The patient will be notified immediately." data-confirm-ok="Cancel" data-danger data-reason="Reason (shared with patient)" data-done="Appointment cancelled — patient notified" title="Cancel"><svg class="icon icon-sm"><use href="#i-ban" /></svg>Cancel</button>
+        <button type="button" class="btn-icon" data-open="consult-dialog" data-if="status=CONFIRMED,COMPLETED" title="Diagnosis &amp; treatment" aria-label="Diagnosis and treatment"><svg class="icon icon-sm"><use href="#i-notebook-pen" /></svg></button>
+        <button type="button" class="btn-icon" data-action="prescribe" data-if="status=CONFIRMED,COMPLETED" title="Write prescription" aria-label="Write prescription"><svg class="icon icon-sm"><use href="#i-pill" /></svg></button>
+      </div>
+    </td>
+  </tr>
+</template>
+<!-- @include dialogs/doctor-dialogs.html -->
+<!-- @include portal-end.html -->
+<script type="module" src="/src/js/pages/doctor/appointments.js"></script>
+</body>
+</html>
