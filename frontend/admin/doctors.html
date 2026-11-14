@@ -57,14 +57,14 @@
 <template id="tpl-avail"><li class="row between box" style="margin-bottom:0.25rem"><span data-text="dayOfWeek|day"></span><span data-text="{startTime|timestr} – {endTime|timestr}"></span></li></template>
 
 <dialog class="modal size-lg" id="doctor-dialog" aria-labelledby="dd-title">
-  <form class="modal-panel" id="doctor-form" data-api="POST /admin/doctors" data-api-edit="PUT /admin/doctors/{id}" data-fill data-done="Doctor added — they can now log in to the doctor portal" data-done-edit="Doctor updated">
+  <form class="modal-panel" id="doctor-form" data-api="POST /admin/doctors" data-api-edit="PUT /admin/doctors/{id}" data-fill data-done="Doctor added. They can log in with {user.email}" data-done-edit="Doctor updated">
     <div class="modal-handle"></div>
     <div class="modal-head"><h3 id="dd-title"><span data-if="id" data-text="Edit Dr. {fullName}"></span><span data-if="!id">Add doctor</span></h3><button type="button" class="btn-icon" data-close aria-label="Close"><svg class="icon icon-md"><use href="#i-x" /></svg></button></div>
     <div class="modal-body stack">
       <div class="form-grid cols-2">
         <div class="field"><label class="label" for="d-name">Full name <span class="req">*</span></label><input class="input" id="d-name" name="fullName" required /></div>
-        <div class="field"><label class="label" for="d-email">Email (login) <span class="req">*</span></label><input class="input" id="d-email" name="email" type="email" required data-from="user.email" /></div>
-        <fieldset class="contents" data-if="!id"><div class="field"><label class="label" for="d-pass">Temporary password <span class="req">*</span></label><input class="input" id="d-pass" name="password" minlength="8" required /><p class="hint">Min. 8 chars, letter + number</p></div></fieldset>
+        <div class="field"><label class="label" for="d-email">Email (login) <span class="req">*</span></label><input class="input" id="d-email" name="email" type="email" placeholder="doctor.name@medicore.com" required data-from="user.email" /></div>
+        <fieldset class="contents" data-if="!id"><div class="field"><label class="label" for="d-pass">Temporary password <span class="req">*</span></label><div class="input-wrap"><input class="input" style="padding-left:0.875rem;padding-right:2.5rem" id="d-pass" name="password" type="password" minlength="8" required /><button type="button" class="input-action" data-toggle-password aria-label="Show password"><svg class="icon icon-sm"><use href="#i-eye" /></svg></button></div><p class="hint">Min. 8 chars, letter + number</p></div></fieldset>
         <div class="field"><label class="label" for="d-phone">Phone</label><input class="input" id="d-phone" name="phone" /></div>
         <div class="field"><label class="label" for="d-gender">Gender</label><select class="input" id="d-gender" name="gender"><option value="">—</option><option value="MALE">Male</option><option value="FEMALE">Female</option><option value="OTHER">Other</option></select></div>
         <div class="field"><label class="label" for="d-spec">Specialization <span class="req">*</span></label><input class="input" id="d-spec" name="specialization" required /></div>
