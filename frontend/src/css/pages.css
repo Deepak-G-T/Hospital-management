@@ -60,11 +60,6 @@ html:not([data-theme='dark']) .hero-stat { background: #f8fafc; }
 .agenda li.is-next a { background: var(--tint-brand); box-shadow: inset 0 0 0 1px var(--tint-brand-ring); }
 .agenda time { width: 4.5rem; flex-shrink: 0; font-size: var(--fs-sm); font-weight: 600; color: var(--tint-brand-text); font-variant-numeric: tabular-nums; }
 
-/* Login demo buttons */
-.demo-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; margin-top: 0.75rem; }
-.demo-grid button { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; padding: 0.75rem; border-radius: var(--r); border: 1px solid var(--border); font-size: var(--fs-xs); font-weight: 500; transition: all var(--t); }
-.demo-grid button:hover { border-color: var(--brand-400); background: var(--tint-brand); }
-.demo-grid .icon { color: var(--brand-600); }
 
 /* 404 */
 .big-404 { font-size: 4.5rem; font-weight: 800; background: linear-gradient(to right, var(--brand-600), var(--accent-500)); -webkit-background-clip: text; background-clip: text; color: transparent; }

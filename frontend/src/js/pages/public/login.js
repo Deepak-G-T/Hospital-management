@@ -13,10 +13,6 @@ const go = (role) => {
 };
 // already signed in → straight to the portal
 if (getToken() && !q.expired) api.raw('GET', '/auth/me').then(({ user }) => go(user.role)).catch(() => {});
-document.querySelectorAll('[data-demo]').forEach((b) => b.addEventListener('click', () => {
-  const [email, password] = b.dataset.demo.split(':');
-  form.email.value = email; form.password.value = password;
-}));
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = form.querySelector('[type=submit]');
