@@ -55,8 +55,8 @@ html[data-theme='dark'] .hero { background: linear-gradient(135deg, #070b16, #0f
 .hero::after { left: -8rem; bottom: -8rem; background: rgba(153, 246, 228, 0.4); }
 html[data-theme='dark'] .hero::before { background: rgba(37, 99, 235, 0.1); }
 html[data-theme='dark'] .hero::after { background: rgba(13, 148, 136, 0.1); }
-.hero-grid { position: relative; z-index: 1; display: grid; gap: 3rem; align-items: center; padding: 4rem 0; }
-@media (min-width: 1024px) { .hero-grid { grid-template-columns: 1fr 1fr; padding: 6rem 0; } }
+.hero-grid { position: relative; z-index: 1; display: grid; gap: 3rem; align-items: center; padding-top: 4rem; padding-bottom: 4rem; }
+@media (min-width: 1024px) { .hero-grid { grid-template-columns: 1fr 1fr; padding-top: 6rem; padding-bottom: 6rem; } }
 .hero h1 { font-size: 2.25rem; font-weight: 800; line-height: 1.1; margin-top: 1.25rem; }
 .hero .lead { margin-top: 1.25rem; max-width: 36rem; font-size: var(--fs-lg); color: var(--text-muted); }
 @media (min-width: 768px) { .hero h1 { font-size: 3rem; } }
@@ -65,7 +65,7 @@ html[data-theme='dark'] .hero::after { background: rgba(13, 148, 136, 0.1); }
 .hero-band { padding: 5rem 0; color: #fff; background: linear-gradient(135deg, var(--brand-700), var(--accent-700)); text-align: center; }
 .hero-band h1 { color: #fff; font-size: 2.25rem; font-weight: 800; margin-top: 0.75rem; }
 .hero-band p { margin: 1.25rem auto 0; max-width: 48rem; font-size: var(--fs-lg); color: var(--brand-100); }
-.section { padding: 5rem 0; }
+.section { padding-top: 5rem; padding-bottom: 5rem; }
 .section-alt { background: var(--surface); }
 html[data-theme='dark'] .section-alt { background: rgba(15, 23, 42, 0.5); }
 .section-head { max-width: 42rem; margin: 0 auto; text-align: center; }
