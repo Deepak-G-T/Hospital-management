@@ -135,7 +135,7 @@ html.sidebar-collapsed .user-card-inner { flex-direction: column; background: tr
 .account-btn { display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem; border-radius: var(--r); transition: background var(--t); }
 .account-btn:hover { background: var(--hover); }
 .account-btn .name, .account-btn .chev { display: none; }
-.portal-content { width: 100%; max-width: 80rem; min-width: 0; margin: 0 auto; padding: 1.25rem 1rem 7rem; animation: fade-up 0.45s var(--ease) both; }
+.portal-content { width: 100%; max-width: 80rem; min-width: 0; margin: 0 auto; padding: 1.25rem 1rem calc(7rem + env(safe-area-inset-bottom, 0px)); animation: fade-up 0.45s var(--ease) both; }
 .collapse-btn { display: none !important; }
 
 .bell-badge { position: absolute; right: -2px; top: -2px; min-width: 1.25rem; height: 1.25rem; padding: 0 0.25rem; display: none; align-items: center; justify-content: center;

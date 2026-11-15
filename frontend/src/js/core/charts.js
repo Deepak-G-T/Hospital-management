@@ -78,21 +78,48 @@ export function lineChart(el, data, series, { height = 280, area = false, xKey =
 
 /* ---------- Vertical grouped bars ---------- */
 export function barChart(el, data, series, { xKey = 'name', height = 280 } = {}) {
-  const h = isPhone() ? Math.min(height, 240) : height;
-  if (!hasData(data, series.map((s) => s.key))) { noData(el, h); return; }
-  const max = niceMax(Math.max(...data.flatMap((d) => series.map((s) => Number(d[s.key]) || 0))));
-  const crowded = data.length > (isPhone() ? 4 : 6);
-  const ticks = [0, 1, 2, 3, 4].map((k) => Math.round((max / 4) * k));
-  el.innerHTML = `
-    <div class="vbars ${crowded ? 'is-crowded' : ''}" style="--h:${h}px" role="img" aria-label="${esc(series.map((s) => s.name).join(', '))} by ${esc(xKey)}">
-      <div class="vbars-y">${ticks.map((t) => `<span>${t}</span>`).join('')}</div>
-      <div class="vbars-plot">${data.map((d) => `
-        <div class="vbars-group">
-          ${series.map((s, i) => `<div class="vbar" style="--h:${((Number(d[s.key]) || 0) / max) * 100};--c:${color(i)}" data-tip="${esc(d[xKey])} · ${esc(s.name)}: ${d[s.key] ?? 0}"></div>`).join('')}
-          <small title="${esc(d[xKey])}">${esc(d[xKey])}</small>
-        </div>`).join('')}
-      </div>
-    </div>${series.length > 1 ? legend(series) : ''}`;
+  const draw = () => {
+    const h = isPhone() ? Math.min(height, 240) : height;
+    if (!hasData(data, series.map((s) => s.key))) { noData(el, h); return; }
+    const max = niceMax(Math.max(...data.flatMap((d) => series.map((s) => Number(d[s.key]) || 0))));
+
+    // On phones (under 640px) with multiple series or crowded items, draw horizontal grouped bars
+    if (isPhone() && (series.length > 1 || data.length > 6)) {
+      el.innerHTML = `
+        <div class="ghbars" role="img" aria-label="${esc(series.map((s) => s.name).join(', '))} by ${esc(xKey)}">
+          ${data.map((d) => `
+            <div class="ghbar-row">
+              <span class="ghbar-label" title="${esc(d[xKey])}">${esc(d[xKey])}</span>
+              <div class="ghbar-bars">
+                ${series.map((s, i) => `
+                  <div class="ghbar-bar" style="--w:${((Number(d[s.key]) || 0) / max) * 100};--c:${color(i)}" data-tip="${esc(d[xKey])} · ${esc(s.name)}: ${d[s.key] ?? 0}" tabindex="0" role="img" aria-label="${esc(s.name)}: ${d[s.key] ?? 0}"></div>
+                `).join('')}
+              </div>
+            </div>`).join('')}
+        </div>${series.length > 1 ? legend(series) : ''}`;
+      return;
+    }
+
+    const crowded = data.length > (isPhone() ? 4 : 6);
+    const ticks = [0, 1, 2, 3, 4].map((k) => Math.round((max / 4) * k));
+    el.innerHTML = `
+      <div class="vbars ${crowded ? 'is-crowded' : ''}" style="--h:${h}px" role="img" aria-label="${esc(series.map((s) => s.name).join(', '))} by ${esc(xKey)}">
+        <div class="vbars-y">${ticks.map((t) => `<span>${t}</span>`).join('')}</div>
+        <div class="vbars-plot">${data.map((d) => `
+          <div class="vbars-group">
+            ${series.map((s, i) => `<div class="vbar" style="--h:${((Number(d[s.key]) || 0) / max) * 100};--c:${color(i)}" data-tip="${esc(d[xKey])} · ${esc(s.name)}: ${d[s.key] ?? 0}" tabindex="0"></div>`).join('')}
+            <small title="${esc(d[xKey])}">${esc(d[xKey])}</small>
+          </div>`).join('')}
+        </div>
+      </div>${series.length > 1 ? legend(series) : ''}`;
+  };
+
+  draw();
+  if (!el.dataset.observed) {
+    el.dataset.observed = '1';
+    let lastW = el.clientWidth;
+    new ResizeObserver(() => { if (Math.abs(el.clientWidth - lastW) > 24) { lastW = el.clientWidth; draw(); } }).observe(el);
+  }
 }
 
 /* ---------- Horizontal (stacked) bars — long category names ---------- */

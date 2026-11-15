@@ -94,10 +94,21 @@ html[data-theme='dark'] .chart-tip { background: #0b1120; }
 
 /* CSS tooltips on bars / segments (data-tip) */
 [data-tip] { position: relative; }
-[data-tip]:hover::after { content: attr(data-tip); position: absolute; z-index: 5; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); white-space: pre; pointer-events: none;
+[data-tip]:hover::after, [data-tip]:focus::after, [data-tip]:focus-visible::after { content: attr(data-tip); position: absolute; z-index: 5; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); white-space: pre; pointer-events: none;
   padding: 0.375rem 0.625rem; border-radius: var(--r-sm); border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow-pop);
   font-size: var(--fs-xs); font-weight: 600; color: var(--text-strong); animation: fade-in var(--t-fast) ease both; }
-html[data-theme='dark'] [data-tip]:hover::after { background: #0b1120; }
+html[data-theme='dark'] [data-tip]:hover::after, html[data-theme='dark'] [data-tip]:focus::after, html[data-theme='dark'] [data-tip]:focus-visible::after { background: #0b1120; }
+
+/* Grouped horizontal bars on mobile (phones < 640px) */
+.ghbars { display: flex; flex-direction: column; gap: 0.375rem; }
+.ghbar-row { display: grid; grid-template-columns: minmax(0, 7.25rem) 1fr; align-items: center; gap: 0.75rem; min-height: 44px; padding: 0.25rem 0; border-bottom: 1px dashed var(--divider); }
+.ghbar-row:last-child { border-bottom: 0; }
+.ghbar-label { font-size: var(--fs-xs); color: var(--text-muted); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.25; }
+.ghbar-bars { position: relative; display: flex; flex-direction: column; justify-content: center; gap: 3px; height: 100%; min-height: 36px; padding: 2px 0;
+  background: repeating-linear-gradient(to right, var(--chart-grid) 0 1px, transparent 1px 25%) 0 0 / 100% 100% no-repeat; }
+.ghbar-bar { position: relative; height: 8px; width: calc(var(--w) * 1%); min-width: 0; border-radius: 0 4px 4px 0; background: var(--c);
+  transform-origin: left; animation: grow-x 0.7s var(--ease) both; transition: filter var(--t-fast); cursor: pointer; }
+.ghbar-bar:hover, .ghbar-bar:focus { filter: brightness(1.12); outline: none; }
 
 /* Horizontal (stacked) bars */
 .hbars { display: grid; gap: 0.5rem; }
