@@ -6,11 +6,41 @@
 </head>
 <body>
 <!-- @include public-header.html -->
-<div class="container center" style="max-width:32rem;padding:6rem 1.5rem">
+<div class="container center page-404-wrap" style="max-width:44rem;padding:5rem 1.5rem">
+  <div class="page-404-art" aria-hidden="true">
+    <svg viewBox="0 0 240 80" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:240px;margin:0 auto;display:block">
+      <path d="M10 50 H70 L80 35 L90 65 L100 20 L110 55 L120 50 H230" stroke="var(--brand-500)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.4" />
+      <circle cx="100" cy="20" r="4" fill="var(--brand-500)" />
+    </svg>
+  </div>
   <p class="big-404">404</p>
-  <h1 class="mt-4" style="font-size:1.5rem">Page not found</h1>
-  <p class="muted mt-2">The page you're looking for doesn't exist or has moved.</p>
-  <a class="btn btn-primary mt-6" href="/">Back to home</a>
+  <h1 class="mt-2" style="font-size:1.75rem">Page not found</h1>
+  <p class="muted mt-2" style="max-width:32rem;margin-left:auto;margin-right:auto">We couldn't find the page you were looking for. It may have moved or the link might be out of date. Let us help you find what you need.</p>
+  <div class="grid grid-2 sm-grid-4 mt-6 text-left" style="--gap:1rem">
+    <a class="card card-pad card-hover center" href="/doctors">
+      <span class="icon-tile" data-tone="brand" style="margin:0 auto 0.5rem"><svg class="icon icon-md"><use href="#i-stethoscope" /></svg></span>
+      <strong style="font-size:var(--fs-sm)">Find a doctor</strong>
+      <small class="xsmall muted">Browse specialists</small>
+    </a>
+    <a class="card card-pad card-hover center" href="/departments">
+      <span class="icon-tile" data-tone="brand" style="margin:0 auto 0.5rem"><svg class="icon icon-md"><use href="#i-building-2" /></svg></span>
+      <strong style="font-size:var(--fs-sm)">Departments</strong>
+      <small class="xsmall muted">Explore care units</small>
+    </a>
+    <a class="card card-pad card-hover center" href="/login">
+      <span class="icon-tile" data-tone="brand" style="margin:0 auto 0.5rem"><svg class="icon icon-md"><use href="#i-user" /></svg></span>
+      <strong style="font-size:var(--fs-sm)">Patient portal</strong>
+      <small class="xsmall muted">Access your account</small>
+    </a>
+    <a class="card card-pad card-hover center" href="/contact">
+      <span class="icon-tile" data-tone="brand" style="margin:0 auto 0.5rem"><svg class="icon icon-md"><use href="#i-mail" /></svg></span>
+      <strong style="font-size:var(--fs-sm)">Contact us</strong>
+      <small class="xsmall muted">Hospital helpdesk</small>
+    </a>
+  </div>
+  <div class="mt-6">
+    <a class="btn btn-primary" href="/">Back to home</a>
+  </div>
 </div>
 <!-- @include public-footer.html -->
 <script type="module" src="/src/js/public.js"></script>

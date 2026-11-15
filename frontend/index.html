@@ -14,7 +14,7 @@
       <span class="chip tone-brand"><svg class="icon icon-sm"><use href="#i-heart-pulse" /></svg>Smart care, connected</span>
       <h1>Healthcare that <span class="gradient-text">moves with you</span></h1>
       <p class="lead">Book specialists, manage your medical records and get coordinated hospital support — all from one secure platform.</p>
-      <div class="row mt-6" style="--gap:0.75rem">
+      <div class="row mt-6 hero-cta-row" style="--gap:0.75rem">
         <a class="btn btn-primary btn-lg" href="/doctors">Find a doctor<svg class="icon icon-sm"><use href="#i-arrow-right" /></svg></a>
         <a class="btn btn-secondary btn-lg" href="/login">Log in</a>
         <a class="btn btn-secondary btn-lg" href="/register">Create free account</a>
@@ -25,74 +25,240 @@
         <span><svg class="icon icon-sm"><use href="#i-check-circle-2" /></svg>Digital prescriptions</span>
       </div>
     </div>
-    <div class="card card-pad animate-up" id="live-stats" data-source="/public/stats">
-      <div class="row between">
-        <p class="strong">Today at MediCore</p>
-        <span class="badge" data-status="ACTIVE">Live</span>
+    <div class="hero-art-wrapper animate-up" id="live-stats" data-source="/public/stats">
+      <div class="hero-art-card">
+        <div class="floating-badge badge-top-right">
+          <span class="live-dot" aria-hidden="true"></span>
+          <span><strong data-stat="doctors">—</strong> specialists</span>
+        </div>
+        <div class="floating-badge badge-bottom-left">
+          <svg class="icon icon-sm" style="color:var(--brand-600)"><use href="#i-shield-check" /></svg>
+          <span>Secure sign-in</span>
+        </div>
+
+        <!-- Inline Medical SVG Art -->
+        <svg class="hero-art-svg" viewBox="0 0 460 210" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="MediCore Smart Hospital Medical Hub">
+          <defs>
+            <linearGradient id="heroArtGlow" x1="230" y1="20" x2="230" y2="190" gradientUnits="userSpaceOnUse">
+              <stop stop-color="var(--brand-500)" stop-opacity="0.12" />
+              <stop offset="1" stop-color="var(--accent-500)" stop-opacity="0.04" />
+            </linearGradient>
+            <linearGradient id="heroPulseGrad" x1="0" y1="0" x2="400" y2="0" gradientUnits="userSpaceOnUse">
+              <stop stop-color="var(--brand-500)" />
+              <stop offset="0.5" stop-color="var(--accent-500)" />
+              <stop offset="1" stop-color="var(--brand-500)" />
+            </linearGradient>
+          </defs>
+          <circle cx="230" cy="105" r="92" fill="url(#heroArtGlow)" />
+          <circle cx="230" cy="105" r="76" stroke="var(--border-strong)" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.6" />
+          
+          <rect x="206" y="81" width="48" height="48" rx="14" fill="var(--surface)" stroke="var(--brand-500)" stroke-width="2" />
+          <path d="M230 91V119M216 105H244" stroke="var(--brand-600)" stroke-width="4.5" stroke-linecap="round" />
+
+          <path d="M30 145 H140 L155 125 L170 170 L185 110 L200 155 L212 145 H248 L260 145 L272 120 L287 175 L302 128 L315 150 L325 145 H430" 
+                stroke="url(#heroPulseGrad)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+          <circle cx="185" cy="110" r="4" fill="var(--brand-500)" />
+          <circle cx="287" cy="175" r="4" fill="var(--accent-500)" />
+
+          <g transform="translate(105, 52)">
+            <rect width="36" height="36" rx="10" fill="var(--surface)" stroke="var(--border)" />
+            <circle cx="18" cy="18" r="8" fill="var(--tint-brand)" />
+            <path d="M15 18H21M18 15V21" stroke="var(--brand-600)" stroke-width="2" stroke-linecap="round"/>
+          </g>
+          <g transform="translate(320, 52)">
+            <rect width="36" height="36" rx="10" fill="var(--surface)" stroke="var(--border)" />
+            <circle cx="18" cy="18" r="8" fill="var(--teal-bg)" />
+            <path d="M14 18L17 21L22 15" stroke="var(--teal-fg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+        </svg>
+
+        <div class="hero-stat-pills">
+          <div class="stat-pill"><strong data-stat="doctors">—</strong><small>Specialists</small></div>
+          <div class="stat-pill"><strong data-stat="departments">—</strong><small>Departments</small></div>
+          <div class="stat-pill"><strong data-stat="patients">—</strong><small>Patients served</small></div>
+          <div class="stat-pill"><strong><span data-if="avgRating" data-text="{avgRating}/5"></span><span data-if="!avgRating">—</span></strong><small>Avg. rating</small></div>
+        </div>
+
+        <div class="hero-callout">
+          <svg class="icon icon-xl shrink-0"><use href="#i-clock" /></svg>
+          <div><p class="strong" style="color:#fff"><span data-stat="completedAppointments">—</span> consultations completed</p><p class="xsmall" style="color:var(--brand-100)">Book your next visit in under a minute</p></div>
+        </div>
       </div>
-      <div class="grid grid-2 mt-4">
-        <div class="hero-stat"><svg class="icon icon-md text-brand"><use href="#i-stethoscope" /></svg><strong data-stat="doctors">—</strong><small>Specialists</small></div>
-        <div class="hero-stat"><svg class="icon icon-md text-brand"><use href="#i-building-2" /></svg><strong data-stat="departments">—</strong><small>Departments</small></div>
-        <div class="hero-stat"><svg class="icon icon-md text-brand"><use href="#i-users" /></svg><strong data-stat="patients">—</strong><small>Patients served</small></div>
-        <div class="hero-stat"><svg class="icon icon-md text-brand"><use href="#i-star" /></svg><strong><span data-if="avgRating" data-text="{avgRating}/5"></span><span data-if="!avgRating">—</span></strong><small>Avg. rating</small></div>
-      </div>
-      <div class="hero-callout">
-        <svg class="icon icon-xl shrink-0"><use href="#i-clock" /></svg>
-        <div><p class="strong" style="color:#fff"><span data-stat="completedAppointments">—</span> consultations completed</p><p class="xsmall" style="color:var(--brand-100)">Book your next visit in under a minute</p></div>
-      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How MediCore Works (Proposal 2) -->
+<section class="section container">
+  <div class="section-head">
+    <p class="eyebrow">Patient care pathway</p>
+    <h2>How MediCore works</h2>
+    <p class="muted mt-2">Book appointments and receive care in three simple steps.</p>
+  </div>
+  <div class="journey-track mt-6">
+    <div class="grid sm-grid-3 stagger" style="--gap:1.5rem">
+      <article class="card card-hover journey-card">
+        <div class="step-num-bubble">01</div>
+        <span class="icon-tile" data-tone="brand" style="margin-bottom:0.875rem"><svg class="icon icon-md"><use href="#i-search" /></svg></span>
+        <h3>Find your specialist</h3>
+        <p>Explore specialists across 10 clinical departments with verified profiles and reviews.</p>
+      </article>
+      <article class="card card-hover journey-card">
+        <div class="step-num-bubble">02</div>
+        <span class="icon-tile" data-tone="brand" style="margin-bottom:0.875rem"><svg class="icon icon-md"><use href="#i-calendar-check" /></svg></span>
+        <h3>Pick an open slot</h3>
+        <p>Choose real-time doctor availability and reserve your appointment slot in seconds.</p>
+      </article>
+      <article class="card card-hover journey-card">
+        <div class="step-num-bubble">03</div>
+        <span class="icon-tile" data-tone="brand" style="margin-bottom:0.875rem"><svg class="icon icon-md"><use href="#i-file-text" /></svg></span>
+        <h3>Receive coordinated care</h3>
+        <p>Attend your consultation, access prescriptions, and track your history all in one place.</p>
+      </article>
     </div>
   </div>
 </section>
 
 <!-- Features -->
-<section class="section container">
-  <div class="section-head">
-    <p class="eyebrow">Why MediCore</p>
-    <h2>Everything your care journey needs</h2>
-  </div>
-  <div class="grid sm-grid-2 lg-grid-4 mt-6 stagger" style="--gap:1.5rem">
-    <article class="card card-hover feature-card"><span class="icon-tile" data-tone="brand"><svg class="icon icon-md"><use href="#i-calendar-check" /></svg></span><h3>Instant booking</h3><p>See real-time doctor availability and reserve a slot in seconds — no phone queues.</p></article>
-    <article class="card card-hover feature-card"><span class="icon-tile" data-tone="brand"><svg class="icon icon-md"><use href="#i-siren" /></svg></span><h3>Coordinated emergencies</h3><p>Urgent requests are routed to the right department and on-shift doctors are alerted instantly.</p></article>
-    <article class="card card-hover feature-card"><span class="icon-tile" data-tone="brand"><svg class="icon icon-md"><use href="#i-file-text" /></svg></span><h3>Digital records</h3><p>Prescriptions, reports, allergies and history in one secure place you control.</p></article>
-    <article class="card card-hover feature-card"><span class="icon-tile" data-tone="brand"><svg class="icon icon-md"><use href="#i-shield-check" /></svg></span><h3>Private by design</h3><p>Role-based access, encrypted passwords and a full audit trail on every medical record.</p></article>
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">Why MediCore</p>
+      <h2>Everything your care journey needs</h2>
+    </div>
+    <div class="grid sm-grid-2 lg-grid-4 mt-6 stagger" style="--gap:1.5rem">
+      <article class="card card-hover feature-card"><span class="icon-tile" data-tone="brand"><svg class="icon icon-md"><use href="#i-calendar-check" /></svg></span><h3>Instant booking</h3><p>See real-time doctor availability and reserve a slot in seconds — no phone queues.</p></article>
+      <article class="card card-hover feature-card"><span class="icon-tile" data-tone="brand"><svg class="icon icon-md"><use href="#i-siren" /></svg></span><h3>Coordinated emergencies</h3><p>Urgent requests are routed to the right department and on-shift doctors are alerted instantly.</p></article>
+      <article class="card card-hover feature-card"><span class="icon-tile" data-tone="brand"><svg class="icon icon-md"><use href="#i-file-text" /></svg></span><h3>Digital records</h3><p>Prescriptions, reports, allergies and history in one secure place you control.</p></article>
+      <article class="card card-hover feature-card"><span class="icon-tile" data-tone="brand"><svg class="icon icon-md"><use href="#i-shield-check" /></svg></span><h3>Private by design</h3><p>Role-based access, encrypted passwords and a full audit trail on every medical record.</p></article>
+    </div>
   </div>
 </section>
 
 <!-- Departments -->
-<section class="section section-alt">
-  <div class="container">
-    <div class="section-row">
-      <div><p class="eyebrow">Specialities</p><h2>Our departments</h2></div>
-      <a class="link" href="/departments">All departments<svg class="icon icon-sm"><use href="#i-arrow-right" /></svg></a>
-    </div>
-    <div class="mt-6" data-state="loading" id="departments" data-source="/public/departments" data-template="tpl-dept-tile">
-      <!-- @include load-states.html -->
-      <div class="when-empty"><p class="center muted">No departments yet.</p></div>
-      <div class="when-ready grid grid-2 sm-grid-3 lg-grid-5 stagger is-grid top-10" data-list></div>
-    </div>
+<section class="section container">
+  <div class="section-row">
+    <div><p class="eyebrow">Specialities</p><h2>Our departments</h2></div>
+    <a class="link" href="/departments">All departments<svg class="icon icon-sm"><use href="#i-arrow-right" /></svg></a>
+  </div>
+  <div class="mt-6" data-state="loading" id="departments" data-source="/public/departments" data-template="tpl-dept-tile">
+    <!-- @include load-states.html -->
+    <div class="when-empty"><p class="center muted">No departments yet.</p></div>
+    <div class="when-ready grid grid-2 sm-grid-3 lg-grid-5 stagger is-grid top-10" data-list></div>
   </div>
 </section>
 
 <!-- Doctors -->
-<section class="section container">
-  <div class="section-row">
-    <div><p class="eyebrow">Top rated</p><h2>Meet our specialists</h2></div>
-    <a class="link" href="/doctors">All doctors<svg class="icon icon-sm"><use href="#i-arrow-right" /></svg></a>
-  </div>
-  <div class="mt-6" data-state="loading" id="doctors" data-source="/public/doctors" data-template="tpl-doctor-card" data-sort="-rating">
-    <!-- @include load-states.html -->
-    <div class="when-empty"><p class="center muted">No doctors yet.</p></div>
-    <div class="when-ready grid md-grid-3 stagger is-grid top-3" style="--gap:1.5rem" data-list></div>
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-row">
+      <div><p class="eyebrow">Top rated</p><h2>Meet our specialists</h2></div>
+      <a class="link" href="/doctors">All doctors<svg class="icon icon-sm"><use href="#i-arrow-right" /></svg></a>
+    </div>
+    <div class="mt-6" data-state="loading" id="doctors" data-source="/public/doctors" data-template="tpl-doctor-card" data-sort="-rating">
+      <!-- @include load-states.html -->
+      <div class="when-empty"><p class="center muted">No doctors yet.</p></div>
+      <div class="when-ready grid md-grid-3 stagger is-grid top-3" style="--gap:1.5rem" data-list></div>
+    </div>
   </div>
 </section>
 
-<!-- Call to action -->
+<!-- Patient Stories & Trust Strip (Proposal 3: Fictional Sample Content) -->
+<section class="section container">
+  <div class="section-head">
+    <p class="eyebrow">Sample stories</p>
+    <h2>What our patients experience</h2>
+    <p class="muted mt-2">Fictional examples showing how patients navigate consultations and care.</p>
+  </div>
+  <div class="grid sm-grid-3 mt-6 stagger" style="--gap:1.5rem">
+    <article class="card card-hover testimonial-card">
+      <div>
+        <div class="row between" style="margin-bottom:0.75rem">
+          <div class="stars-row" aria-label="5 stars">
+            <svg class="icon icon-sm"><use href="#i-star" /></svg>
+            <svg class="icon icon-sm"><use href="#i-star" /></svg>
+            <svg class="icon icon-sm"><use href="#i-star" /></svg>
+            <svg class="icon icon-sm"><use href="#i-star" /></svg>
+            <svg class="icon icon-sm"><use href="#i-star" /></svg>
+          </div>
+          <span class="chip tone-teal" style="font-size:var(--fs-xs)">Fictional example</span>
+        </div>
+        <blockquote>"Booking a follow-up was simple and clear. My prescription was available directly in my patient portal right after the consultation."</blockquote>
+      </div>
+      <div class="patient-author">
+        <div class="patient-avatar">M</div>
+        <div class="patient-meta">
+          <strong>Marcus</strong>
+          <small class="muted">Cardiology consultation</small>
+        </div>
+      </div>
+    </article>
+    <article class="card card-hover testimonial-card">
+      <div>
+        <div class="row between" style="margin-bottom:0.75rem">
+          <div class="stars-row" aria-label="5 stars">
+            <svg class="icon icon-sm"><use href="#i-star" /></svg>
+            <svg class="icon icon-sm"><use href="#i-star" /></svg>
+            <svg class="icon icon-sm"><use href="#i-star" /></svg>
+            <svg class="icon icon-sm"><use href="#i-star" /></svg>
+            <svg class="icon icon-sm"><use href="#i-star" /></svg>
+          </div>
+          <span class="chip tone-teal" style="font-size:var(--fs-xs)">Fictional example</span>
+        </div>
+        <blockquote>"Finding an available morning slot for a general checkup took less than a minute. Everything was organized and on schedule."</blockquote>
+      </div>
+      <div class="patient-author">
+        <div class="patient-avatar">E</div>
+        <div class="patient-meta">
+          <strong>Elena</strong>
+          <small class="muted">General medicine consultation</small>
+        </div>
+      </div>
+    </article>
+    <article class="card card-hover testimonial-card">
+      <div>
+        <div class="row between" style="margin-bottom:0.75rem">
+          <div class="stars-row" aria-label="5 stars">
+            <svg class="icon icon-sm"><use href="#i-star" /></svg>
+            <svg class="icon icon-sm"><use href="#i-star" /></svg>
+            <svg class="icon icon-sm"><use href="#i-star" /></svg>
+            <svg class="icon icon-sm"><use href="#i-star" /></svg>
+            <svg class="icon icon-sm"><use href="#i-star" /></svg>
+          </div>
+          <span class="chip tone-teal" style="font-size:var(--fs-xs)">Fictional example</span>
+        </div>
+        <blockquote>"Being able to view lab reports, doctor notes, and appointment reminders in one account saves so much time."</blockquote>
+      </div>
+      <div class="patient-author">
+        <div class="patient-avatar">D</div>
+        <div class="patient-meta">
+          <strong>David</strong>
+          <small class="muted">Outpatient follow-up</small>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- Trust strip -->
+  <div class="trust-strip mt-6">
+    <div class="trust-item"><svg class="icon icon-md"><use href="#i-shield-check" /></svg><span>Secure sign-in</span></div>
+    <div class="trust-item"><svg class="icon icon-md"><use href="#i-stethoscope" /></svg><span>Verified specialists</span></div>
+    <div class="trust-item"><svg class="icon icon-md"><use href="#i-file-text" /></svg><span>Your records in one place</span></div>
+    <div class="trust-item"><svg class="icon icon-md"><use href="#i-calendar-check" /></svg><span>Real-time availability</span></div>
+  </div>
+</section>
+
+<!-- Call to action (Proposal 5) -->
 <section class="container" style="padding-bottom:5rem">
   <div class="cta">
     <div class="cta-grid">
       <div>
         <h2>Ready to take charge of your health?</h2>
         <p>Create your account to book appointments, keep your allergies and history up to date, and download your prescriptions anytime.</p>
+        <div class="cta-contact-note mt-3">
+          <span class="cta-contact-item"><svg class="icon icon-sm"><use href="#i-phone" /></svg>Hospital desk: +1 555 0100 (Mon–Sat, 8:00 AM – 8:00 PM)</span>
+          <span class="cta-contact-item"><svg class="icon icon-sm"><use href="#i-info" /></svg>Online services do not replace local emergency services.</span>
+        </div>
       </div>
       <div class="row" style="--gap:0.75rem">
         <a class="btn btn-white btn-lg" href="/register">Get started</a>

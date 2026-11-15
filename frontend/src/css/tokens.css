@@ -60,9 +60,9 @@
 
   /* Shape */
   --r-sm: 0.5rem; --r: 0.75rem; --r-lg: 1rem; --r-xl: 1.5rem; --r-full: 9999px;
-  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
-  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 2px 8px -2px rgba(15, 23, 42, 0.06);
-  --shadow-hover: 0 4px 6px -2px rgba(15, 23, 42, 0.05), 0 16px 32px -8px rgba(15, 23, 42, 0.14);
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.05), 0 4px 12px -2px rgba(15, 23, 42, 0.06);
+  --shadow-hover: 0 4px 6px -2px rgba(15, 23, 42, 0.05), 0 16px 32px -8px rgba(15, 23, 42, 0.12);
   --shadow-pop: 0 20px 48px -12px rgba(15, 23, 42, 0.28);
   --shadow-glow: 0 8px 24px -8px rgba(37, 99, 235, 0.55);
   --shadow-glow-accent: 0 8px 24px -8px rgba(13, 148, 136, 0.55);

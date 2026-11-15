@@ -39,7 +39,7 @@ html[data-theme='dark'] .btn-secondary { background: rgba(15, 23, 42, 0.9); }
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-card); min-width: 0; }
 .card-pad { padding: 1rem; }
 .card-hover { transition: transform var(--t) var(--ease), box-shadow var(--t) var(--ease), border-color var(--t); }
-.card-hover:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); border-color: var(--border-strong); }
+.card-hover:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); border-color: var(--border-strong); }
 .card-head { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); }
 .card-foot { border-top: 1px solid var(--border); padding: 0.75rem 1rem; }
 .card-danger { border-color: rgba(248, 113, 113, 0.45); background: linear-gradient(to right, var(--red-bg), var(--surface)); }
