@@ -21,7 +21,8 @@ html[data-theme='dark'] .logo b { color: var(--brand-400); }
 .topbar span { display: inline-flex; align-items: center; gap: 0.375rem; }
 @media (min-width: 768px) { .topbar { display: block; } }
 .site-header { position: sticky; top: 0; z-index: 30; border-bottom: 1px solid var(--border); }
-.site-header .bar { display: flex; height: 4rem; align-items: center; justify-content: space-between; gap: 1rem; }
+.site-header .bar { display: flex; height: 4rem; align-items: center; justify-content: space-between; gap: 0.5rem; }
+@media (min-width: 640px) { .site-header .bar { gap: 1rem; } }
 .site-nav { display: none; align-items: center; gap: 0.25rem; }
 .site-nav a { padding: 0.5rem 0.75rem; border-radius: var(--r-sm); font-size: var(--fs-sm); font-weight: 500; color: var(--text-muted); transition: background var(--t), color var(--t); }
 .site-nav a:hover { background: var(--hover); color: var(--text-strong); }
@@ -40,7 +41,7 @@ html[data-theme='dark'] .logo b { color: var(--brand-400); }
 .site-main { flex: 1; min-width: 0; animation: fade-in 0.35s ease both; }
 .site-footer { border-top: 1px solid var(--border); background: var(--surface); }
 html[data-theme='dark'] .site-footer { background: #0b1120; }
-.footer-grid { display: grid; gap: 2.5rem; padding: 3rem 0; }
+.footer-grid { display: grid; gap: 2.5rem; padding-top: 3rem; padding-bottom: 3rem; }
 @media (min-width: 768px) { .footer-grid { grid-template-columns: 2fr 1fr 1fr; } }
 .footer-grid h4 { font-size: var(--fs-sm); font-weight: 600; margin-bottom: 0.75rem; }
 .footer-grid li { margin-bottom: 0.5rem; font-size: var(--fs-sm); color: var(--text-muted); display: flex; gap: 0.5rem; }
@@ -72,7 +73,7 @@ html[data-theme='dark'] .section-alt { background: rgba(15, 23, 42, 0.5); }
 .section-head h2, .section-row h2 { margin-top: 0.5rem; font-size: 1.875rem; font-weight: 700; }
 .section-row { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1rem; }
 .page-intro { text-align: center; max-width: 42rem; margin: 0 auto 2.5rem; }
-.page-intro h1 { font-size: 2.25rem; font-weight: 800; }
+.page-intro h1 { font-size: clamp(1.75rem, 5vw + 1rem, 2.25rem); font-weight: 800; overflow-wrap: anywhere; }
 .page-intro p { margin-top: 0.75rem; color: var(--text-muted); }
 .page-pad { padding-top: 3.5rem; padding-bottom: 3.5rem; }
 .cta { position: relative; overflow: hidden; border-radius: var(--r-xl); padding: 3.5rem 2rem; color: #fff; background: linear-gradient(135deg, var(--brand-700), var(--brand-600) 50%, var(--accent-600)); }
