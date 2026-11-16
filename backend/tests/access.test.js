@@ -17,6 +17,11 @@ const { PrismaClient } = require('@prisma/client');
 const DB_URL = process.env.DATABASE_URL || '';
 if (!/_test(\?|$)/.test(DB_URL)) { console.log('Skipped: set DATABASE_URL to a disposable *_test database'); process.exit(0); }
 const BASE = process.env.API_URL || `http://localhost:${process.env.PORT || 5000}`;
+const TEST_PASSWORD = process.env.TEST_PASSWORD || 'TestPass#Dev2026';
+const TEST_ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || process.env.SEED_ADMIN_PASSWORD || TEST_PASSWORD;
+const TEST_DOCTOR_PASSWORD = process.env.TEST_DOCTOR_PASSWORD || process.env.SEED_DOCTOR_PASSWORD || TEST_PASSWORD;
+const TEST_PATIENT_PASSWORD = process.env.TEST_PATIENT_PASSWORD || process.env.SEED_PATIENT_PASSWORD || TEST_PASSWORD;
+
 const API = `${BASE}/api`;
 const db = new PrismaClient({ datasources: { db: { url: DB_URL } } });
 const { REPORT_DIR } = require('../src/middleware/upload');
@@ -55,7 +60,7 @@ const tag = () => crypto.randomBytes(4).toString('hex');
 
 async function newPatient(label) {
   const email = `acc.${label}.${Date.now()}.${tag()}@example.com`;
-  const r = await req('POST', '/auth/register', { body: { email, password: 'Start@1234', fullName: `Access ${label}` } });
+  const r = await req('POST', '/auth/register', { body: { email, password: TEST_PASSWORD, fullName: `Access ${label}` } });
   assert.strictEqual(r.status, 201, JSON.stringify(r.body));
   const patient = await db.patient.findUnique({ where: { userId: r.body.user.id } });
   return { id: patient.id, userId: r.body.user.id, token: r.body.token, label };
@@ -89,13 +94,13 @@ const waitAudit = async (where, n = 1, ms = 3000) => { const end = Date.now() + 
 
 (async () => {
   // ── people ──
-  const admin = await login('admin@medicore.com', 'Admin@123');
+  const admin = await login('admin@medicore.com', TEST_ADMIN_PASSWORD);
   const docRow = async (email) => { const u = await db.user.findUnique({ where: { email }, include: { doctor: true } }); return { id: u.doctor.id, userId: u.id, email }; };
   const D1 = await docRow('david.chen@medicore.com');     // the doctor under test
   const D2 = await docRow('priya.raman@medicore.com');    // another doctor who wrote "other" records
   const D3 = await docRow('sarah.mitchell@medicore.com'); // a doctor with no link to any fixture patient
-  const doc1 = await login(D1.email, 'Doctor@123');
-  const doc3 = await login(D3.email, 'Doctor@123');
+  const doc1 = await login(D1.email, TEST_DOCTOR_PASSWORD);
+  const doc3 = await login(D3.email, TEST_DOCTOR_PASSWORD);
   const department = await db.department.findFirst({ where: { name: 'Cardiology' } });
   const appt = (patientId, doctorId, status, offsetHours, extra = {}) => db.appointment.create({ data: { patientId, doctorId, departmentId: department.id, status, type: 'CONSULTATION', reason: 'access test', ...when(offsetHours), ...extra } });
 

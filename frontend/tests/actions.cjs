@@ -3,6 +3,12 @@
 //   WEB_URL=http://localhost:8089 node tests/actions.cjs      (optional ONLY=admin|doctor|patient|public)
 // Independent of the time of day: the emergency section makes its doctor "on shift" through the doctor's own schedule endpoint.
 const { chromium } = require('playwright');
+
+const TEST_PASSWORD = process.env.TEST_PASSWORD || 'TestPass#Dev2026';
+const TEST_ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || process.env.SEED_ADMIN_PASSWORD || TEST_PASSWORD;
+const TEST_DOCTOR_PASSWORD = process.env.TEST_DOCTOR_PASSWORD || process.env.SEED_DOCTOR_PASSWORD || TEST_PASSWORD;
+const TEST_PATIENT_PASSWORD = process.env.TEST_PATIENT_PASSWORD || process.env.SEED_PATIENT_PASSWORD || TEST_PASSWORD;
+
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -73,7 +79,7 @@ const listHas = async (p, sel, text) => { await p.waitForTimeout(700); return (a
   const stamp = Date.now().toString().slice(-6);
 
   if (!ONLY || ONLY === 'admin') {
-    const p = await login(browser, 'admin@medicore.com', 'Admin@123');
+    const p = await login(browser, 'admin@medicore.com', TEST_ADMIN_PASSWORD);
     // Departments
     await go(p, '/admin/departments');
     const dn = `QA Dept ${stamp}`;
@@ -90,7 +96,7 @@ const listHas = async (p, sel, text) => { await p.waitForTimeout(700); return (a
     await step('admin: add doctor', p, async () => {
       await p.click('#add'); const d = dlg(p);
       await d.locator('[name=fullName]').fill(docName); await d.locator('[name=email]').fill(`qa.doc${stamp}@example.com`);
-      await d.locator('[name=password]').fill('Doctor@123'); await d.locator('[name=specialization]').fill('Cardiology');
+      await d.locator('[name=password]').fill(TEST_DOCTOR_PASSWORD); await d.locator('[name=specialization]').fill('Cardiology');
       await d.locator('[name=licenseNumber]').fill(`LIC-QA-${stamp}`); await d.locator('[name="departmentIds[]"]').first().check();
       await submitDialog(p); return toastText(p);
     }, /added/i);
@@ -105,7 +111,7 @@ const listHas = async (p, sel, text) => { await p.waitForTimeout(700); return (a
     // Patients
     await go(p, '/admin/patients');
     const pn = `QA Patient ${stamp}`;
-    await step('admin: register patient', p, async () => { await p.click('#add'); const d = dlg(p); await d.locator('[name=fullName]').fill(pn); await d.locator('[name=email]').fill(`qa.pat${stamp}@example.com`); await d.locator('[name=password]').fill('Patient@123'); await submitDialog(p); return toastText(p); }, /registered/i);
+    await step('admin: register patient', p, async () => { await p.click('#add'); const d = dlg(p); await d.locator('[name=fullName]').fill(pn); await d.locator('[name=email]').fill(`qa.pat${stamp}@example.com`); await d.locator('[name=password]').fill(TEST_PATIENT_PASSWORD); await submitDialog(p); return toastText(p); }, /registered/i);
     await p.fill('#filters [name=search]', pn); await p.waitForTimeout(900);
     await step('admin: view patient', p, async () => { await row(p, pn).getByRole('button', { name: 'View' }).click(); await p.waitForTimeout(800); const t = await dlg(p).textContent(); await dlg(p).locator('[data-close]').first().click(); return t; }, new RegExp(`qa.pat${stamp}`));
     await step('admin: edit patient', p, async () => { await row(p, pn).getByRole('button', { name: 'Edit' }).click(); check('admin: patient form prefilled', (await dlg(p).locator('[name=fullName]').inputValue()) === pn); await dlg(p).locator('[name=address]').fill('1 QA Street'); await submitDialog(p); return toastText(p); }, /updated/i);
@@ -114,7 +120,7 @@ const listHas = async (p, sel, text) => { await p.waitForTimeout(700); return (a
     // Users
     await go(p, '/admin/users');
     await p.fill('#filters [name=search]', `qa.pat${stamp}`); await p.waitForTimeout(900);
-    await step('admin: reset password', p, async () => { await row(p, `qa.pat${stamp}`).getByRole('button', { name: /Reset/ }).click(); await dlg(p).locator('[name=newPassword]').fill('NewPass@123'); await submitDialog(p); return toastText(p); }, /reset/i);
+    await step('admin: reset password', p, async () => { await row(p, `qa.pat${stamp}`).getByRole('button', { name: /Reset/ }).click(); await dlg(p).locator('[name=newPassword]').fill(TEST_PASSWORD); await submitDialog(p); return toastText(p); }, /reset/i);
     await step('admin: activate user', p, async () => { await row(p, `qa.pat${stamp}`).getByRole('button', { name: /Activate/ }).click(); return toastText(p); }, /activated/i);
     await p.selectOption('#filters [name=role]', 'DOCTOR'); await p.fill('#filters [name=search]', ''); await p.waitForTimeout(900);
     check('admin: users role filter', (await p.locator('#list [data-list] > *').count()) > 0 && !(await listHas(p, '#list [data-list]', 'Patient')));
@@ -152,7 +158,7 @@ const listHas = async (p, sel, text) => { await p.waitForTimeout(700); return (a
   }
 
   if (!ONLY || ONLY === 'doctor') {
-    const p = await login(browser, 'david.chen@medicore.com', 'Doctor@123');
+    const p = await login(browser, 'david.chen@medicore.com', TEST_DOCTOR_PASSWORD);
     await go(p, '/doctor/appointments');
     await step('doctor: accept request', p, async () => { await p.click('#scope [data-value=all]').catch(() => {}); await p.selectOption('#status', 'PENDING'); await p.waitForTimeout(900); await p.locator('#appts [data-list] > *').first().locator('button[title="Accept"]').click(); await confirmOk(p); return toastText(p); }, /confirmed/i);
     await p.fill('#search', 'zzzz-nobody'); await p.waitForTimeout(900);
@@ -182,9 +188,9 @@ const listHas = async (p, sel, text) => { await p.waitForTimeout(700); return (a
     await step('doctor: new referral (choose patient)', p, async () => { await p.click('#new-ref'); const d = dlg(p); await d.locator('[name=patientId]').selectOption({ index: 1 }); await d.locator('[name=toDoctorId]').selectOption({ index: 2 }); await d.locator('[name=reason]').fill('QA second referral'); await submitDialog(p); return toastText(p); }, /Referral sent/);
     await go(p, '/doctor/appointments');
     await step('doctor: consultation notes', p, async () => { await p.click('#scope [data-value=""]'); await p.selectOption('#status', 'COMPLETED'); await p.waitForTimeout(900); await p.locator('#appts [data-list] > *').first().getByRole('button', { name: 'Diagnosis and treatment' }).click(); const d = dlg(p); await d.locator('[name=treatment]').fill(`QA treatment ${stamp}`); await submitDialog(p); return toastText(p); }, /saved/i);
-    const restoreSchedule = await putDoctorOnShiftAllWeek('david.chen@medicore.com', 'Doctor@123');
+    const restoreSchedule = await putDoctorOnShiftAllWeek('david.chen@medicore.com', TEST_DOCTOR_PASSWORD);
     // raise a fresh emergency (as a patient, through the API) for the doctor to handle
-    const pt = await (await fetch(`${B}/api/auth/login`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: 'patient@medicore.com', password: 'Patient@123' }) })).json();
+    const pt = await (await fetch(`${B}/api/auth/login`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: 'patient@medicore.com', password: TEST_PATIENT_PASSWORD }) })).json();
     const raised = await fetch(`${B}/api/patient/emergencies`, { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${pt.token}` }, body: JSON.stringify({ priority: 'HIGH', symptoms: 'QA chest pain and palpitations' }) });
     check('test setup: emergency raised', raised.ok, String(raised.status));
     await go(p, '/doctor/emergencies');
@@ -207,7 +213,7 @@ const listHas = async (p, sel, text) => { await p.waitForTimeout(700); return (a
   }
 
   if (!ONLY || ONLY === 'patient') {
-    const p = await login(browser, 'patient@medicore.com', 'Patient@123');
+    const p = await login(browser, 'patient@medicore.com', TEST_PATIENT_PASSWORD);
     await go(p, '/patient/find-doctors');
     await p.locator('#directory a:has-text("View profile")').first().click(); await p.waitForURL('**/patient/doctors/*'); await p.waitForTimeout(800);
     check('patient: profile opened from directory', (await p.getAttribute('#profile', 'data-state')) === 'ready');
@@ -245,9 +251,9 @@ const listHas = async (p, sel, text) => { await p.waitForTimeout(700); return (a
     await step('patient: submit complaint', p, async () => { await p.click('#new-complaint'); const d = dlg(p); await d.locator('[name=subject]').fill(`QA complaint ${stamp}`); await d.locator('[name=description]').fill('Testing the complaint form'); await submitDialog(p); return toastText(p); }, /submitted/i);
     check('patient: complaint listed', await listHas(p, '#complaints', `QA complaint ${stamp}`));
     await go(p, '/patient/settings');
-    await step('patient: password mismatch rejected', p, async () => { await p.fill('#password-form [name=currentPassword]', 'Patient@123'); await p.fill('#password-form [name=newPassword]', 'Patient@999'); await p.fill('#pw-confirm', 'Patient@998'); await p.click('#password-form [type=submit]'); return toastText(p, 'error'); }, /match/i);
+    await step('patient: password mismatch rejected', p, async () => { await p.fill('#password-form [name=currentPassword]', TEST_PATIENT_PASSWORD); await p.fill('#password-form [name=newPassword]', 'Patient@999'); await p.fill('#pw-confirm', 'Patient@998'); await p.click('#password-form [type=submit]'); return toastText(p, 'error'); }, /match/i);
     await step('patient: change password', p, async () => { await p.fill('#pw-confirm', 'Patient@999'); await p.click('#password-form [type=submit]'); return toastText(p); }, /changed/i);
-    await step('patient: change password back', p, async () => { await p.fill('#password-form [name=currentPassword]', 'Patient@999'); await p.fill('#password-form [name=newPassword]', 'Patient@123'); await p.fill('#pw-confirm', 'Patient@123'); await p.click('#password-form [type=submit]'); return toastText(p); }, /changed/i);
+    await step('patient: change password back', p, async () => { await p.fill('#password-form [name=currentPassword]', 'Patient@999'); await p.fill('#password-form [name=newPassword]', TEST_PATIENT_PASSWORD); await p.fill('#pw-confirm', TEST_PATIENT_PASSWORD); await p.click('#password-form [type=submit]'); return toastText(p); }, /changed/i);
     await go(p, '/patient/appointments'); await p.waitForTimeout(1500);
     check('patient: still signed in after changing password (renewed token)', new URL(p.url()).pathname === '/patient/appointments' && (await p.getAttribute('#appts', 'data-state')) !== 'error');
     check('patient: live connection re-established with the renewed token', await p.evaluate(() => document.documentElement.classList.contains('is-live')));
@@ -272,7 +278,7 @@ const listHas = async (p, sel, text) => { await p.waitForTimeout(700); return (a
     await step('public: contact form', p, async () => { await p.fill('#contact-form [name=name]', 'QA Visitor'); await p.fill('#contact-form [name=email]', 'qa@example.com'); await p.fill('#contact-form [name=subject]', `QA contact ${stamp}`); await p.fill('#contact-form [name=message]', 'Testing the contact form'); await p.click('#contact-form [type=submit]'); return toastText(p); }, /./);
     await go(p, '/register');
     await step('public: register validation', p, async () => { await p.fill('#register-form [name=fullName]', 'QA New'); await p.fill('#register-form [name=email]', `qa.new${stamp}@example.com`); await p.fill('#register-form [name=password]', 'short'); await p.click('#register-form [type=submit]'); await p.waitForTimeout(300); const hint = p.locator('[data-error=password]'); return (await hint.isVisible()) && !(await p.url()).includes('/patient') ? await hint.textContent() : 'hint hidden'; }, /8 characters/);
-    await step('public: register account', p, async () => { await p.fill('#register-form [name=password]', 'Welcome@123'); await p.fill('#r-confirm', 'Welcome@123'); await p.check('#r-agree', { force: true }); await p.click('#register-form [type=submit]'); await p.waitForURL('**/patient/medical-profile'); return 'ok'; }, /ok/);
+    await step('public: register account', p, async () => { await p.fill('#register-form [name=password]', TEST_PASSWORD); await p.fill('#r-confirm', TEST_PASSWORD); await p.check('#r-agree', { force: true }); await p.click('#register-form [type=submit]'); await p.waitForURL('**/patient/medical-profile'); return 'ok'; }, /ok/);
     check('public: no page errors', p.errors.length === 0, p.errors.join(' | ').slice(0, 300));
     await p.context().close();
   }

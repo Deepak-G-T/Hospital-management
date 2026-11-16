@@ -5,6 +5,12 @@
 // Usage: WEB_URL=http://localhost:8089 node tests/pagination-ui.cjs
 const { chromium } = require('playwright');
 
+const TEST_PASSWORD = process.env.TEST_PASSWORD || 'TestPass#Dev2026';
+const TEST_ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || process.env.SEED_ADMIN_PASSWORD || TEST_PASSWORD;
+const TEST_DOCTOR_PASSWORD = process.env.TEST_DOCTOR_PASSWORD || process.env.SEED_DOCTOR_PASSWORD || TEST_PASSWORD;
+const TEST_PATIENT_PASSWORD = process.env.TEST_PATIENT_PASSWORD || process.env.SEED_PATIENT_PASSWORD || TEST_PASSWORD;
+
+
 const B = process.env.WEB_URL || 'http://localhost:5173';
 const results = []; let failed = 0;
 const check = (name, ok, extra = '') => { results.push(`  ${ok ? '✔' : '✘'} ${name}${ok ? '' : ` ${extra}`}`); if (!ok) failed += 1; };
@@ -56,22 +62,22 @@ async function walkUi(name, p, sel, { expectPages, list = '[data-list]' }) {
 
 (async () => {
   const browser = await chromium.launch();
-  const admin = await tokenOf('admin@medicore.com', 'Admin@123');
+  const admin = await tokenOf('admin@medicore.com', TEST_ADMIN_PASSWORD);
 
   // the doctor with the most patients, and the one with the most reviews
   const doctors = (await api('GET', '/admin/doctors?limit=100', admin)).data.items; let busiest = null; let reviewed = null;
   for (const d of doctors) {
-    const t = await tokenOf(d.user.email, 'Doctor@123').catch(() => null); if (!t) continue;
+    const t = await tokenOf(d.user.email, TEST_DOCTOR_PASSWORD).catch(() => null); if (!t) continue;
     const n = (await api('GET', '/doctor/patients?limit=1', t)).data.pagination.totalItems; const r = (await api('GET', '/doctor/reviews?limit=1', t)).data.pagination.totalItems;
     if (!busiest || n > busiest.n) busiest = { email: d.user.email, n, t }; if (!reviewed || r > reviewed.n) reviewed = { email: d.user.email, n: r, t };
   }
   // data for the seeded patient: 11 complaints (2 pages of 10), 13 reports (2 pages of 12)
-  const pt = await tokenOf('patient@medicore.com', 'Patient@123');
+  const pt = await tokenOf('patient@medicore.com', TEST_PATIENT_PASSWORD);
   for (let i = 1; i <= 11; i += 1) await api('POST', '/complaints', pt, { subject: `Paging UI test ${i}`, description: 'Created by the pagination UI test.', category: 'OTHER' });
   for (let i = 1; i <= 13; i += 1) { const f = new FormData(); f.append('title', `Paging report ${i}`); f.append('reportType', 'LAB'); f.append('file', new Blob(['%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n'], { type: 'application/pdf' }), 'r.pdf'); await fetch(`${B}/api/patient/reports`, { method: 'POST', headers: { authorization: `Bearer ${pt}` }, body: f }); }
 
   // ── an existing paginated page: admin users ──
-  let p = await open(browser, 'admin@medicore.com', 'Admin@123', '/admin/users');
+  let p = await open(browser, 'admin@medicore.com', TEST_ADMIN_PASSWORD, '/admin/users');
   const users = await walkUi('admin users', p, '#list', {});
   const pg = pagerOf(p, '#list');
   // filters: back to page 1, totals follow the filter
@@ -86,7 +92,7 @@ async function walkUi(name, p, sel, { expectPages, list = '[data-list]' }) {
   check('admin users: no script errors', p.errors.length === 0, p.errors.join(' | '));
 
   // ── loading and error states while turning the page ──
-  p = await open(browser, 'admin@medicore.com', 'Admin@123', '/admin/users');
+  p = await open(browser, 'admin@medicore.com', TEST_ADMIN_PASSWORD, '/admin/users');
   await settled(p, '#list');
   await p.route(/\/api\/admin\/users\?.*page=2/, async (r) => { await new Promise((x) => setTimeout(x, 1500)); await r.continue(); });
   await pagerOf(p, '#list').next.click();
@@ -101,48 +107,48 @@ async function walkUi(name, p, sel, { expectPages, list = '[data-list]' }) {
   check('error state: no uncaught script errors', p.errors.filter((e) => !/500/.test(e)).length === 0, p.errors.join(' | '));
 
   // ── converted pages ──
-  p = await open(browser, busiest.email, 'Doctor@123', '/doctor/patients');
+  p = await open(browser, busiest.email, TEST_DOCTOR_PASSWORD, '/doctor/patients');
   check(`doctor patients (${busiest.n} patients): converted page loads`, busiest.n > 12);
   await walkUi('doctor patients', p, '#patients', { expectPages: Math.ceil(busiest.n / 12) });
   await p.fill('#search', 'zzzz'); await p.waitForTimeout(900); await settled(p, '#patients');
   check('doctor patients: a search without results shows the empty state', (await p.getAttribute('#patients', 'data-state')) === 'empty' && !(await pagerOf(p, '#patients').el.isVisible()));
 
-  p = await open(browser, reviewed.email, 'Doctor@123', '/doctor/reviews');
+  p = await open(browser, reviewed.email, TEST_DOCTOR_PASSWORD, '/doctor/reviews');
   await settled(p, '#reviews');
   const avg1 = await p.locator('#reviews [data-text="average|or:—"]').first().innerText(); const total1 = await p.locator('#reviews .small.muted.mt-1').first().innerText();
   await walkUi('doctor reviews', p, '#reviews', { expectPages: Math.ceil(reviewed.n / 10), list: '[data-each="items:tpl-review"]' });
   const avg2 = await p.locator('#reviews [data-text="average|or:—"]').first().innerText();
   check('doctor reviews: the average and the rating distribution describe all reviews on every page', avg1 === avg2 && /\d+ review/.test(total1) && total1.includes(String(reviewed.n)), `${avg1} ${avg2} ${total1}`);
 
-  p = await open(browser, 'patient@medicore.com', 'Patient@123', '/patient/prescriptions');
+  p = await open(browser, 'patient@medicore.com', TEST_PATIENT_PASSWORD, '/patient/prescriptions');
   await walkUi('patient prescriptions', p, '#rx', {});
-  p = await open(browser, 'patient@medicore.com', 'Patient@123', '/patient/reviews');
+  p = await open(browser, 'patient@medicore.com', TEST_PATIENT_PASSWORD, '/patient/reviews');
   await walkUi('patient reviews', p, '#reviews', {});
-  p = await open(browser, 'patient@medicore.com', 'Patient@123', '/patient/complaints');
+  p = await open(browser, 'patient@medicore.com', TEST_PATIENT_PASSWORD, '/patient/complaints');
   await walkUi('complaints', p, '#complaints', { expectPages: 2 });
-  p = await open(browser, 'patient@medicore.com', 'Patient@123', '/patient/reports');
+  p = await open(browser, 'patient@medicore.com', TEST_PATIENT_PASSWORD, '/patient/reports');
   await walkUi('patient reports', p, '#reports', { expectPages: 2 });
   check('patient reports: the "Recently deleted" list is paginated separately and shows its empty state', (await p.getAttribute('#deleted-reports', 'data-state')) === 'empty');
 
   // ── a new account: empty states, no pager ──
-  const email = `paging.${Date.now()}@example.com`; await api('POST', '/auth/register', null, { email, password: 'Start@1234', fullName: 'Paging Newcomer' });
-  p = await open(browser, email, 'Start@1234', '/patient/reports'); await settled(p, '#reports');
+  const email = `paging.${Date.now()}@example.com`; await api('POST', '/auth/register', null, { email, password: TEST_PASSWORD, fullName: 'Paging Newcomer' });
+  p = await open(browser, email, TEST_PASSWORD, '/patient/reports'); await settled(p, '#reports');
   check('empty state: a new patient sees "No reports yet" and no pager', (await p.getAttribute('#reports', 'data-state')) === 'empty' && !(await pagerOf(p, '#reports').el.isVisible()) && /No reports yet/.test(await p.locator('#reports').innerText()));
   await p.goto(`${B}/patient/prescriptions`, { waitUntil: 'networkidle' }); await settled(p, '#rx');
   check('empty state: no prescriptions yet', /No prescriptions yet/.test(await p.locator('body').innerText()));
 
   // ── phone ──
-  p = await open(browser, 'admin@medicore.com', 'Admin@123', '/admin/users', { viewport: { width: 390, height: 844 } });
+  p = await open(browser, 'admin@medicore.com', TEST_ADMIN_PASSWORD, '/admin/users', { viewport: { width: 390, height: 844 } });
   await settled(p, '#list'); const m = pagerOf(p, '#list'); await m.next.click(); await settled(p, '#list');
   const box = await m.next.boundingBox(); const overflow = await p.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   check('phone: the pager fits the screen (no horizontal scrolling), shows "2/n", and its buttons are tappable', await m.el.isVisible() && /^2\/\d+$/.test((await m.page.innerText()).trim()) && overflow <= 0 && box.height >= 40 && box.width >= 40, `overflow ${overflow}, box ${JSON.stringify(box)}`);
   check('phone: Previous and Next stay inside the viewport', (await m.prev.boundingBox()).x >= 0 && box.x + box.width <= 390);
-  p = await open(browser, 'patient@medicore.com', 'Patient@123', '/patient/prescriptions', { viewport: { width: 390, height: 844 } });
+  p = await open(browser, 'patient@medicore.com', TEST_PATIENT_PASSWORD, '/patient/prescriptions', { viewport: { width: 390, height: 844 } });
   await settled(p, '#rx'); const mo = await p.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   check('phone: a converted page (prescriptions) has no horizontal overflow', mo <= 0, `${mo}`);
 
   // ── pickers need every item: the referral dialog follows the pages ──
-  p = await open(browser, busiest.email, 'Doctor@123', '/doctor/referrals');
+  p = await open(browser, busiest.email, TEST_DOCTOR_PASSWORD, '/doctor/referrals');
   const ctx = p.context(); let requests = 0;
   await ctx.route(/\/api\/doctor\/patients\?.*treating=true/, async (r) => {
     requests += 1; const u = new URL(r.request().url()); const page = Number(u.searchParams.get('page')); const limit = Number(u.searchParams.get('limit'));

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # One-command LOCAL (development/test) database setup: roles, migrations, grants, demo data.
-#   ./database/setup-dev.sh "postgresql://postgres:postgres@localhost:5432/smart_hospital?schema=public" [--no-seed]
+#   ./database/setup-dev.sh "postgresql://postgres:your-password-here@localhost:5432/smart_hospital?schema=public" [--no-seed]
 # The URL is the PostgreSQL ADMIN login (used here only; never put it in backend/.env). The database must already exist (createdb).
 # Roles are cluster-wide: set MEDICORE_MIGRATOR_PW / MEDICORE_APP_PW / MEDICORE_SEEDER_PW to keep passwords you already use for other
 # MediCore databases on this server; otherwise new random ones are generated (and replace the old ones).

@@ -26,6 +26,11 @@ const spec = JSON.parse(SPEC_TEXT);
 const OPS = Object.entries(spec.paths).flatMap(([p, o]) => Object.entries(o).map(([m, op]) => ({ method: m.toUpperCase(), path: `/api${p.replace(/\{(\w+)\}/g, ':$1')}`, op })));
 const opOf = (key) => OPS.find((o) => `${o.method} ${o.path}` === key).op;
 
+const TEST_PASSWORD = process.env.TEST_PASSWORD || 'TestPass#Dev2026';
+const TEST_ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || process.env.SEED_ADMIN_PASSWORD || TEST_PASSWORD;
+const TEST_DOCTOR_PASSWORD = process.env.TEST_DOCTOR_PASSWORD || process.env.SEED_DOCTOR_PASSWORD || TEST_PASSWORD;
+const TEST_PATIENT_PASSWORD = process.env.TEST_PATIENT_PASSWORD || process.env.SEED_PATIENT_PASSWORD || TEST_PASSWORD;
+
 let passed = 0; let failed = 0; const results = [];
 async function test(name, fn) { try { await fn(); passed += 1; results.push(`  ✔ ${name}`); } catch (e) { failed += 1; results.push(`  ✘ ${name}\n      ${String(e.stack).split('\n').slice(0, 4).join('\n      ')}`); } }
 
@@ -171,9 +176,9 @@ const login = async (email, password) => { const r = await call('POST', '/api/au
   });
 
   // ═══════════ Live conformance: documented examples are sent, real responses are validated ═══════════
-  const admin = await login('admin@medicore.com', 'Admin@123');
-  const dr = await login('david.chen@medicore.com', 'Doctor@123');
-  const pt = await login('patient@medicore.com', 'Patient@123');
+  const admin = await login('admin@medicore.com', TEST_ADMIN_PASSWORD);
+  const dr = await login('david.chen@medicore.com', TEST_DOCTOR_PASSWORD);
+  const pt = await login('patient@medicore.com', TEST_PATIENT_PASSWORD);
   const A = admin.token; const D = dr.token; const P = pt.token;
   const list = async (p, t, h = {}) => { const r = await call('GET', p, { token: t, headers: h }); return Array.isArray(r.json.data) ? r.json.data : r.json.data.items; };
   const doctors = await list('/api/admin/doctors', A);
@@ -185,7 +190,7 @@ const login = async (email, password) => { const r = await call('POST', '/api/au
   assert.ok(done, 'the seeded patient has a completed, unreviewed appointment');
   REAL.appointment = done.id;
   const treating = doctors.find((d) => d.id === done.doctorId); // the doctor of that past appointment: consultation notes, prescription
-  const T = (await login(treating.user.email, 'Doctor@123')).token;
+  const T = (await login(treating.user.email, TEST_DOCTOR_PASSWORD)).token;
   const day = (n) => new Date(Date.now() + n * 86400000).toISOString().slice(0, 10);
 
   await test('LIVE public · every public route returns what the document says', async () => {
@@ -201,9 +206,9 @@ const login = async (email, password) => { const r = await call('POST', '/api/au
     const email = `openapi.${uniq()}@example.com`;
     const reg = await doc('POST /api/auth/register', { body: { ...subst(meta['POST /api/auth/register'][2].ex), email } });
     assert.ok(reg.json.token && reg.json.user, 'deprecated top-level copies still present'); assert.deepStrictEqual(reg.json.token, reg.json.data.token);
-    const lg = await doc('POST /api/auth/login', { body: { email, password: 'Start@1234' } });
+    const lg = await doc('POST /api/auth/login', { body: { email, password: TEST_PASSWORD } });
     await doc('GET /api/auth/me', { token: lg.json.data.token });
-    const cp = await doc('PUT /api/auth/change-password', { token: lg.json.data.token, body: { currentPassword: 'Start@1234', newPassword: 'Changed@5678' } });
+    const cp = await doc('PUT /api/auth/change-password', { token: lg.json.data.token, body: { currentPassword: TEST_PASSWORD, newPassword: 'Changed#NewPass2026' } });
     await doc('POST /api/auth/logout', { token: cp.json.data.token });
   });
   const RX_ID = (await list('/api/patient/prescriptions', P))[0].id;
@@ -354,7 +359,7 @@ const login = async (email, password) => { const r = await call('POST', '/api/au
     const form = new FormData(); Object.entries(meta['POST /api/doctor/patients/:id/reports'][2].ex).forEach(([k, v]) => form.append(k, v)); form.append('file', new Blob([pdfBuf], { type: 'application/pdf' }), 'lab.pdf');
     await doc('POST /api/doctor/patients/:id/reports', { token: D, vars: { id: own }, form });
     const ref = (await doc('POST /api/doctor/referrals', { token: D })).json.data;
-    const toDoc = doctors.find((d) => d.id === REAL.doctor2); const toLogin = await call('POST', '/api/auth/login', { body: { email: toDoc.user.email, password: 'Doctor@123' } });
+    const toDoc = doctors.find((d) => d.id === REAL.doctor2); const toLogin = await call('POST', '/api/auth/login', { body: { email: toDoc.user.email, password: TEST_DOCTOR_PASSWORD } });
     assert.ok(toLogin.json?.data?.token, 'second doctor can sign in');
     await doc('PATCH /api/doctor/referrals/:id', { token: toLogin.json.data.token, vars: { id: ref.id } });
     await doc('POST /api/doctor/messages', { token: D, body: subst(meta['POST /api/doctor/messages'][2].ex) });

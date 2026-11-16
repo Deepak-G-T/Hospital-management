@@ -4,13 +4,19 @@
 // Usage: node tests/ui-sweep.cjs [screenshotDir]   (needs API on :5000 and Vite on :5173, seeded DB)
 const { chromium } = require('playwright');
 
+const TEST_PASSWORD = process.env.TEST_PASSWORD || 'TestPass#Dev2026';
+const TEST_ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || process.env.SEED_ADMIN_PASSWORD || TEST_PASSWORD;
+const TEST_DOCTOR_PASSWORD = process.env.TEST_DOCTOR_PASSWORD || process.env.SEED_DOCTOR_PASSWORD || TEST_PASSWORD;
+const TEST_PATIENT_PASSWORD = process.env.TEST_PATIENT_PASSWORD || process.env.SEED_PATIENT_PASSWORD || TEST_PASSWORD;
+
+
 const B = process.env.WEB_URL || 'http://localhost:5173';
 const SHOTS = process.argv[2];
 const ONLY = process.env.ONLY ? new RegExp(process.env.ONLY) : null; // e.g. ONLY='/admin/doctors' for a quick targeted run
 const ROLES = {
-  ADMIN: ['admin@medicore.com', 'Admin@123', ['/admin', '/admin/doctors', '/admin/patients', '/admin/departments', '/admin/appointments', '/admin/emergencies', '/admin/complaints', '/admin/users', '/admin/activity', '/admin/reports', '/admin/notifications', '/admin/audit-logs', '/admin/settings']],
-  DOCTOR: ['david.chen@medicore.com', 'Doctor@123', ['/doctor', '/doctor/appointments', '/doctor/schedule', '/doctor/patients', '/doctor/prescriptions', '/doctor/emergencies', '/doctor/referrals', '/doctor/messages', '/doctor/reviews', '/doctor/complaints', '/doctor/notifications', '/doctor/profile', '/doctor/settings']],
-  PATIENT: ['patient@medicore.com', 'Patient@123', ['/patient', '/patient/find-doctors', '/patient/appointments', '/patient/medical-profile', '/patient/reports', '/patient/emergency', '/patient/prescriptions', '/patient/reviews', '/patient/complaints', '/patient/notifications', '/patient/profile', '/patient/settings']],
+  ADMIN: ['admin@medicore.com', TEST_ADMIN_PASSWORD, ['/admin', '/admin/doctors', '/admin/patients', '/admin/departments', '/admin/appointments', '/admin/emergencies', '/admin/complaints', '/admin/users', '/admin/activity', '/admin/reports', '/admin/notifications', '/admin/audit-logs', '/admin/settings']],
+  DOCTOR: ['david.chen@medicore.com', TEST_DOCTOR_PASSWORD, ['/doctor', '/doctor/appointments', '/doctor/schedule', '/doctor/patients', '/doctor/prescriptions', '/doctor/emergencies', '/doctor/referrals', '/doctor/messages', '/doctor/reviews', '/doctor/complaints', '/doctor/notifications', '/doctor/profile', '/doctor/settings']],
+  PATIENT: ['patient@medicore.com', TEST_PATIENT_PASSWORD, ['/patient', '/patient/find-doctors', '/patient/appointments', '/patient/medical-profile', '/patient/reports', '/patient/emergency', '/patient/prescriptions', '/patient/reviews', '/patient/complaints', '/patient/notifications', '/patient/profile', '/patient/settings']],
 };
 const PUBLIC = ['/', '/about', '/departments', '/doctors', '/contact', '/login', '/register', '/does-not-exist'];
 // THEME=dark runs everything in dark mode; MOTION=reduce emulates prefers-reduced-motion

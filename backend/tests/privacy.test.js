@@ -13,6 +13,11 @@ const { PrismaClient } = require('@prisma/client');
 const DB_URL = process.env.DATABASE_URL || '';
 if (!/_test(\?|$)/.test(DB_URL)) { console.log('Skipped: set DATABASE_URL to a disposable *_test database'); process.exit(0); }
 const BASE = process.env.API_URL || `http://localhost:${process.env.PORT || 5000}`;
+const TEST_PASSWORD = process.env.TEST_PASSWORD || 'TestPass#Dev2026';
+const TEST_ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || process.env.SEED_ADMIN_PASSWORD || TEST_PASSWORD;
+const TEST_DOCTOR_PASSWORD = process.env.TEST_DOCTOR_PASSWORD || process.env.SEED_DOCTOR_PASSWORD || TEST_PASSWORD;
+const TEST_PATIENT_PASSWORD = process.env.TEST_PATIENT_PASSWORD || process.env.SEED_PATIENT_PASSWORD || TEST_PASSWORD;
+
 const API = `${BASE}/api`;
 const db = new PrismaClient({ datasources: { db: { url: DB_URL } } });
 
@@ -41,7 +46,7 @@ async function login(email, password) {
 const tag = () => crypto.randomBytes(4).toString('hex');
 async function newPatient(label) {
   const email = `priv.${label}.${Date.now()}.${tag()}@example.com`;
-  const r = await req('POST', '/auth/register', { body: { email, password: 'Start@1234', fullName: `Privacy ${label}` } });
+  const r = await req('POST', '/auth/register', { body: { email, password: TEST_PASSWORD, fullName: `Privacy ${label}` } });
   assert.strictEqual(r.status, 201, JSON.stringify(r.body));
   const patient = await db.patient.findUnique({ where: { userId: r.body.user.id } });
   return { id: patient.id, userId: r.body.user.id, token: r.body.token, label, email };
@@ -55,11 +60,11 @@ const REASON = 'Quarterly review of patient registrations';
 
 (async () => {
   const t0 = new Date();
-  const admin = await login('admin@medicore.com', 'Admin@123');
+  const admin = await login('admin@medicore.com', TEST_ADMIN_PASSWORD);
   const docRow = async (email) => { const u = await db.user.findUnique({ where: { email }, include: { doctor: true } }); return { id: u.doctor.id, userId: u.id, email }; };
   const D1 = await docRow('david.chen@medicore.com');
   const D2 = await docRow('priya.raman@medicore.com');
-  const doc1 = await login(D1.email, 'Doctor@123');
+  const doc1 = await login(D1.email, TEST_DOCTOR_PASSWORD);
   const cardiology = await db.department.findFirst({ where: { name: 'Cardiology' } });
   let slot = 0;
   const when = (offsetHours) => { slot += 1; const startAt = new Date(Date.now() + offsetHours * 3600000 + slot * 60000); return { startAt, endAt: new Date(startAt.getTime() + 1800000) }; };
@@ -126,7 +131,7 @@ const REASON = 'Quarterly review of patient registrations';
     const found = await req('GET', `/admin/patients?search=${encodeURIComponent(r.data.items[0].fullName.split(' ')[0])}&limit=100`, { token: admin.token });
     assert.ok(found.data.items.length > 0, 'search still works');
   });
-  const reg = { email: `priv.reg.${Date.now()}.${tag()}@example.com`, password: 'Temp@1234', fullName: 'Privacy Registered', phone: '+1 555 0142', dateOfBirth: '1990-05-17', gender: 'FEMALE', bloodGroup: 'O_POS', address: '12 Test Street' };
+  const reg = { email: `priv.reg.${Date.now()}.${tag()}@example.com`, password: TEST_PASSWORD, fullName: 'Privacy Registered', phone: '+1 555 0142', dateOfBirth: '1990-05-17', gender: 'FEMALE', bloodGroup: 'O_POS', address: '12 Test Street' };
   let regId;
   await test('REGISTRATION · admin can enter blood group; it is stored, never returned by list, create, update or the plain detail', async () => {
     const c = await req('POST', '/admin/patients', { token: admin.token, body: reg });

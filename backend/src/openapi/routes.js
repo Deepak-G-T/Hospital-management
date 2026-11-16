@@ -26,7 +26,7 @@ const Q = {
 const r = {
   // ── System and authentication ──
   'GET /api/health': ['Health check', 'Health'],
-  'POST /api/auth/register': ['Register a patient account', 'Session', { s: 201, conflict: true, ex: { email: 'new.patient@example.com', password: 'Start@1234', fullName: 'Jane Doe', phone: '+1 555 0100', dateOfBirth: '1990-04-12', gender: 'FEMALE' } }],
+  'POST /api/auth/register': ['Register a patient account', 'Session', { s: 201, conflict: true, ex: { email: 'new.patient@example.com', password: 'Your-password-1', fullName: 'Jane Doe', phone: '+1 555 0100', dateOfBirth: '1990-04-12', gender: 'FEMALE' } }],
   'POST /api/auth/login': ['Sign in', 'Session', { ex: { email: 'patient@example.com', password: 'Your-password-1' } }],
   'POST /api/auth/logout': ['Sign out (records the audit event; the JWT is stateless)', null],
   'GET /api/auth/me': ['The signed-in account', 'CurrentUser'],
@@ -66,14 +66,14 @@ const r = {
 
   // ── Admin: doctors, patients, departments ──
   'GET /api/admin/doctors': ['List doctors', 'DoctorPage', { q: ['page', 'limit', 'search', 'departmentId', 'status'] }],
-  'POST /api/admin/doctors': ['Create a doctor account', 'Doctor', { s: 201, conflict: true, ex: { email: 'new.doctor@example.com', password: 'Start@1234', fullName: 'Dr. Sam Rivera', specialization: 'Cardiologist', licenseNumber: 'MED-99001', qualification: 'MD', experienceYears: 6, consultationFee: 120, slotDurationMinutes: 30, departmentIds: [ID.department], primaryDepartmentId: ID.department, availability: [{ dayOfWeek: 1, startTime: '09:00', endTime: '13:00' }] } }],
+  'POST /api/admin/doctors': ['Create a doctor account', 'Doctor', { s: 201, conflict: true, ex: { email: 'new.doctor@example.com', password: 'Your-password-1', fullName: 'Dr. Sam Rivera', specialization: 'Cardiologist', licenseNumber: 'MED-99001', qualification: 'MD', experienceYears: 6, consultationFee: 120, slotDurationMinutes: 30, departmentIds: [ID.department], primaryDepartmentId: ID.department, availability: [{ dayOfWeek: 1, startTime: '09:00', endTime: '13:00' }] } }],
   'GET /api/admin/doctors/:id': ['One doctor', 'Doctor'],
   'PUT /api/admin/doctors/:id': ['Update a doctor', 'Doctor', { conflict: true, ex: { specialization: 'Interventional Cardiologist', consultationFee: 140 } }],
   'DELETE /api/admin/doctors/:id': ['Delete a doctor (soft deletion: clinical history is kept)', null, { msg: true }],
   'POST /api/admin/doctors/:id/restore': ['Restore a deleted doctor', null, { msg: true }],
   'PUT /api/admin/doctors/:id/departments': ['Replace the departments of a doctor', 'Doctor', { ex: { departmentIds: [ID.department], primaryDepartmentId: ID.department } }],
   'GET /api/admin/patients': ['List patients (no clinical data)', 'PatientPage', { q: ['page', 'limit', 'search', 'status'] }],
-  'POST /api/admin/patients': ['Create a patient account', 'Patient', { s: 201, conflict: true, ex: { email: 'new.patient2@example.com', password: 'Start@1234', fullName: 'Chris Lee', phone: '+1 555 0111', dateOfBirth: '1985-09-30', gender: 'MALE', bloodGroup: 'O_POS', address: '12 Example Street' } }],
+  'POST /api/admin/patients': ['Create a patient account', 'Patient', { s: 201, conflict: true, ex: { email: 'new.patient2@example.com', password: 'Your-password-1', fullName: 'Chris Lee', phone: '+1 555 0111', dateOfBirth: '1985-09-30', gender: 'MALE', bloodGroup: 'O_POS', address: '12 Example Street' } }],
   'GET /api/admin/patients/:id': ['One patient (clinical sections need an access reason)', 'AdminPatientDetail', { reason: 'unlocks' }],
   'PUT /api/admin/patients/:id': ['Update a patient\'s administrative data', 'Patient', { conflict: true, ex: { fullName: 'Chris A. Lee', phone: '+1 555 0112', address: '14 Example Street' } }],
   'GET /api/admin/departments': ['List departments', 'Department[]', { q: ['deleted'] }],

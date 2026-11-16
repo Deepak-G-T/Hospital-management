@@ -13,6 +13,11 @@ const { PrismaClient } = require('@prisma/client');
 const DB_URL = process.env.DATABASE_URL || '';
 if (!/_test(\?|$)/.test(DB_URL)) { console.log('Skipped: set DATABASE_URL to a disposable *_test database'); process.exit(0); }
 const BASE = process.env.API_URL || `http://localhost:${process.env.PORT || 5000}`;
+const TEST_PASSWORD = process.env.TEST_PASSWORD || 'TestPass#Dev2026';
+const TEST_ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || process.env.SEED_ADMIN_PASSWORD || TEST_PASSWORD;
+const TEST_DOCTOR_PASSWORD = process.env.TEST_DOCTOR_PASSWORD || process.env.SEED_DOCTOR_PASSWORD || TEST_PASSWORD;
+const TEST_PATIENT_PASSWORD = process.env.TEST_PATIENT_PASSWORD || process.env.SEED_PATIENT_PASSWORD || TEST_PASSWORD;
+
 const API = `${BASE}/api`;
 const db = new PrismaClient({ datasources: { db: { url: DB_URL } } });
 const { REPORT_DIR } = require('../src/middleware/upload');
@@ -37,7 +42,7 @@ async function req(method, p, { token, body, reason, raw } = {}) {
 async function login(email, password) { const r = await req('POST', '/auth/login', { body: { email, password } }); assert.strictEqual(r.status, 200, `${email}: ${JSON.stringify(r.body)}`); return { token: r.body.token, user: r.body.user }; }
 const tag = () => crypto.randomBytes(4).toString('hex');
 async function newPatient(label) {
-  const r = await req('POST', '/auth/register', { body: { email: `sd.${label}.${Date.now()}.${tag()}@example.com`, password: 'Start@1234', fullName: `SoftDel ${label}` } });
+  const r = await req('POST', '/auth/register', { body: { email: `sd.${label}.${Date.now()}.${tag()}@example.com`, password: TEST_PASSWORD, fullName: `SoftDel ${label}` } });
   assert.strictEqual(r.status, 201, JSON.stringify(r.body));
   const p = await db.patient.findUnique({ where: { userId: r.body.user.id } });
   return { id: p.id, userId: r.body.user.id, token: r.body.token };
@@ -52,11 +57,11 @@ const REASON = 'Restoring an item at the patient\'s request';
 (async () => {
   const before = await counts();
   const t0 = new Date();
-  const admin = await login('admin@medicore.com', 'Admin@123');
+  const admin = await login('admin@medicore.com', TEST_ADMIN_PASSWORD);
   const D1u = await db.user.findUnique({ where: { email: 'david.chen@medicore.com' }, include: { doctor: true } });
   const D1 = { id: D1u.doctor.id, userId: D1u.id };
-  const doc1 = await login('david.chen@medicore.com', 'Doctor@123');
-  const doc3 = await login('sarah.mitchell@medicore.com', 'Doctor@123');
+  const doc1 = await login('david.chen@medicore.com', TEST_DOCTOR_PASSWORD);
+  const doc3 = await login('sarah.mitchell@medicore.com', TEST_DOCTOR_PASSWORD);
   const dept = await db.department.findFirst({ where: { name: 'Cardiology' } });
 
   const P = await newPatient('p'); const Q = await newPatient('q');
@@ -157,7 +162,7 @@ const REASON = 'Restoring an item at the patient\'s request';
   // ═══════════ Doctors ═══════════
   const stamp = Date.now();
   const newDoctor = async () => {
-    const r = await req('POST', '/admin/doctors', { token: admin.token, body: { email: `sd.doctor.${stamp}.${tag()}@medicore.com`, password: 'Doctor@123', fullName: 'SoftDel Doctor', specialization: 'Test Medicine', licenseNumber: `SD-${tag()}`, consultationFee: 50, experienceYears: 3, departmentIds: [dept.id], primaryDepartmentId: dept.id } });
+    const r = await req('POST', '/admin/doctors', { token: admin.token, body: { email: `sd.doctor.${stamp}.${tag()}@medicore.com`, password: TEST_DOCTOR_PASSWORD, fullName: 'SoftDel Doctor', specialization: 'Test Medicine', licenseNumber: `SD-${tag()}`, consultationFee: 50, experienceYears: 3, departmentIds: [dept.id], primaryDepartmentId: dept.id } });
     assert.strictEqual(r.status, 201, JSON.stringify(r.body));
     return { ...r.data, email: r.body.data.user?.email || r.data.email };
   };
@@ -171,14 +176,14 @@ const REASON = 'Restoring an item at the patient\'s request';
     assert.ok((await req('GET', '/admin/doctors?limit=100&status=deleted', { token: admin.token })).data.items.some((x) => x.id === d.id), 'listed under deleted');
     assert.strictEqual((await req('GET', `/admin/doctors/${d.id}`, { token: admin.token })).status, 200, 'detail still reachable');
     assert.ok(!JSON.stringify((await req('GET', '/public/doctors', {})).body).includes(d.id), 'public directory');
-    assert.strictEqual((await req('POST', '/auth/login', { body: { email: u.user.email, password: 'Doctor@123' } })).status, 403, 'login blocked');
+    assert.strictEqual((await req('POST', '/auth/login', { body: { email: u.user.email, password: TEST_DOCTOR_PASSWORD } })).status, 403, 'login blocked');
     assert.strictEqual((await req('DELETE', `/admin/doctors/${d.id}`, { token: admin.token })).status, 404, 'double delete');
     assert.ok(await db.auditLog.findFirst({ where: { action: 'DOCTOR_DELETED', entityId: d.id, userId: admin.user.id } }), 'audited');
     // restore
     for (const tok of [doc1.token, P.token]) assert.strictEqual((await req('POST', `/admin/doctors/${d.id}/restore`, { token: tok })).status, 403, 'only admins restore');
     assert.strictEqual((await req('POST', `/admin/doctors/${d.id}/restore`, { token: admin.token })).status, 200);
     assert.ok((await req('GET', '/admin/doctors?limit=100&status=active&search=SoftDel', { token: admin.token })).data.items.some((x) => x.id === d.id));
-    assert.strictEqual((await req('POST', '/auth/login', { body: { email: u.user.email, password: 'Doctor@123' } })).status, 200, 'can log in again');
+    assert.strictEqual((await req('POST', '/auth/login', { body: { email: u.user.email, password: TEST_DOCTOR_PASSWORD } })).status, 200, 'can log in again');
     assert.strictEqual((await req('POST', `/admin/doctors/${d.id}/restore`, { token: admin.token })).status, 404, 'not deleted');
     assert.ok(await db.auditLog.findFirst({ where: { action: 'DOCTOR_RESTORED', entityId: d.id } }));
     for (const tok of [doc1.token, P.token]) assert.strictEqual((await req('DELETE', `/admin/doctors/${d.id}`, { token: tok })).status, 403, 'only admins delete');

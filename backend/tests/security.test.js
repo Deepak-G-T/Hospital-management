@@ -13,6 +13,11 @@ const { io } = require('socket.io-client');
 const { seedBlockReason } = require('../prisma/seed-guard');
 
 const BASE = process.env.API_URL || `http://localhost:${process.env.PORT || 5000}`;
+const TEST_PASSWORD = process.env.TEST_PASSWORD || 'TestPass#Dev2026';
+const TEST_ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || process.env.SEED_ADMIN_PASSWORD || TEST_PASSWORD;
+const TEST_DOCTOR_PASSWORD = process.env.TEST_DOCTOR_PASSWORD || process.env.SEED_DOCTOR_PASSWORD || TEST_PASSWORD;
+const TEST_PATIENT_PASSWORD = process.env.TEST_PATIENT_PASSWORD || process.env.SEED_PATIENT_PASSWORD || TEST_PASSWORD;
+
 const API = `${BASE}/api`;
 let passed = 0; let failed = 0; let skipped = 0;
 const results = [];
@@ -35,9 +40,9 @@ const skip = (name, why) => { skipped += 1; results.push(`  ○ ${name} (skipped
 const login = (email, password, headers) => req('POST', '/auth/login', { body: { email, password }, headers });
 async function register(tag) {
   const email = `p0.${tag}.${Date.now()}@example.com`;
-  const r = await req('POST', '/auth/register', { body: { email, password: 'Start@1234', fullName: `P0 ${tag}` } });
+  const r = await req('POST', '/auth/register', { body: { email, password: TEST_PASSWORD, fullName: `P0 ${tag}` } });
   assert.strictEqual(r.status, 201, JSON.stringify(r.body));
-  return { email, password: 'Start@1234', token: r.body.token, id: r.body.user.id };
+  return { email, password: TEST_PASSWORD, token: r.body.token, id: r.body.user.id };
 }
 /** Connects a socket; resolves with { socket, error } once connected or refused */
 function openSocket(token) {
@@ -53,7 +58,7 @@ const waitDisconnect = (socket, ms) => new Promise((resolve) => {
 });
 
 (async () => {
-  const admin = (await login('admin@medicore.com', 'Admin@123')).body;
+  const admin = (await login('admin@medicore.com', TEST_ADMIN_PASSWORD)).body;
   assert.ok(admin.token, 'admin login failed — is the API running against a seeded database?');
 
   // ── 1. Seed guard ──
@@ -91,7 +96,7 @@ const waitDisconnect = (socket, ms) => new Promise((resolve) => {
     const u = await register('pwchange');
     const otherDevice = (await login(u.email, u.password)).body.token;
     await sleep(1100); // tokens carry whole-second issue times
-    const r = await req('PUT', '/auth/change-password', { token: u.token, body: { currentPassword: u.password, newPassword: 'Changed@5678' } });
+    const r = await req('PUT', '/auth/change-password', { token: u.token, body: { currentPassword: u.password, newPassword: 'Changed#NewPass2026' } });
     assert.strictEqual(r.status, 200, JSON.stringify(r.body));
     assert.strictEqual(r.body.success, true); assert.ok(r.body.message); // existing contract kept
     assert.ok(r.body.token, 'response should include a renewed token');
@@ -105,7 +110,7 @@ const waitDisconnect = (socket, ms) => new Promise((resolve) => {
     const newSocket = await openSocket(r.body.token);
     assert.ok(!newSocket.error, 'socket with the renewed token must connect'); newSocket.socket.close();
     assert.strictEqual((await login(u.email, u.password)).status, 401);
-    assert.strictEqual((await login(u.email, 'Changed@5678')).status, 200);
+    assert.strictEqual((await login(u.email, 'Changed#NewPass2026')).status, 200);
   });
   await test('admin password reset: ends the user\'s sessions and live sockets; response unchanged', async () => {
     const u = await register('pwreset');
@@ -119,7 +124,7 @@ const waitDisconnect = (socket, ms) => new Promise((resolve) => {
     assert.strictEqual((await login(u.email, 'Reset@9999')).status, 200);
   });
   await test('existing sessions are unaffected when the password never changed', async () => {
-    const t = (await login('patient@medicore.com', 'Patient@123')).body.token;
+    const t = (await login('patient@medicore.com', TEST_PATIENT_PASSWORD)).body.token;
     assert.strictEqual((await req('GET', '/auth/me', { token: t })).status, 200);
   });
 
@@ -180,7 +185,7 @@ const waitDisconnect = (socket, ms) => new Promise((resolve) => {
     assert.strictEqual(right.body.success, false); assert.ok(/Too many failed sign-in attempts/.test(right.body.message));
   });
   await test('login throttling: other accounts are unaffected; a success resets the counter', async () => {
-    assert.strictEqual((await login('patient@medicore.com', 'Patient@123')).status, 200);
+    assert.strictEqual((await login('patient@medicore.com', TEST_PATIENT_PASSWORD)).status, 200);
     const u = await register('reset-counter');
     for (let i = 1; i < max; i += 1) await login(u.email, 'Wrong@0000');
     assert.strictEqual((await login(u.email, u.password)).status, 200);
@@ -195,8 +200,8 @@ const waitDisconnect = (socket, ms) => new Promise((resolve) => {
     const u = await register('unlock');
     for (let i = 0; i < max; i += 1) await login(u.email, 'Wrong@0000');
     assert.strictEqual((await login(u.email, u.password)).status, 429);
-    assert.strictEqual((await req('POST', `/admin/users/${u.id}/reset-password`, { token: admin.token, body: { newPassword: 'Unlock@1234' } })).status, 200);
-    assert.strictEqual((await login(u.email, 'Unlock@1234')).status, 200);
+    assert.strictEqual((await req('POST', `/admin/users/${u.id}/reset-password`, { token: admin.token, body: { newPassword: TEST_PASSWORD } })).status, 200);
+    assert.strictEqual((await login(u.email, TEST_PASSWORD)).status, 200);
   });
   await test('registration and normal login still work', async () => {
     const u = await register('regular');

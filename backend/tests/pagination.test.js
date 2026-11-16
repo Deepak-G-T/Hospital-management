@@ -9,6 +9,11 @@ const assert = require('assert');
 if (!/_test(\?|$)/.test(process.env.DATABASE_URL || '')) { console.log('Skipped: set DATABASE_URL to a disposable *_test database'); process.exit(0); }
 const BASE = process.env.API_URL || 'http://localhost:5001';
 
+const TEST_PASSWORD = process.env.TEST_PASSWORD || 'TestPass#Dev2026';
+const TEST_ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || process.env.SEED_ADMIN_PASSWORD || TEST_PASSWORD;
+const TEST_DOCTOR_PASSWORD = process.env.TEST_DOCTOR_PASSWORD || process.env.SEED_DOCTOR_PASSWORD || TEST_PASSWORD;
+const TEST_PATIENT_PASSWORD = process.env.TEST_PATIENT_PASSWORD || process.env.SEED_PATIENT_PASSWORD || TEST_PASSWORD;
+
 let passed = 0; let failed = 0; const results = [];
 async function test(name, fn) { try { await fn(); passed += 1; results.push(`  ✔ ${name}`); } catch (e) { failed += 1; results.push(`  ✘ ${name}\n      ${String(e.stack).split('\n').slice(0, 4).join('\n      ')}`); } }
 
@@ -45,9 +50,9 @@ const DOCTOR_LISTS = ['/api/doctor/appointments?scope=all', '/api/doctor/prescri
 const PATIENT_LISTS = ['/api/patient/appointments?scope=all', '/api/patient/prescriptions', '/api/patient/reviews', '/api/patient/reports', '/api/complaints'];
 
 (async () => {
-  const admin = await login('admin@medicore.com', 'Admin@123');
-  const doc = await login('david.chen@medicore.com', 'Doctor@123');
-  const pat = await login('patient@medicore.com', 'Patient@123');
+  const admin = await login('admin@medicore.com', TEST_ADMIN_PASSWORD);
+  const doc = await login('david.chen@medicore.com', TEST_DOCTOR_PASSWORD);
+  const pat = await login('patient@medicore.com', TEST_PATIENT_PASSWORD);
   const A = admin.token; const D = doc.token; const P = pat.token;
   const all = [[ADMIN_LISTS, A], [DOCTOR_LISTS, D], [PATIENT_LISTS, P]].flatMap(([list, t]) => list.map((p) => [p, t]));
 
@@ -122,7 +127,7 @@ const PATIENT_LISTS = ['/api/patient/appointments?scope=all', '/api/patient/pres
     const d = await ok('/api/admin/users?page=9999&limit=20', A);
     assert.deepStrictEqual(d.items, []); assert.ok(d.pagination.totalItems > 0 && d.pagination.hasNextPage === false && d.pagination.hasPreviousPage === true && d.pagination.page === 9999);
     const email = `pagination.${Date.now()}@example.com`;
-    const reg = await call('POST', '/api/auth/register', { body: { email, password: 'Start@1234', fullName: 'Empty Lists' } }); const N = reg.json.data.token;
+    const reg = await call('POST', '/api/auth/register', { body: { email, password: TEST_PASSWORD, fullName: 'Empty Lists' } }); const N = reg.json.data.token;
     for (const p of ['/api/patient/appointments', '/api/patient/prescriptions', '/api/patient/reviews', '/api/patient/reports', '/api/complaints', '/api/notifications']) {
       const g = (await ok(p, N)).pagination; assert.deepStrictEqual([g.totalItems, g.totalPages, g.hasNextPage, g.hasPreviousPage, g.page], [p === '/api/notifications' ? g.totalItems : 0, p === '/api/notifications' ? g.totalPages : 0, false, false, 1], p);
     }

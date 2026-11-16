@@ -5,6 +5,12 @@
 // Usage: node tests/flow.cjs            (desktop)   |   VIEWPORT=phone node tests/flow.cjs
 const { chromium, devices } = require('playwright');
 
+const TEST_PASSWORD = process.env.TEST_PASSWORD || 'TestPass#Dev2026';
+const TEST_ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || process.env.SEED_ADMIN_PASSWORD || TEST_PASSWORD;
+const TEST_DOCTOR_PASSWORD = process.env.TEST_DOCTOR_PASSWORD || process.env.SEED_DOCTOR_PASSWORD || TEST_PASSWORD;
+const TEST_PATIENT_PASSWORD = process.env.TEST_PATIENT_PASSWORD || process.env.SEED_PATIENT_PASSWORD || TEST_PASSWORD;
+
+
 const B = process.env.WEB_URL || 'http://localhost:5173';
 const PHONE = process.env.VIEWPORT === 'phone';
 const ctxOpts = PHONE ? { ...devices['iPhone 13'] } : { viewport: { width: 1440, height: 900 } };
@@ -25,11 +31,11 @@ async function login(browser, email, pw) {
 
 (async () => {
   const browser = await chromium.launch();
-  const doc = await login(browser, 'priya.raman@medicore.com', 'Doctor@123');
+  const doc = await login(browser, 'priya.raman@medicore.com', TEST_DOCTOR_PASSWORD);
   await doc.goto(`${B}/doctor/appointments`, { waitUntil: 'networkidle' });
   const unreadOf = async () => Number((await doc.locator('header button[aria-label^="Notifications"]').getAttribute('aria-label')).match(/\((\d+) unread\)/)[1]);
   const unreadBefore = await unreadOf();
-  const pat = await login(browser, 'patient@medicore.com', 'Patient@123');
+  const pat = await login(browser, 'patient@medicore.com', TEST_PATIENT_PASSWORD);
 
   // 1) Patient books Dr. Priya Raman
   if (PHONE) { await pat.click('nav[aria-label="Quick navigation"] a:visible:has-text("Doctors")'); await pat.waitForURL('**/patient/find-doctors'); }

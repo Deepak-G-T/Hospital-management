@@ -65,12 +65,12 @@ Open **http://localhost:5173**. The Vite dev server proxies `/api` and `/socket.
 
 | Portal | Email | Password |
 |---|---|---|
-| Admin | `admin@medicore.com` | `Admin@123` |
-| Doctor | `david.chen@medicore.com` (Cardiology — has a live emergency alert) | `Doctor@123` |
-| Doctor | any seeded doctor, e.g. `sarah.mitchell@medicore.com`, `priya.raman@medicore.com` | `Doctor@123` |
-| Patient | `patient@medicore.com` | `Patient@123` |
+| Admin | `admin@medicore.com` | Set via `SEED_ADMIN_PASSWORD` (or generated during seed) |
+| Doctor | `david.chen@medicore.com` (Cardiology — has a live emergency alert) | Set via `SEED_DOCTOR_PASSWORD` (or generated during seed) |
+| Doctor | any seeded doctor, e.g. `sarah.mitchell@medicore.com`, `priya.raman@medicore.com` | Set via `SEED_DOCTOR_PASSWORD` (or generated during seed) |
+| Patient | `patient@medicore.com` | Set via `SEED_PATIENT_PASSWORD` (or generated during seed) |
 
-The login page also has one-click buttons that fill these in. **Change or remove them before any real deployment.**
+Credentials can be customized by setting environment variables (`SEED_ADMIN_PASSWORD`, `SEED_DOCTOR_PASSWORD`, `SEED_PATIENT_PASSWORD`) before seeding. If unset, random secure passwords are generated and printed to the terminal.
 
 The seed creates 10 departments, 14 doctors with weekly schedules, 32 patients, ~1,350 appointments over the past 75 days and next 14 days, prescriptions, reviews, allergies, medical history, emergency history, complaints and audit entries — so every chart has real database rows behind it. Re-running `npm --prefix backend run db:seed` wipes and recreates all data. As a safety guard, the seed **refuses to run** when `NODE_ENV=production`, or when the database already has user accounts but not the demo admin (it looks like real data). Nothing is deleted when it refuses.
 

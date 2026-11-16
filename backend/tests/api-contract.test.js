@@ -30,6 +30,11 @@ const NO_RIGHT_ROLE_PROBE = new Set(['PUT /api/doctor/availability', 'PATCH /api
 const LEAKS = /passwordHash|password_hash|\$2[aby]\$\d{2}\$|"stack"|node_modules|\/home\/user|PrismaClient|Invalid `prisma|JWT_SECRET|DATABASE_URL|medicore_(app|migrator|seeder):/;
 const JWT_LIKE = /eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\./;
 
+const TEST_PASSWORD = process.env.TEST_PASSWORD || 'TestPass#Dev2026';
+const TEST_ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || process.env.SEED_ADMIN_PASSWORD || TEST_PASSWORD;
+const TEST_DOCTOR_PASSWORD = process.env.TEST_DOCTOR_PASSWORD || process.env.SEED_DOCTOR_PASSWORD || TEST_PASSWORD;
+const TEST_PATIENT_PASSWORD = process.env.TEST_PATIENT_PASSWORD || process.env.SEED_PATIENT_PASSWORD || TEST_PASSWORD;
+
 let passed = 0; let failed = 0;
 const results = [];
 async function test(name, fn) {
@@ -79,9 +84,9 @@ const uuid = () => crypto.randomUUID();
 const fill = (p) => p.replace(':type', 'doctors').replace(':kind', 'records').replace(/:[a-zA-Z]+/g, uuid());
 
 (async () => {
-  const admin = await login('admin@medicore.com', 'Admin@123');
-  const doctor = await login('david.chen@medicore.com', 'Doctor@123');
-  const patient = await login('patient@medicore.com', 'Patient@123');
+  const admin = await login('admin@medicore.com', TEST_ADMIN_PASSWORD);
+  const doctor = await login('david.chen@medicore.com', TEST_DOCTOR_PASSWORD);
+  const patient = await login('patient@medicore.com', TEST_PATIENT_PASSWORD);
   const tokens = { ADMIN: admin.token, DOCTOR: doctor.token, PATIENT: patient.token };
   const routes = inventory();
 
@@ -146,7 +151,7 @@ const fill = (p) => p.replace(':type', 'doctors').replace(':kind', 'records').re
 
   // ═══════════ Authentication flows ═══════════
   await test('AUTH · login: success has data{token,user} plus the deprecated top-level copies; wrong credentials are 401 UNAUTHENTICATED; bad input is a VALIDATION_ERROR with field details', async () => {
-    const ok = await call('POST', '/api/auth/login', { body: { email: 'admin@medicore.com', password: 'Admin@123' } });
+    const ok = await call('POST', '/api/auth/login', { body: { email: 'admin@medicore.com', password: TEST_ADMIN_PASSWORD } });
     const b = assertSuccess(ok);
     assert.ok(b.data.token && b.data.user.role === 'ADMIN'); assert.strictEqual(b.token, b.data.token); assert.deepStrictEqual(b.user, b.data.user);
     assert.ok(!('passwordHash' in b.data.user) && !JSON.stringify(b).includes('passwordHash'));
@@ -161,10 +166,10 @@ const fill = (p) => p.replace(':type', 'doctors').replace(':kind', 'records').re
     const me = assertSuccess(await call('GET', '/api/auth/me', { token: admin.token }));
     assert.strictEqual(me.data.user.email, 'admin@medicore.com'); assert.deepStrictEqual(me.user, me.data.user);
     const email = `contract.${Date.now()}@example.com`;
-    const reg = await call('POST', '/api/auth/register', { body: { email, password: 'Start@1234', fullName: 'Contract Test' } });
+    const reg = await call('POST', '/api/auth/register', { body: { email, password: TEST_PASSWORD, fullName: 'Contract Test' } });
     assert.strictEqual(reg.status, 201); assert.ok(assertSuccess(reg).data.token);
-    const dup = assertError(await call('POST', '/api/auth/register', { body: { email, password: 'Start@1234', fullName: 'Contract Test' } }), 409, 'CONFLICT');
-    assert.ok(!JSON.stringify(dup).includes('Start@1234'));
+    const dup = assertError(await call('POST', '/api/auth/register', { body: { email, password: TEST_PASSWORD, fullName: 'Contract Test' } }), 409, 'CONFLICT');
+    assert.ok(!JSON.stringify(dup).includes(TEST_PASSWORD));
     const weak = assertError(await call('POST', '/api/auth/register', { body: { email: `w.${Date.now()}@example.com`, password: 'abcdefgh', fullName: 'X' } }), 400, 'VALIDATION_ERROR');
     assert.ok(!JSON.stringify(weak).includes('abcdefgh'), 'the rejected password is not echoed');
     // logout: success envelope with no payload; anonymous logout is a standard 401

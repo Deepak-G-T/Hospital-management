@@ -100,9 +100,22 @@ async function main() {
   console.log('Seeding database…');
   await wipe();
 
-  const adminHash = await bcrypt.hash('Admin@123', 12);
-  const doctorHash = await bcrypt.hash('Doctor@123', 12);
-  const patientHash = await bcrypt.hash('Patient@123', 12);
+  const crypto = require('crypto');
+  function getSeedPassword(envVar, roleName) {
+    if (process.env[envVar]) return process.env[envVar];
+    if (process.env.TEST_PASSWORD) return process.env.TEST_PASSWORD;
+    if (process.env.SEED_DEFAULT_PASSWORD) return process.env.SEED_DEFAULT_PASSWORD;
+    const gen = `Mcd#${crypto.randomBytes(6).toString('hex')}!`;
+    console.log(`  [Notice] ${envVar} not set: generated temporary ${roleName} password: ${gen}`);
+    return gen;
+  }
+  const adminPassword = getSeedPassword('SEED_ADMIN_PASSWORD', 'Admin');
+  const doctorPassword = getSeedPassword('SEED_DOCTOR_PASSWORD', 'Doctor');
+  const patientPassword = getSeedPassword('SEED_PATIENT_PASSWORD', 'Patient');
+
+  const adminHash = await bcrypt.hash(adminPassword, 12);
+  const doctorHash = await bcrypt.hash(doctorPassword, 12);
+  const patientHash = await bcrypt.hash(patientPassword, 12);
 
   // Admin
   const adminUser = await prisma.user.create({
@@ -363,10 +376,10 @@ async function main() {
 
   console.log(`✔ Seed complete: ${DEPARTMENTS.length} departments, ${doctors.length} doctors, ${patients.length} patients, ${apptCount} appointments, ${rxCount} prescriptions, ${reviewCount} reviews`);
   console.log('\nLogin credentials:');
-  console.log('  Admin   → admin@medicore.com / Admin@123');
-  console.log('  Doctor  → sarah.mitchell@medicore.com / Doctor@123  (any doctor email, same password)');
-  console.log('  Doctor  → david.chen@medicore.com / Doctor@123      (Cardiology — has a live emergency alert)');
-  console.log('  Patient → patient@medicore.com / Patient@123');
+  console.log(`  Admin   → admin@medicore.com / ${adminPassword}`);
+  console.log(`  Doctor  → sarah.mitchell@medicore.com / ${doctorPassword}  (any doctor email, same password)`);
+  console.log(`  Doctor  → david.chen@medicore.com / ${doctorPassword}      (Cardiology — has a live emergency alert)`);
+  console.log(`  Patient → patient@medicore.com / ${patientPassword}`);
 }
 
 main()

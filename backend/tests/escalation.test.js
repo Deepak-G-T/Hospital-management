@@ -28,6 +28,11 @@ const secs = (p) => TARGETS[p] * 60;
 const PROD_SECRET = crypto.randomBytes(32).toString('hex'); // test-only secret for the production-mode instances
 const BACKEND = path.join(__dirname, '..');
 
+const TEST_PASSWORD = process.env.TEST_PASSWORD || 'TestPass#Dev2026';
+const TEST_ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || process.env.SEED_ADMIN_PASSWORD || TEST_PASSWORD;
+const TEST_DOCTOR_PASSWORD = process.env.TEST_DOCTOR_PASSWORD || process.env.SEED_DOCTOR_PASSWORD || TEST_PASSWORD;
+const TEST_PATIENT_PASSWORD = process.env.TEST_PATIENT_PASSWORD || process.env.SEED_PATIENT_PASSWORD || TEST_PASSWORD;
+
 let passed = 0; let failed = 0;
 const results = [];
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -91,7 +96,7 @@ let patientSeq = 0;
 async function newPatient(inst) {
   patientSeq += 1;
   const email = `esc.${Date.now()}.${patientSeq}@example.com`;
-  const r = await req(inst, 'POST', '/auth/register', { body: { email, password: 'Start@1234', fullName: `Escalation Test ${patientSeq}` } });
+  const r = await req(inst, 'POST', '/auth/register', { body: { email, password: TEST_PASSWORD, fullName: `Escalation Test ${patientSeq}` } });
   assert.strictEqual(r.status, 201, JSON.stringify(r.body));
   return { token: r.body.token, user: r.body.user };
 }
@@ -167,9 +172,9 @@ async function expectedRecipients(level, em) {
 
   // ── Phase 1: one API instance ──
   const A = await ready(startApi('A', 5011));
-  const admin = await login(A, 'admin@medicore.com', 'Admin@123');
-  const cardio = await login(A, cardioDoctor.user.email, 'Doctor@123');
-  const unavailable = await login(A, unavailableDoctor.user.email, 'Doctor@123');
+  const admin = await login(A, 'admin@medicore.com', TEST_ADMIN_PASSWORD);
+  const cardio = await login(A, cardioDoctor.user.email, TEST_DOCTOR_PASSWORD);
+  const unavailable = await login(A, unavailableDoctor.user.email, TEST_DOCTOR_PASSWORD);
 
   await test('worker starts with the provisional targets and logs it', async () => {
     await waitFor(() => /automatic emergency escalation is ON/.test(A.log), 3000, 'ON log line');
@@ -272,7 +277,7 @@ async function expectedRecipients(level, em) {
       assert.ok((await escalations(em.id))[1].notifiedUserIds.includes(edDoctor.userId), 'ED doctor alerted at level 2');
     }
     // Doctors alerted by escalation can see the case on their board
-    const edLogin = await login(A, edDoctor.user.email, 'Doctor@123');
+    const edLogin = await login(A, edDoctor.user.email, TEST_DOCTOR_PASSWORD);
     const board = await req(A, 'GET', '/doctor/emergencies?scope=active', { token: edLogin.token });
     assert.ok(Object.values(cases).every((c) => board.body.data.some((e) => e.id === c.id)), 'ED doctor sees escalated cases');
     // Unavailable doctors are never alerted
@@ -296,7 +301,7 @@ async function expectedRecipients(level, em) {
   });
 
   await test('a client that was offline retrieves the missed escalation notifications on reconnect (GET /notifications)', async () => {
-    const ed = await login(A, edDoctor.user.email, 'Doctor@123'); // never had a socket open
+    const ed = await login(A, edDoctor.user.email, TEST_DOCTOR_PASSWORD); // never had a socket open
     const r = await req(A, 'GET', '/notifications?status=unread&limit=100', { token: ed.token });
     assert.strictEqual(r.status, 200);
     for (const c of Object.values(cases)) {
@@ -482,7 +487,7 @@ async function expectedRecipients(level, em) {
     em = await row(c.id);
     assert.deepStrictEqual((await escalations(c.id)).map((r) => r.level), [1, 2, 3], 'each level exactly once after recovery');
     assert.strictEqual((await eventsOf(c.id, 'AUTO_ESCALATED')).length, 3);
-    const admin2 = await login(G, 'admin@medicore.com', 'Admin@123');
+    const admin2 = await login(G, 'admin@medicore.com', TEST_ADMIN_PASSWORD);
     await req(G, 'POST', `/admin/emergencies/${c.id}/resolve`, { token: admin2.token, body: {} });
     await stopApi(G);
   });
@@ -492,7 +497,7 @@ async function expectedRecipients(level, em) {
   await test('production: worker OFF by default — nothing is scheduled or escalated', async () => {
     const P = await ready(startApi('P-default', 5021, prodEnv));
     assert.match(P.log, /automatic emergency escalation is OFF: off by default in production/);
-    const adm = await login(P, 'admin@medicore.com', 'Admin@123');
+    const adm = await login(P, 'admin@medicore.com', TEST_ADMIN_PASSWORD);
     const cfg = await req(P, 'GET', '/admin/escalation-config', { token: adm.token });
     assert.strictEqual(cfg.body.data.enabled, false); assert.strictEqual(cfg.body.data.production, true);
     const c = await createEmergency(P, 'CRITICAL', cardiology.id);

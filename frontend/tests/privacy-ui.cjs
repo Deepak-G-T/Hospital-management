@@ -5,6 +5,12 @@
 //   doctor patients: blood group appears only for patients under treatment
 // Usage: WEB_URL=http://localhost:8089 node tests/privacy-ui.cjs
 const { chromium } = require('playwright');
+
+const TEST_PASSWORD = process.env.TEST_PASSWORD || 'TestPass#Dev2026';
+const TEST_ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || process.env.SEED_ADMIN_PASSWORD || TEST_PASSWORD;
+const TEST_DOCTOR_PASSWORD = process.env.TEST_DOCTOR_PASSWORD || process.env.SEED_DOCTOR_PASSWORD || TEST_PASSWORD;
+const TEST_PATIENT_PASSWORD = process.env.TEST_PATIENT_PASSWORD || process.env.SEED_PATIENT_PASSWORD || TEST_PASSWORD;
+
 const fs = require('fs');
 
 const B = process.env.WEB_URL || 'http://localhost:5173';
@@ -32,10 +38,10 @@ const toast = async (p, type) => { const t = p.locator(`.toast.is-${type}`).last
 const askReason = async (p, text) => { await p.locator('#confirm-dialog [data-confirm-reason] textarea').fill(text); await p.click('#confirm-dialog [data-confirm-ok]'); };
 
 (async () => {
-  const adminToken = (await api('POST', '/auth/login', null, { email: 'admin@medicore.com', password: 'Admin@123' })).token;
-  const docToken = (await api('POST', '/auth/login', null, { email: 'david.chen@medicore.com', password: 'Doctor@123' })).token;
+  const adminToken = (await api('POST', '/auth/login', null, { email: 'admin@medicore.com', password: TEST_ADMIN_PASSWORD })).token;
+  const docToken = (await api('POST', '/auth/login', null, { email: 'david.chen@medicore.com', password: TEST_DOCTOR_PASSWORD })).token;
   const browser = await chromium.launch();
-  const adm = await login(browser, 'admin@medicore.com', 'Admin@123');
+  const adm = await login(browser, 'admin@medicore.com', TEST_ADMIN_PASSWORD);
 
   // ── Admin patient list ──
   await adm.goto(`${B}/admin/patients`, { waitUntil: 'networkidle' });
@@ -51,7 +57,7 @@ const askReason = async (p, text) => { await p.locator('#confirm-dialog [data-co
   const dlg = adm.locator('#patient-dialog');
   await dlg.locator('[name=fullName]').fill('Privacy UiRegistered');
   await dlg.locator('[name=email]').fill(email);
-  await dlg.locator('[name=password]').fill('Temp@1234');
+  await dlg.locator('[name=password]').fill(TEST_PASSWORD);
   await dlg.locator('[name=phone]').fill('+1 555 0177');
   await dlg.locator('[name=dateOfBirth]').fill('1988-03-09');
   await dlg.locator('[name=gender]').selectOption('MALE');
@@ -118,7 +124,7 @@ const askReason = async (p, text) => { await p.locator('#confirm-dialog [data-co
   const mine = (await api('GET', '/doctor/patients?limit=100', docToken)).data.items;
   const sample = await Promise.all(mine.map(async (p) => ({ p, level: (await api('GET', `/doctor/patients/${p.id}`, docToken)).data?.access?.level })));
   const hist = sample.find((x) => x.level === 'HISTORICAL'); const treat = sample.find((x) => x.level === 'TREATMENT');
-  const doc = await login(browser, 'david.chen@medicore.com', 'Doctor@123');
+  const doc = await login(browser, 'david.chen@medicore.com', TEST_DOCTOR_PASSWORD);
   await doc.goto(`${B}/doctor/patients`, { waitUntil: 'networkidle' });
   await doc.waitForSelector('#patients[data-state=ready]');
   if (hist) {

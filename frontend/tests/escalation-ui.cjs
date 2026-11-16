@@ -9,6 +9,12 @@
 //   DISCONNECT_CMD / RECONNECT_CMD (optional): shell commands that cut and restore the browser's connection to the API
 //   (e.g. stop/start the reverse proxy) so the reconnect catch-up is tested with a real dropped socket.
 const { chromium } = require('playwright');
+
+const TEST_PASSWORD = process.env.TEST_PASSWORD || 'TestPass#Dev2026';
+const TEST_ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || process.env.SEED_ADMIN_PASSWORD || TEST_PASSWORD;
+const TEST_DOCTOR_PASSWORD = process.env.TEST_DOCTOR_PASSWORD || process.env.SEED_DOCTOR_PASSWORD || TEST_PASSWORD;
+const TEST_PATIENT_PASSWORD = process.env.TEST_PATIENT_PASSWORD || process.env.SEED_PATIENT_PASSWORD || TEST_PASSWORD;
+
 const { execSync } = require('child_process');
 
 const B = process.env.WEB_URL || 'http://localhost:5173';
@@ -34,7 +40,7 @@ async function login(browser, email, pw) {
 const unreadOf = async (p) => Number((await p.locator('header button[aria-label^="Notifications"]').getAttribute('aria-label')).match(/\((\d+) unread\)/)[1]);
 
 (async () => {
-  const adminToken = (await api('POST', '/auth/login', null, { email: 'admin@medicore.com', password: 'Admin@123' })).token;
+  const adminToken = (await api('POST', '/auth/login', null, { email: 'admin@medicore.com', password: TEST_ADMIN_PASSWORD })).token;
   const cfg = (await api('GET', '/admin/escalation-config', adminToken)).data;
   if (!cfg?.enabled || cfg.targetsMinutes.CRITICAL > 0.2 || cfg.maxLevel !== 1) {
     console.log('Skipped: start the API with fast test-only ESCALATION_TARGETS (CRITICAL ≤ 0.2 min) and ESCALATION_MAX_LEVEL=1'); process.exit(0);
@@ -42,11 +48,11 @@ const unreadOf = async (p) => Number((await p.locator('header button[aria-label^
   const waitMs = cfg.targetsMinutes.CRITICAL * 60000;
   const cardiology = (await api('GET', '/public/departments')).data.find((d) => d.name === 'Cardiology');
   const email = `esc.ui.${Date.now()}@example.com`;
-  const patient = await api('POST', '/auth/register', null, { email, password: 'Start@1234', fullName: 'Escalation UiTest' });
+  const patient = await api('POST', '/auth/register', null, { email, password: TEST_PASSWORD, fullName: 'Escalation UiTest' });
   const em = (await api('POST', '/patient/emergencies', patient.token, { priority: 'CRITICAL', departmentId: cardiology.id, symptoms: 'Synthetic UI test — chest pain' })).data;
 
   const browser = await chromium.launch();
-  const doc = await login(browser, 'david.chen@medicore.com', 'Doctor@123'); // Cardiology
+  const doc = await login(browser, 'david.chen@medicore.com', TEST_DOCTOR_PASSWORD); // Cardiology
   await doc.goto(`${B}/doctor/emergencies`, { waitUntil: 'networkidle' });
   const card = doc.locator('article', { hasText: 'Escalation UiTest' });
   await card.waitFor({ timeout: 8000 });
@@ -91,7 +97,7 @@ const unreadOf = async (p) => Number((await p.locator('header button[aria-label^
   if (!realDrop) results.push('  ○ real disconnect/reconnect not tested (set DISCONNECT_CMD and RECONNECT_CMD)');
 
   // Admin view
-  const adm = await login(browser, 'admin@medicore.com', 'Admin@123');
+  const adm = await login(browser, 'admin@medicore.com', TEST_ADMIN_PASSWORD);
   await adm.goto(`${B}/admin/emergencies`, { waitUntil: 'networkidle' });
   const banner = await adm.locator('#escalation-config').textContent();
   check('admin banner states automatic escalation is on, provisional and not a replacement for emergency services', /Automatic escalation is on/.test(banner) && /not clinically validated/.test(banner) && /do not replace emergency services/.test(banner));
@@ -117,7 +123,7 @@ const unreadOf = async (p) => Number((await p.locator('header button[aria-label^
   check('accepting stops automatic escalation', accepted.status === 'ACCEPTED' && accepted.nextEscalationAt === null);
   await doc.waitForTimeout(800);
   check('accepted card no longer shows a next automatic alert', !/Next automatic alert/.test(await card.innerText()));
-  await api('POST', `/doctor/emergencies/${em.id}/resolve`, (await api('POST', '/auth/login', null, { email: 'david.chen@medicore.com', password: 'Doctor@123' })).token, {});
+  await api('POST', `/doctor/emergencies/${em.id}/resolve`, (await api('POST', '/auth/login', null, { email: 'david.chen@medicore.com', password: TEST_DOCTOR_PASSWORD })).token, {});
 
   for (const [n, p] of [['doctor', doc], ['admin', adm]]) check(`no console/page errors (${n})`, !p.errors.length, p.errors.join(' | '));
   await browser.close();

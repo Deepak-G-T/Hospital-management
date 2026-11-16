@@ -6,6 +6,12 @@
 // Usage: WEB_URL=http://localhost:8089 node tests/softdelete-ui.cjs
 const { chromium } = require('playwright');
 
+const TEST_PASSWORD = process.env.TEST_PASSWORD || 'TestPass#Dev2026';
+const TEST_ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || process.env.SEED_ADMIN_PASSWORD || TEST_PASSWORD;
+const TEST_DOCTOR_PASSWORD = process.env.TEST_DOCTOR_PASSWORD || process.env.SEED_DOCTOR_PASSWORD || TEST_PASSWORD;
+const TEST_PATIENT_PASSWORD = process.env.TEST_PATIENT_PASSWORD || process.env.SEED_PATIENT_PASSWORD || TEST_PASSWORD;
+
+
 const B = process.env.WEB_URL || 'http://localhost:5173';
 const results = []; let failed = 0;
 const check = (name, ok, extra = '') => { results.push(`  ${ok ? '✔' : '✘'} ${name}${ok ? '' : ` ${extra}`}`); if (!ok) failed += 1; };
@@ -30,8 +36,8 @@ const toast = async (p, type = 'success') => { const t = p.locator(`.toast.is-${
 const confirm = (p) => p.click('#confirm-dialog [data-confirm-ok]');
 
 (async () => {
-  const adminToken = (await api('POST', '/auth/login', null, { email: 'admin@medicore.com', password: 'Admin@123' })).token;
-  const docToken = (await api('POST', '/auth/login', null, { email: 'david.chen@medicore.com', password: 'Doctor@123' })).token;
+  const adminToken = (await api('POST', '/auth/login', null, { email: 'admin@medicore.com', password: TEST_ADMIN_PASSWORD })).token;
+  const docToken = (await api('POST', '/auth/login', null, { email: 'david.chen@medicore.com', password: TEST_DOCTOR_PASSWORD })).token;
   const browser = await chromium.launch();
 
   // a patient David Chen is treating now (found through his own patient list, then logged in with the seed password)
@@ -41,14 +47,14 @@ const confirm = (p) => p.click('#confirm-dialog [data-confirm-ok]');
     if (c?.access.level === 'TREATMENT') { target = { id: p.id, email: c.user.email, name: p.fullName }; break; }
   }
   if (!target) { console.log('Skipped: no treated patient in this data set'); process.exit(0); }
-  const patientToken = (await api('POST', '/auth/login', null, { email: target.email, password: 'Patient@123' })).token;
+  const patientToken = (await api('POST', '/auth/login', null, { email: target.email, password: TEST_PATIENT_PASSWORD })).token;
   const marker = `Latex-${Date.now()}`;
   await api('POST', '/patient/allergies', patientToken, { allergen: marker, type: 'ENVIRONMENTAL', severity: 'MODERATE' });
   const form = new FormData(); form.append('title', `Report-${marker}`); form.append('reportType', 'LAB'); form.append('file', new Blob(['%PDF-1.4\n%ui test\n'], { type: 'application/pdf' }), 'ui.pdf');
   const up = await api('POST', '/patient/reports', patientToken, null, form);
 
   // ── Patient ──
-  const pat = await login(browser, target.email, 'Patient@123');
+  const pat = await login(browser, target.email, TEST_PATIENT_PASSWORD);
   await pat.goto(`${B}/patient/medical-profile`, { waitUntil: 'networkidle' });
   await pat.locator('li', { hasText: marker }).first().waitFor();
   await pat.locator('li', { hasText: marker }).first().locator('[data-call^="DELETE"]').click();
@@ -58,7 +64,7 @@ const confirm = (p) => p.click('#confirm-dialog [data-confirm-ok]');
   check('patient: the allergy leaves the active list and appears under "Recently deleted"', await pat.locator('#deleted-allergies li', { hasText: marker }).count() === 1 && await pat.locator('#allergies li, [data-source="/patient/allergies"]:not(#deleted-allergies) li', { hasText: marker }).count() === 0);
   const docChart = (await api('GET', `/doctor/patients/${target.id}`, docToken)).data;
   check('API: the treating doctor still receives it, flagged', docChart.allergies.some((a) => a.allergen === marker && a.deletedAt));
-  const doc = await login(browser, 'david.chen@medicore.com', 'Doctor@123');
+  const doc = await login(browser, 'david.chen@medicore.com', TEST_DOCTOR_PASSWORD);
   await doc.goto(`${B}/doctor/patients/${target.id}`, { waitUntil: 'networkidle' });
   await doc.waitForSelector('#record[data-state=ready]');
   check('doctor: the chart shows the removed allergy marked "removed by patient"', /removed by patient/.test(await doc.locator('#record').innerText()) && (await doc.locator('#record').innerText()).includes(marker));
@@ -81,8 +87,8 @@ const confirm = (p) => p.click('#confirm-dialog [data-confirm-ok]');
 
   // ── Admin: doctor ──
   const stamp = Date.now();
-  const d = (await api('POST', '/admin/doctors', adminToken, { email: `sd.ui.${stamp}@medicore.com`, password: 'Doctor@123', fullName: `SoftUi Doctor ${stamp}`, specialization: 'UI Medicine', licenseNumber: `SDUI-${stamp}`, consultationFee: 10, experienceYears: 1, departmentIds: [], primaryDepartmentId: null })).data;
-  const adm = await login(browser, 'admin@medicore.com', 'Admin@123');
+  const d = (await api('POST', '/admin/doctors', adminToken, { email: `sd.ui.${stamp}@medicore.com`, password: TEST_DOCTOR_PASSWORD, fullName: `SoftUi Doctor ${stamp}`, specialization: 'UI Medicine', licenseNumber: `SDUI-${stamp}`, consultationFee: 10, experienceYears: 1, departmentIds: [], primaryDepartmentId: null })).data;
+  const adm = await login(browser, 'admin@medicore.com', TEST_ADMIN_PASSWORD);
   await adm.goto(`${B}/admin/doctors`, { waitUntil: 'networkidle' });
   await adm.fill('#filters input[name=search]', `SoftUi Doctor ${stamp}`);
   await adm.waitForTimeout(900);

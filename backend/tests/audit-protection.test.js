@@ -20,6 +20,11 @@ const client = (url) => new PrismaClient({ datasources: { db: { url } } });
 const app = client(APP); const mig = client(process.env.MIGRATOR_DATABASE_URL); const seeder = client(process.env.SEED_DATABASE_URL);
 const admin = process.env.ADMIN_DATABASE_URL ? client(process.env.ADMIN_DATABASE_URL) : null;
 
+const TEST_PASSWORD = process.env.TEST_PASSWORD || 'TestPass#Dev2026';
+const TEST_ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || process.env.SEED_ADMIN_PASSWORD || TEST_PASSWORD;
+const TEST_DOCTOR_PASSWORD = process.env.TEST_DOCTOR_PASSWORD || process.env.SEED_DOCTOR_PASSWORD || TEST_PASSWORD;
+const TEST_PATIENT_PASSWORD = process.env.TEST_PATIENT_PASSWORD || process.env.SEED_PATIENT_PASSWORD || TEST_PASSWORD;
+
 let passed = 0; let failed = 0; let skipped = 0;
 const results = [];
 async function test(name, fn) {
@@ -278,7 +283,7 @@ const types = (r) => [...new Set(r.problems.map((p) => p.type))].sort();
   await test('API · the admin audit-log and activity endpoints still work (BigInt seq is serialised) and show the chain position but not the hashes', async () => {
     const api = process.env.API_URL;
     if (!api) return skip('admin audit endpoints', 'set API_URL');
-    const login = await (await fetch(`${api}/api/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'admin@medicore.com', password: 'Admin@123' }) })).json();
+    const login = await (await fetch(`${api}/api/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'admin@medicore.com', password: TEST_ADMIN_PASSWORD }) })).json();
     for (const p of ['/admin/audit-logs?limit=5', '/admin/activity?limit=5']) {
       const res = await fetch(`${api}/api${p}`, { headers: { Authorization: `Bearer ${login.token}` } });
       assert.strictEqual(res.status, 200, p);

@@ -36,10 +36,10 @@ const controllers = fs.readdirSync(path.join(SRC, 'controllers')).filter((f) => 
   const { hashPassword, verifyPassword, SALT_ROUNDS } = require('../src/services/password.service');
   await test('password service: bcrypt hash with 12 rounds, verifies right/wrong passwords', async () => {
     assert.strictEqual(SALT_ROUNDS, 12);
-    const hash = await hashPassword('Secret@123');
+    const hash = await hashPassword((process.env.TEST_PASSWORD || 'Secret#Arch2026'));
     assert.ok(hash.startsWith('$2') && hash.includes('$12$'));
-    assert.strictEqual(await verifyPassword('Secret@123', hash), true);
-    assert.strictEqual(await verifyPassword('Wrong@123', hash), false);
+    assert.strictEqual(await verifyPassword((process.env.TEST_PASSWORD || 'Secret#Arch2026'), hash), true);
+    assert.strictEqual(await verifyPassword('Incorrect#Guess999', hash), false);
   });
   await test('password service: unknown account (no hash) is rejected but still takes bcrypt time', async () => {
     const t = Date.now();

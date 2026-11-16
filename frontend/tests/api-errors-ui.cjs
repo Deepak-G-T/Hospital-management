@@ -5,6 +5,12 @@
 // Usage: WEB_URL=http://localhost:8089 node tests/api-errors-ui.cjs
 const { chromium } = require('playwright');
 
+const TEST_PASSWORD = process.env.TEST_PASSWORD || 'TestPass#Dev2026';
+const TEST_ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || process.env.SEED_ADMIN_PASSWORD || TEST_PASSWORD;
+const TEST_DOCTOR_PASSWORD = process.env.TEST_DOCTOR_PASSWORD || process.env.SEED_DOCTOR_PASSWORD || TEST_PASSWORD;
+const TEST_PATIENT_PASSWORD = process.env.TEST_PATIENT_PASSWORD || process.env.SEED_PATIENT_PASSWORD || TEST_PASSWORD;
+
+
 const B = process.env.WEB_URL || 'http://localhost:5173';
 const results = []; let failed = 0;
 const check = (name, ok, extra = '') => { results.push(`  ${ok ? '✔' : '✘'} ${name}${ok ? '' : ` ${extra}`}`); if (!ok) failed += 1; };
@@ -31,7 +37,7 @@ const loginError = async (p) => { const e = p.locator('[role=alert], .alert-erro
   await tryLogin(p, 'admin@medicore.com', 'definitely-wrong-1');
   const wrong = await loginError(p);
   check('login: a real wrong password shows the API message (401 UNAUTHENTICATED)', /invalid|incorrect|wrong/i.test(wrong), wrong);
-  await p.fill('input[type=password]', 'Admin@123'); await p.click('button[type=submit]');
+  await p.fill('input[type=password]', TEST_ADMIN_PASSWORD); await p.click('button[type=submit]');
   await p.waitForURL((u) => u.pathname.startsWith('/admin'), { timeout: 10000 });
   check('login: success still signs in (token and user now come from data)', true);
   await p.waitForSelector('[data-bell]', { timeout: 8000 });
@@ -56,7 +62,7 @@ const loginError = async (p) => { const e = p.locator('[role=alert], .alert-erro
 
   // ── the ApiError object the pages receive ──
   p = await page(browser);
-  await tryLogin(p, 'admin@medicore.com', 'Admin@123');
+  await tryLogin(p, 'admin@medicore.com', TEST_ADMIN_PASSWORD);
   await p.waitForURL((u) => u.pathname.startsWith('/admin'), { timeout: 10000 });
   await p.route('**/api/admin/dashboard*', (r) => r.fulfill(json(500, { success: false, message: 'Something went wrong. Please try again later.', error: { code: 'INTERNAL_ERROR', status: 500 }, requestId: 'deadbeef-1234-5678' })));
   await p.reload({ waitUntil: 'networkidle' });
@@ -67,7 +73,7 @@ const loginError = async (p) => { const e = p.locator('[role=alert], .alert-erro
 
   // ── expired session ──
   p = await page(browser);
-  await tryLogin(p, 'admin@medicore.com', 'Admin@123');
+  await tryLogin(p, 'admin@medicore.com', TEST_ADMIN_PASSWORD);
   await p.waitForURL((u) => u.pathname.startsWith('/admin'), { timeout: 10000 });
   await p.route('**/api/admin/patients*', (r) => r.fulfill(json(401, { success: false, message: 'Session expired or invalid. Please log in again.', error: { code: 'UNAUTHENTICATED', status: 401 }, requestId: 'expired-0000-1111' })));
   await p.goto(`${B}/admin/patients`, { waitUntil: 'networkidle' });

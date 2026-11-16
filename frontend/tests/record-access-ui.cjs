@@ -6,6 +6,12 @@
 // Usage: WEB_URL=http://localhost:8089 node tests/record-access-ui.cjs
 const { chromium } = require('playwright');
 
+const TEST_PASSWORD = process.env.TEST_PASSWORD || 'TestPass#Dev2026';
+const TEST_ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || process.env.SEED_ADMIN_PASSWORD || TEST_PASSWORD;
+const TEST_DOCTOR_PASSWORD = process.env.TEST_DOCTOR_PASSWORD || process.env.SEED_DOCTOR_PASSWORD || TEST_PASSWORD;
+const TEST_PATIENT_PASSWORD = process.env.TEST_PATIENT_PASSWORD || process.env.SEED_PATIENT_PASSWORD || TEST_PASSWORD;
+
+
 const B = process.env.WEB_URL || 'http://localhost:5173';
 const results = []; let failed = 0;
 const check = (name, ok, extra = '') => { results.push(`  ${ok ? '✔' : '✘'} ${name}${ok ? '' : ` ${extra}`}`); if (!ok) failed += 1; };
@@ -30,8 +36,8 @@ async function login(browser, email, pw) {
 const toast = async (p, type) => { const t = p.locator(`.toast.is-${type}`).last(); await t.waitFor({ timeout: 6000 }); const s = await t.textContent(); await p.evaluate(() => document.querySelectorAll('.toast').forEach((x) => x.remove())); return s; };
 
 (async () => {
-  const adminToken = (await api('POST', '/auth/login', null, { email: 'admin@medicore.com', password: 'Admin@123' })).token;
-  const docToken = (await api('POST', '/auth/login', null, { email: 'david.chen@medicore.com', password: 'Doctor@123' })).token;
+  const adminToken = (await api('POST', '/auth/login', null, { email: 'admin@medicore.com', password: TEST_ADMIN_PASSWORD })).token;
+  const docToken = (await api('POST', '/auth/login', null, { email: 'david.chen@medicore.com', password: TEST_DOCTOR_PASSWORD })).token;
   const browser = await chromium.launch();
 
   // ── Doctor: a patient seen only in the past ──
@@ -39,7 +45,7 @@ const toast = async (p, type) => { const t = p.locator(`.toast.is-${type}`).last
   let past = null;
   for (const p of mine) { const r = (await api('GET', `/doctor/patients/${p.id}`, docToken)).data; if (r?.access.level === 'HISTORICAL') { past = r; break; } }
   if (!past) { console.log('Skipped: no historical patient for this doctor in the data'); process.exit(0); }
-  const doc = await login(browser, 'david.chen@medicore.com', 'Doctor@123');
+  const doc = await login(browser, 'david.chen@medicore.com', TEST_DOCTOR_PASSWORD);
   await doc.goto(`${B}/doctor/patients/${past.id}`, { waitUntil: 'networkidle' });
   await doc.waitForSelector('#record[data-state=ready]');
   const text = await doc.locator('#record').innerText();
@@ -56,10 +62,10 @@ const toast = async (p, type) => { const t = p.locator(`.toast.is-${type}`).last
   // ── Admin: patient dialog ──
   // the admin list no longer shows allergy counts, so create a patient who has an allergy
   const apEmail = `acc.ui.allergy.${Date.now()}@example.com`;
-  const ap = await api('POST', '/auth/register', null, { email: apEmail, password: 'Start@1234', fullName: 'Allergy UiPatient' });
+  const ap = await api('POST', '/auth/register', null, { email: apEmail, password: TEST_PASSWORD, fullName: 'Allergy UiPatient' });
   await api('POST', '/patient/allergies', ap.token, { allergen: 'Latex', type: 'ENVIRONMENTAL', severity: 'MODERATE' });
   const withAllergy = (await api('GET', '/admin/patients?search=Allergy%20UiPatient', adminToken)).data.items[0];
-  const adm = await login(browser, 'admin@medicore.com', 'Admin@123');
+  const adm = await login(browser, 'admin@medicore.com', TEST_ADMIN_PASSWORD);
   await adm.goto(`${B}/admin/patients`, { waitUntil: 'networkidle' });
   await adm.fill('#filters input[name=search]', withAllergy.fullName);
   await adm.waitForTimeout(900);
@@ -85,7 +91,7 @@ const toast = async (p, type) => { const t = p.locator(`.toast.is-${type}`).last
 
   // ── Admin: emergency dialog (an active emergency with an allergy) ──
   const email = `acc.ui.${Date.now()}@example.com`;
-  const reg = await api('POST', '/auth/register', null, { email, password: 'Start@1234', fullName: 'Access UiTest' });
+  const reg = await api('POST', '/auth/register', null, { email, password: TEST_PASSWORD, fullName: 'Access UiTest' });
   await api('POST', '/patient/allergies', reg.token, { allergen: 'Penicillin', type: 'DRUG', severity: 'SEVERE' });
   const dept = (await api('GET', '/public/departments')).data.find((d) => d.name === 'Cardiology');
   await api('POST', '/patient/emergencies', reg.token, { priority: 'LOW', departmentId: dept.id, symptoms: 'Synthetic UI test — palpitations' });

@@ -6,6 +6,11 @@ const assert = require('assert');
 const { io } = require('socket.io-client');
 
 const BASE = process.env.API_URL || `http://localhost:${process.env.PORT || 5000}`;
+const TEST_PASSWORD = process.env.TEST_PASSWORD || 'TestPass#Dev2026';
+const TEST_ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || process.env.SEED_ADMIN_PASSWORD || TEST_PASSWORD;
+const TEST_DOCTOR_PASSWORD = process.env.TEST_DOCTOR_PASSWORD || process.env.SEED_DOCTOR_PASSWORD || TEST_PASSWORD;
+const TEST_PATIENT_PASSWORD = process.env.TEST_PATIENT_PASSWORD || process.env.SEED_PATIENT_PASSWORD || TEST_PASSWORD;
+
 const API = `${BASE}/api`;
 let passed = 0; let failed = 0;
 const results = [];
@@ -60,14 +65,14 @@ function waitForEvent(socket, event, predicate = () => true, ms = 5000) {
   await test('auth: invalid credentials rejected, valid login works', async () => {
     const bad = await req('POST', '/auth/login', { body: { email: 'admin@medicore.com', password: 'wrong-password1' } });
     assert.strictEqual(bad.status, 401);
-    ctx.admin = await login('admin@medicore.com', 'Admin@123');
+    ctx.admin = await login('admin@medicore.com', TEST_ADMIN_PASSWORD);
     assert.strictEqual(ctx.admin.user.role, 'ADMIN');
     assert.ok(!('passwordHash' in ctx.admin.user), 'password hash must never be returned');
   });
 
   await test('security: protected routes need a token and the right role', async () => {
     assert.strictEqual((await req('GET', '/admin/dashboard')).status, 401);
-    const p = await login('patient@medicore.com', 'Patient@123');
+    const p = await login('patient@medicore.com', TEST_PATIENT_PASSWORD);
     ctx.seedPatient = p;
     assert.strictEqual((await req('GET', '/admin/dashboard', { token: p.token })).status, 403);
     assert.strictEqual((await req('GET', '/doctor/dashboard', { token: p.token })).status, 403);
@@ -91,7 +96,7 @@ function waitForEvent(socket, event, predicate = () => true, ms = 5000) {
     const r = await req('POST', '/admin/doctors', {
       token: ctx.admin.token,
       body: {
-        email: `e2e.doctor.${stamp}@medicore.com`, password: 'Doctor@123', fullName: 'E2E Tester', specialization: 'Test Medicine',
+        email: `e2e.doctor.${stamp}@medicore.com`, password: TEST_DOCTOR_PASSWORD, fullName: 'E2E Tester', specialization: 'Test Medicine',
         licenseNumber: `E2E-${stamp}`, consultationFee: 100, experienceYears: 5, departmentIds: [ctx.dept.id, cardiology.id], primaryDepartmentId: ctx.dept.id,
       },
     });
@@ -101,7 +106,7 @@ function waitForEvent(socket, event, predicate = () => true, ms = 5000) {
   });
 
   await test('doctor portal: admin-created doctor can log in and sees departments', async () => {
-    ctx.doctor = await login(`e2e.doctor.${stamp}@medicore.com`, 'Doctor@123');
+    ctx.doctor = await login(`e2e.doctor.${stamp}@medicore.com`, TEST_DOCTOR_PASSWORD);
     assert.strictEqual(ctx.doctor.user.role, 'DOCTOR');
     assert.strictEqual(ctx.doctor.user.profile.departments.length, 2);
     const pub = await req('GET', `/public/doctors?departmentId=${ctx.dept.id}`);
@@ -109,9 +114,9 @@ function waitForEvent(socket, event, predicate = () => true, ms = 5000) {
   });
 
   await test('patient: register, update blood group, add allergy and condition', async () => {
-    const r = await req('POST', '/auth/register', { body: { email: `e2e.patient.${stamp}@example.com`, password: 'Patient@123', fullName: 'E2E Patient', phone: '+1 555 999 0000' } });
+    const r = await req('POST', '/auth/register', { body: { email: `e2e.patient.${stamp}@example.com`, password: TEST_PATIENT_PASSWORD, fullName: 'E2E Patient', phone: '+1 555 999 0000' } });
     assert.strictEqual(r.status, 201, JSON.stringify(r.body)); ctx.patient = r.body;
-    const dup = await req('POST', '/auth/register', { body: { email: `e2e.patient.${stamp}@example.com`, password: 'Patient@123', fullName: 'Dup' } });
+    const dup = await req('POST', '/auth/register', { body: { email: `e2e.patient.${stamp}@example.com`, password: TEST_PATIENT_PASSWORD, fullName: 'Dup' } });
     assert.strictEqual(dup.status, 409, 'duplicate email rejected');
     assert.strictEqual((await req('PUT', '/patient/profile', { token: ctx.patient.token, body: { bloodGroup: 'O_NEG' } })).status, 200);
     assert.strictEqual((await req('POST', '/patient/allergies', { token: ctx.patient.token, body: { allergen: 'Penicillin', type: 'DRUG', severity: 'SEVERE', reaction: 'Hives' } })).status, 201);
@@ -138,7 +143,7 @@ function waitForEvent(socket, event, predicate = () => true, ms = 5000) {
   await test('double booking is prevented (sequential and concurrent)', async () => {
     const again = await req('POST', '/patient/appointments', { token: ctx.seedPatient.token, body: { doctorId: ctx.doctorId, startAt: ctx.slot } });
     assert.strictEqual(again.status, 409, 'same slot rejected');
-    const p2 = (await req('POST', '/auth/register', { body: { email: `e2e.race.${stamp}@example.com`, password: 'Patient@123', fullName: 'Race Patient' } })).body;
+    const p2 = (await req('POST', '/auth/register', { body: { email: `e2e.race.${stamp}@example.com`, password: TEST_PATIENT_PASSWORD, fullName: 'Race Patient' } })).body;
     const [a, b] = await Promise.all([
       req('POST', '/patient/appointments', { token: ctx.seedPatient.token, body: { doctorId: ctx.doctorId, startAt: ctx.slot2 } }),
       req('POST', '/patient/appointments', { token: p2.token, body: { doctorId: ctx.doctorId, startAt: ctx.slot2 } }),
@@ -170,7 +175,7 @@ function waitForEvent(socket, event, predicate = () => true, ms = 5000) {
   await test('doctor can view patient profile with allergies & history; unrelated doctor cannot', async () => {
     const r = await req('GET', `/doctor/patients/${ctx.patient.user.profile.id}`, { token: ctx.doctor.token });
     assert.strictEqual(r.status, 200); assert.strictEqual(r.body.data.allergies.length, 2); assert.strictEqual(r.body.data.bloodGroup, 'O_NEG');
-    const other = await login('rahul.verma@medicore.com', 'Doctor@123');
+    const other = await login('rahul.verma@medicore.com', TEST_DOCTOR_PASSWORD);
     ctx.otherDoctor = other;
     assert.strictEqual((await req('GET', `/doctor/patients/${ctx.patient.user.profile.id}`, { token: other.token })).status, 403);
   });
@@ -309,7 +314,7 @@ function waitForEvent(socket, event, predicate = () => true, ms = 5000) {
     const users = await req('GET', `/admin/users?search=e2e.race.${stamp}`, { token: ctx.admin.token });
     const u = users.body.data.items[0];
     assert.strictEqual((await req('PATCH', `/admin/users/${u.id}/status`, { token: ctx.admin.token, body: { isActive: false } })).status, 200);
-    assert.strictEqual((await req('POST', '/auth/login', { body: { email: `e2e.race.${stamp}@example.com`, password: 'Patient@123' } })).status, 403);
+    assert.strictEqual((await req('POST', '/auth/login', { body: { email: `e2e.race.${stamp}@example.com`, password: TEST_PATIENT_PASSWORD } })).status, 403);
     const b = await req('POST', '/admin/notifications/broadcast', { token: ctx.admin.token, body: { title: 'Maintenance', message: 'Tonight 2am', audience: 'DOCTOR' } });
     assert.strictEqual(b.status, 201); assert.ok(b.body.data.recipients > 10);
     const logs = await req('GET', '/admin/audit-logs?action=EMERGENCY', { token: ctx.admin.token });

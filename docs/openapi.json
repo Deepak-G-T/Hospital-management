@@ -1893,7 +1893,7 @@
               },
               "example": {
                 "email": "new.doctor@example.com",
-                "password": "Start@1234",
+                "password": "Your-password-1",
                 "fullName": "Dr. Sam Rivera",
                 "specialization": "Cardiologist",
                 "licenseNumber": "MED-99001",
@@ -3641,7 +3641,7 @@
               },
               "example": {
                 "email": "new.patient2@example.com",
-                "password": "Start@1234",
+                "password": "Your-password-1",
                 "fullName": "Chris Lee",
                 "phone": "+1 555 0111",
                 "dateOfBirth": "1985-09-30",
@@ -4994,7 +4994,7 @@
               },
               "example": {
                 "email": "new.patient@example.com",
-                "password": "Start@1234",
+                "password": "Your-password-1",
                 "fullName": "Jane Doe",
                 "phone": "+1 555 0100",
                 "dateOfBirth": "1990-04-12",
