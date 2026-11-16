@@ -40,11 +40,11 @@ html:not([data-theme='dark']) .hero-stat { background: #f8fafc; }
 
 /* Hero artwork & live badges (Proposal 1) */
 .hero-art-wrapper { position: relative; display: flex; align-items: center; justify-content: center; min-height: 22rem; }
-.hero-art-card { position: relative; width: 100%; border-radius: var(--r-xl); background: linear-gradient(145deg, var(--surface), var(--surface-2)); border: 1px solid var(--border); box-shadow: var(--shadow-pop); padding: 2rem 1.5rem 1.5rem; overflow: hidden; }
+.hero-art-card { position: relative; width: 100%; border-radius: var(--r-xl); background: linear-gradient(145deg, var(--surface), var(--surface-2)); border: 1px solid var(--border); box-shadow: var(--shadow-pop); padding: 1.5rem; overflow: hidden; }
+.hero-art-badges { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; position: relative; z-index: 2; }
 .hero-art-svg { width: 100%; max-height: 200px; display: block; margin: 0 auto; }
-.floating-badge { position: absolute; display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.875rem; border-radius: var(--r-full); background: var(--surface-glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border-strong); box-shadow: var(--shadow-card); font-size: var(--fs-xs); z-index: 2; animation: float 4s ease-in-out infinite; }
-.floating-badge.badge-top-right { top: 1rem; right: 1rem; }
-.floating-badge.badge-bottom-left { bottom: 5.5rem; left: 1rem; animation-delay: -2s; }
+.floating-badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.45rem 0.8rem; border-radius: var(--r-full); background: var(--surface-glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border-strong); box-shadow: var(--shadow-card); font-size: var(--fs-xs); animation: float 4s ease-in-out infinite; }
+.floating-badge.badge-specialists { animation-delay: -2s; margin-left: auto; }
 .live-dot { display: inline-block; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: #10b981; box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25); }
 .hero-stat-pills { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--divider); }
 @media (max-width: 480px) { .hero-stat-pills { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; } }

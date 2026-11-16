@@ -27,13 +27,15 @@
     </div>
     <div class="hero-art-wrapper animate-up" id="live-stats" data-source="/public/stats">
       <div class="hero-art-card">
-        <div class="floating-badge badge-top-right">
-          <span class="live-dot" aria-hidden="true"></span>
-          <span><strong data-stat="doctors">—</strong> specialists</span>
-        </div>
-        <div class="floating-badge badge-bottom-left">
-          <svg class="icon icon-sm" style="color:var(--brand-600)"><use href="#i-shield-check" /></svg>
-          <span>Secure sign-in</span>
+        <div class="hero-art-badges">
+          <div class="floating-badge badge-secure">
+            <svg class="icon icon-sm" style="color:var(--brand-600)"><use href="#i-shield-check" /></svg>
+            <span>Secure sign-in</span>
+          </div>
+          <div class="floating-badge badge-specialists">
+            <span class="live-dot" aria-hidden="true"></span>
+            <span><strong data-stat="doctors">—</strong> specialists</span>
+          </div>
         </div>
 
         <!-- Inline Medical SVG Art -->
