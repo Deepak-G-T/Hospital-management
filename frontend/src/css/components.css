@@ -372,3 +372,90 @@ a.banner-chip:hover, button.banner-chip:hover { background: rgba(255, 255, 255, 
 /* inline form errors without script: shown once the browser marks the field invalid after the user touched it */
 [data-error] { display: none; }
 .field:has(:user-invalid) [data-error], .check:has(:user-invalid) + [data-error] { display: block; }
+
+
+/* ---------- FAQ Accordion (Proposal 4) ---------- */
+.faq-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.faq-item {
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: border-color var(--t) var(--ease), box-shadow var(--t) var(--ease);
+}
+.faq-item:hover { border-color: var(--border-strong); }
+.faq-item[open] { border-color: var(--brand-500); box-shadow: var(--shadow-card); }
+.faq-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.125rem 1.25rem;
+  font-weight: 600;
+  font-size: var(--fs-base);
+  color: var(--text-strong);
+  cursor: pointer;
+  user-select: none;
+  min-height: 48px;
+  list-style: none;
+}
+.faq-summary::-webkit-details-marker { display: none; }
+.faq-summary:focus-visible { outline: 2px solid var(--brand-500); outline-offset: -2px; }
+.faq-chevron {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform var(--t) var(--ease), color var(--t) var(--ease);
+}
+.faq-item[open] .faq-chevron {
+  transform: rotate(180deg);
+  color: var(--brand-600);
+}
+@media (prefers-reduced-motion: reduce) {
+  .faq-chevron { transition: none; }
+}
+.faq-body {
+  padding: 0 1.25rem 1.25rem 1.25rem;
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  color: var(--text-muted);
+  border-top: 1px solid transparent;
+}
+.faq-item[open] .faq-body {
+  border-top-color: var(--border);
+  padding-top: 0.875rem;
+}
+
+/* ---------- Department Care Badges (Proposal 8) ---------- */
+.dept-card { position: relative; overflow: hidden; }
+.dept-care-tag {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--r-full);
+  line-height: 1.2;
+}
+.dept-care-tag.tone-red {
+  background: var(--red-bg);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+.dept-care-tag.tone-teal {
+  background: var(--teal-bg);
+  color: var(--teal-fg);
+  border: 1px solid rgba(13, 148, 136, 0.25);
+}
+.dept-card:hover .dept-care-tag.tone-red {
+  background: #dc2626;
+  color: #fff;
+}
+.dept-card:hover .dept-care-tag.tone-teal {
+  background: var(--accent-600);
+  color: #fff;
+}
+.dept-badge-pill { display: flex; align-items: center; }

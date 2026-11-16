@@ -248,6 +248,64 @@
   </div>
 </section>
 
+<!-- Frequently Asked Questions (Proposal 4) -->
+<section class="section section-alt">
+  <div class="container" style="max-width:54rem">
+    <div class="section-head center">
+      <p class="eyebrow">Got questions?</p>
+      <h2>Frequently asked questions</h2>
+      <p class="muted mt-2">Everything you need to know about navigating appointments, medical records, and digital hospital care.</p>
+    </div>
+    <div class="faq-list mt-6">
+      <details class="faq-item">
+        <summary class="faq-summary">
+          <span>How do I book an appointment with a specialist?</span>
+          <svg class="icon icon-sm faq-chevron"><use href="#i-chevron-down" /></svg>
+        </summary>
+        <div class="faq-body">
+          <p>You can search specialists by department or rating, choose a suitable date and open time slot, and confirm in seconds. Your booked consultations appear directly in your patient portal.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-summary">
+          <span>Can I access my digital prescriptions and lab reports online?</span>
+          <svg class="icon icon-sm faq-chevron"><use href="#i-chevron-down" /></svg>
+        </summary>
+        <div class="faq-body">
+          <p>Yes. As soon as your doctor finalizes a consultation or releases diagnostic results, your digital prescriptions and reports become available to view or download directly from your secure account.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-summary">
+          <span>What should I do in a medical emergency?</span>
+          <svg class="icon icon-sm faq-chevron"><use href="#i-chevron-down" /></svg>
+        </summary>
+        <div class="faq-body">
+          <p>If you or someone nearby experiences an acute, life-threatening condition, call your local emergency phone number immediately. For urgent hospital admissions, MediCore's emergency triage desk operates 24/7.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-summary">
+          <span>How do I cancel or reschedule an upcoming visit?</span>
+          <svg class="icon icon-sm faq-chevron"><use href="#i-chevron-down" /></svg>
+        </summary>
+        <div class="faq-body">
+          <p>Sign in to your patient portal, navigate to Appointments, and select either reschedule or cancel on your upcoming booking. We recommend modifying appointments at least 2 hours in advance so others may use the slot.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-summary">
+          <span>How is my health information protected?</span>
+          <svg class="icon icon-sm faq-chevron"><use href="#i-chevron-down" /></svg>
+        </summary>
+        <div class="faq-body">
+          <p>MediCore enforces strict role-based access control, encrypted authentication, and tamper-evident audit logging. Only your assigned clinicians and authorized hospital personnel can view your clinical records.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
 <!-- Call to action (Proposal 5) -->
 <section class="container" style="padding-bottom:5rem">
   <div class="cta">
@@ -270,6 +328,8 @@
 
 <template id="tpl-dept-tile">
   <a class="card card-hover dept-card" data-attr="href:/doctors?departmentId={id}">
+    <span class="dept-care-tag tone-red" data-if="isEmergency">24/7 Care</span>
+    <span class="dept-care-tag tone-teal" data-if="!isEmergency">Speciality</span>
     <span class="icon-tile" data-attr="data-tone:{isEmergency|pick:red,accent}"><svg class="icon icon-lg"><use data-attr="href:{icon|icon}" /></svg></span>
     <p data-text="name"></p>
     <small class="xsmall muted" data-text="{_count.doctors} doctor(s)"></small>

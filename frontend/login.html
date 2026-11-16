@@ -7,25 +7,69 @@
 <body>
 <!-- @include public-header.html -->
 <div class="auth-wrap">
-  <div style="width:100%;max-width:28rem" class="animate-up">
-    <form class="card card-pad stack" id="login-form" style="padding:2rem" novalidate>
-      <div>
-        <h1 style="font-size:1.5rem">Welcome back</h1>
-        <p class="small muted mt-1">Sign in to your admin, doctor or patient portal.</p>
-      </div>
-      <p class="alert alert-info" id="expired" hidden>Your session has expired. Please log in again.</p>
-      <p class="alert alert-error" id="login-error" role="alert" hidden></p>
-      <div class="field"><label class="label" for="email">Email</label><input class="input" id="email" name="email" type="email" autocomplete="email" required /></div>
-      <div class="field">
-        <label class="label" for="password">Password</label>
-        <div class="input-wrap">
-          <input class="input" style="padding-left:0.875rem;padding-right:2.5rem" id="password" name="password" type="password" autocomplete="current-password" required />
-          <button type="button" class="input-action" data-toggle-password aria-label="Show password"><svg class="icon icon-sm"><use href="#i-eye" /></svg></button>
+  <div class="auth-split animate-up">
+    <!-- Left Showcase Panel (tablet/desktop >= 960px) -->
+    <aside class="auth-showcase">
+      <div class="auth-showcase-content">
+        <span class="chip tone-brand auth-showcase-chip">
+          <svg class="icon icon-sm"><use href="#i-shield-check" /></svg>
+          Secure care portal
+        </span>
+        <h2 class="auth-showcase-title">Care that connects doctors and patients seamlessly</h2>
+        <p class="auth-showcase-desc">Access real-time specialist appointments, review lab reports, and manage all your prescriptions in one secure place.</p>
+        
+        <div class="auth-pillars">
+          <div class="auth-pillar">
+            <span class="icon-tile" data-tone="brand"><svg class="icon icon-md"><use href="#i-calendar-check" /></svg></span>
+            <div>
+              <strong>Real-time scheduling</strong>
+              <small class="muted">Instant booking with verified hospital specialists.</small>
+            </div>
+          </div>
+          <div class="auth-pillar">
+            <span class="icon-tile" data-tone="accent"><svg class="icon icon-md"><use href="#i-file-text" /></svg></span>
+            <div>
+              <strong>Digital health records</strong>
+              <small class="muted">Prescriptions and consultation notes always at hand.</small>
+            </div>
+          </div>
+          <div class="auth-pillar">
+            <span class="icon-tile" data-tone="teal"><svg class="icon icon-md"><use href="#i-heart-pulse" /></svg></span>
+            <div>
+              <strong>Coordinated hospital network</strong>
+              <small class="muted">Integrated support across 10 clinical departments.</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="auth-trust-note">
+          <svg class="icon icon-sm shrink-0"><use href="#i-shield-check" /></svg>
+          <span>Role-based access &amp; tamper-evident audit logs protect every account.</span>
         </div>
       </div>
-      <button type="submit" class="btn btn-primary btn-block btn-lg"><svg class="icon icon-sm"><use href="#i-log-in" /></svg>Sign in</button>
-      <p class="center small muted">New patient? <a class="link" href="/register">Create an account</a></p>
-    </form>
+    </aside>
+
+    <!-- Right Form Container -->
+    <div class="auth-form-side">
+      <form class="card card-pad stack" id="login-form" style="padding:2rem" novalidate>
+        <div>
+          <h1 style="font-size:1.5rem">Welcome back</h1>
+          <p class="small muted mt-1">Sign in to your admin, doctor or patient portal.</p>
+        </div>
+        <p class="alert alert-info" id="expired" hidden>Your session has expired. Please log in again.</p>
+        <p class="alert alert-error" id="login-error" role="alert" hidden></p>
+        <div class="field"><label class="label" for="email">Email</label><input class="input" id="email" name="email" type="email" autocomplete="email" required /></div>
+        <div class="field">
+          <label class="label" for="password">Password</label>
+          <div class="input-wrap">
+            <input class="input" style="padding-left:0.875rem;padding-right:2.5rem" id="password" name="password" type="password" autocomplete="current-password" required />
+            <button type="button" class="input-action" data-toggle-password aria-label="Show password"><svg class="icon icon-sm"><use href="#i-eye" /></svg></button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg"><svg class="icon icon-sm"><use href="#i-log-in" /></svg>Sign in</button>
+        <p class="center small muted">New patient? <a class="link" href="/register">Create an account</a></p>
+      </form>
+    </div>
   </div>
 </div>
 <!-- @include public-footer.html -->

@@ -26,11 +26,17 @@
 
 <template id="tpl-department">
   <article class="card card-hover card-pad stack" style="padding:1.5rem">
-    <div class="row row-nowrap" style="--gap:1rem">
-      <span class="icon-tile" data-attr="data-tone:{isEmergency|pick:red,brand}"><svg class="icon icon-lg"><use data-attr="href:{icon|icon}" /></svg></span>
-      <div class="grow">
-        <h2 style="font-size:1.125rem" data-text="name"></h2>
-        <p class="xsmall muted" data-if="headDoctor" data-text="Head: Dr. {headDoctor.fullName}"></p>
+    <div class="row row-nowrap between items-start" style="--gap:0.75rem">
+      <div class="row row-nowrap" style="--gap:1rem">
+        <span class="icon-tile" data-attr="data-tone:{isEmergency|pick:red,brand}"><svg class="icon icon-lg"><use data-attr="href:{icon|icon}" /></svg></span>
+        <div>
+          <h2 style="font-size:1.125rem" data-text="name"></h2>
+          <p class="xsmall muted" data-if="headDoctor" data-text="Head: Dr. {headDoctor.fullName}"></p>
+        </div>
+      </div>
+      <div class="dept-badge-pill shrink-0">
+        <span class="chip tone-red" data-if="isEmergency"><svg class="icon icon-xs"><use href="#i-siren" /></svg>24/7 Care</span>
+        <span class="chip tone-brand" data-if="!isEmergency">Specialist</span>
       </div>
     </div>
     <p class="small muted grow" data-text="description"></p>
